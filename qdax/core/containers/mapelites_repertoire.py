@@ -355,7 +355,7 @@ class MapElitesRepertoire(flax.struct.PyTreeNode):
 
         # add initial population to the repertoire
         new_repertoire = repertoire.add(genotypes, descriptors, fitnesses, extra_scores)
-
+        
         return new_repertoire  # type: ignore
 
     @classmethod

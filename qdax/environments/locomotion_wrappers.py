@@ -15,6 +15,7 @@ FEET_NAMES = {
     "walker2d": ["foot", "foot_left"],
     "hopper": ["foot"],
     "humanoid": ["left_shin", "right_shin"],
+    "hexapod": ["leg_0_1", "leg_0_2", "leg_0_3", "leg_1_1", "leg_1_2", "leg_1_3"],
 }
 
 

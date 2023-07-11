@@ -10,7 +10,7 @@ from qdax.environments.bd_extractors import (
     get_final_xy_position,
 )
 from qdax.environments.exploration_wrappers import MazeWrapper, TrapWrapper
-from qdax.environments.humanoidtrap import HumanoidTrap
+from qdax.environments.hexapod import Hexapod
 from qdax.environments.init_state_wrapper import FixedInitialStateWrapper
 from qdax.environments.locomotion_wrappers import (
     FeetContactWrapper,
@@ -25,7 +25,6 @@ from qdax.environments.wrappers import CompletedEvalWrapper
 reward_offset = {
     "pointmaze": 2.3431,
     "anttrap": 3.38,
-    "humanoidtrap": 0.0,
     "antnotrap": 3.38,
     "antmaze": 40.32,
     "ant_omni": 3.0,
@@ -35,12 +34,14 @@ reward_offset = {
     "halfcheetah_uni": 9.231,
     "hopper_uni": 0.9,
     "walker2d_uni": 1.413,
+    "hexapod_omni": 3.6,
+    # Maybe the offset for uni is different (will check if rewards are always positive when running experiments)
+    "hexapod_uni": 3.6,
 }
 
 behavior_descriptor_extractor = {
     "pointmaze": get_final_xy_position,
     "anttrap": get_final_xy_position,
-    "humanoidtrap": get_final_xy_position,
     "antnotrap": get_final_xy_position,
     "antmaze": get_final_xy_position,
     "ant_omni": get_final_xy_position,
@@ -50,11 +51,15 @@ behavior_descriptor_extractor = {
     "halfcheetah_uni": get_feet_contact_proportion,
     "hopper_uni": get_feet_contact_proportion,
     "walker2d_uni": get_feet_contact_proportion,
+    "hexapod_omni": get_final_xy_position,
+    "hexapod_uni": get_feet_contact_proportion,
 }
 
 _qdax_envs = {
     "pointmaze": PointMaze,
-    "humanoid_w_trap": HumanoidTrap,
+}
+_base_custom_envs = {
+    "hexapod": Hexapod,
 }
 
 _qdax_custom_envs = {
@@ -62,11 +67,6 @@ _qdax_custom_envs = {
         "env": "ant",
         "wrappers": [XYPositionWrapper, TrapWrapper],
         "kwargs": [{"minval": [0.0, -8.0], "maxval": [30.0, 8.0]}, {}],
-    },
-    "humanoidtrap": {
-        "env": "humanoid_w_trap",
-        "wrappers": [XYPositionWrapper],
-        "kwargs": [{"minval": [0.0, -8.0], "maxval": [30.0, 8.0]}],
     },
     "antnotrap": {
         "env": "ant",
@@ -109,6 +109,16 @@ _qdax_custom_envs = {
         "wrappers": [FeetContactWrapper],
         "kwargs": [{}, {}],
     },
+    "hexapod_omni": {
+        "env": "hexapod",
+        "wrappers": [XYPositionWrapper],
+        "kwargs": [{"minval": [-2.0, -2.0], "maxval": [2.0, 2.0]}],
+    },
+    "hexapod_uni": {
+        "env": "hexapod",
+        "wrappers": [FeetContactWrapper],
+        "kwargs": [{}, {}],
+    },
 }
 
 
@@ -134,10 +144,10 @@ def create(
         env = _qdax_envs[env_name](**kwargs)
     elif env_name in _qdax_custom_envs.keys():
         base_env_name = _qdax_custom_envs[env_name]["env"]
-        if base_env_name in brax.envs._envs.keys():
+        if base_env_name == "hexapod":
+            env = Hexapod(legacy_spring=True, **kwargs)
+        else:
             env = brax.envs._envs[base_env_name](legacy_spring=True, **kwargs)
-        elif base_env_name in _qdax_envs.keys():
-            env = _qdax_envs[base_env_name](**kwargs)  # type: ignore
     else:
         raise NotImplementedError("This environment name does not exist!")
 
@@ -155,12 +165,17 @@ def create(
         env = brax.envs.wrappers.EpisodeWrapper(env, episode_length, action_repeat)
     if batch_size:
         env = brax.envs.wrappers.VectorWrapper(env, batch_size)
+
+    # fixed init state wrapper should be here to avoid having problems with the wrapper which introduce new bodies - like trap and maze
+    # remove the manual xy obs addition from the maze wrapepr
+    # however it needs to be after the wrapper that applies the state descriptor stuff
     if fixed_init_state:
         # retrieve the base env
         if env_name not in _qdax_custom_envs.keys():
             base_env_name = env_name
         # wrap the env
         env = FixedInitialStateWrapper(env, base_env_name=base_env_name)  # type: ignore
+
     if auto_reset:
         env = brax.envs.wrappers.AutoResetWrapper(env)
         if env_name in _qdax_custom_envs.keys():

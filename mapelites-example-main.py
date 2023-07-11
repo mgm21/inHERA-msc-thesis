@@ -40,9 +40,9 @@ clear_output()
 
 # Init hyperparameters
 batch_size = 100 #@param {type:"number"}
-env_name = 'hopper_uni' #@param['ant_uni', 'hopper_uni', 'walker2d_uni', 'halfcheetah_uni', 'humanoid_uni', 'ant_omni', 'humanoid_omni']
-episode_length = 10 #@param {type:"integer"}
-num_iterations = 10 #@param {type:"integer"}
+env_name = 'hexapod_uni' #@param['ant_uni', 'hopper_uni', 'walker2d_uni', 'halfcheetah_uni', 'humanoid_uni', 'ant_omni', 'humanoid_omni']
+episode_length = 100 #@param {type:"integer"}
+num_iterations = 1000 #@param {type:"integer"}
 seed = 42 #@param {type:"integer"}
 policy_hidden_layer_sizes = (64, 64) #@param {type:"raw"}
 iso_sigma = 0.005 #@param {type:"number"}
@@ -51,6 +51,8 @@ num_init_cvt_samples = 50000 #@param {type:"integer"}
 num_centroids = 1024 #@param {type:"integer"}
 min_bd = 0. #@param {type:"number"}
 max_bd = 1.0 #@param {type:"number"}
+# for higher-dimensional (>2) BD
+grid_shape = [5] * 6
 
 # Init environment
 env = environments.create(env_name, episode_length=episode_length)
@@ -149,8 +151,6 @@ map_elites = MAPElites(
 #     maxval=max_bd,
 #     random_key=random_key,
 # )
-
-grid_shape = [10, 10, 10, 10]
 
 centroids = compute_euclidean_centroids(
     grid_shape = grid_shape,
