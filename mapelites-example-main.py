@@ -21,6 +21,7 @@ from qdax.core.neuroevolution.networks.networks import MLP
 from qdax.core.emitters.mutation_operators import isoline_variation
 from qdax.core.emitters.standard_emitters import MixingEmitter
 from qdax.utils.plotting import plot_map_elites_results
+from qdax.utils.plotting import plot_multidimensional_map_elites_grid
 
 from qdax.utils.metrics import CSVLogger, default_qd_metrics
 
@@ -40,8 +41,8 @@ clear_output()
 # Init hyperparameters
 batch_size = 100 #@param {type:"number"}
 env_name = 'hopper_uni' #@param['ant_uni', 'hopper_uni', 'walker2d_uni', 'halfcheetah_uni', 'humanoid_uni', 'ant_omni', 'humanoid_omni']
-episode_length = 30 #@param {type:"integer"}
-num_iterations = 30 #@param {type:"integer"}
+episode_length = 10 #@param {type:"integer"}
+num_iterations = 10 #@param {type:"integer"}
 seed = 42 #@param {type:"integer"}
 policy_hidden_layer_sizes = (64, 64) #@param {type:"raw"}
 iso_sigma = 0.005 #@param {type:"number"}
@@ -149,8 +150,10 @@ map_elites = MAPElites(
 #     random_key=random_key,
 # )
 
+grid_shape = [10, 10, 10, 10]
+
 centroids = compute_euclidean_centroids(
-    grid_shape = [10, 10, 10, 10],
+    grid_shape = grid_shape,
     minval = min_bd,
     maxval = max_bd
 )
@@ -196,9 +199,18 @@ for i in range(num_loops):
 # create the x-axis array
 env_steps = jnp.arange(num_iterations) * episode_length * batch_size
 
-# create the plots and the grid
-fig, axes = plot_map_elites_results(env_steps=env_steps, metrics=all_metrics, repertoire=repertoire, min_bd=min_bd, max_bd=max_bd)
-fig.savefig("example-plots")
+# # create the plots and the grid
+# fig, axes = plot_map_elites_results(env_steps=env_steps, metrics=all_metrics, repertoire=repertoire, min_bd=min_bd, max_bd=max_bd)
+# fig.savefig("example-plots")
+
+# create the plots and grid for the multidimensional map-elites
+fig, axes = plot_multidimensional_map_elites_grid(
+    repertoire=repertoire,
+    maxval=jnp.asarray([max_bd]),
+    minval=jnp.asarray([min_bd]),
+    grid_shape=tuple(grid_shape)
+)
+fig.savefig("example-multidim-plots")
 
 
 repertoire_path = "./last_repertoire/"
