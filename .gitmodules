@@ -1,0 +1,3 @@
+[submodule "submodules/singularity_scripts"]
+	path = submodules/singularity_scripts
+	url = https://gitlab.doc.ic.ac.uk/AIRL/airl_tools/singularity_scripts
