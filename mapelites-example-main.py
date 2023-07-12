@@ -41,7 +41,7 @@ clear_output()
 # Init hyperparameters
 batch_size = 100 #@param {type:"number"}
 env_name = 'hexapod_uni' #@param['ant_uni', 'hopper_uni', 'walker2d_uni', 'halfcheetah_uni', 'humanoid_uni', 'ant_omni', 'humanoid_omni']
-episode_length = 100 #@param {type:"integer"}
+episode_length = 500 #@param {type:"integer"}
 num_iterations = 1000 #@param {type:"integer"}
 seed = 42 #@param {type:"integer"}
 policy_hidden_layer_sizes = (64, 64) #@param {type:"raw"}
@@ -81,7 +81,7 @@ keys = jnp.repeat(jnp.expand_dims(subkey, axis=0), repeats=batch_size, axis=0)
 reset_fn = jax.jit(jax.vmap(env.reset))
 init_states = reset_fn(keys)
 
-# Define the fonction to play a step with the policy in the environment
+# Define the function to play a step with the policy in the environment
 def play_step_fn(env_state, policy_params, random_key,):
     """
     Play an environment step and return the updated state and the transition.
@@ -128,6 +128,7 @@ metrics_function = functools.partial(
 variation_fn = functools.partial(
     isoline_variation, iso_sigma=iso_sigma, line_sigma=line_sigma
 )
+
 mixing_emitter = MixingEmitter(
     mutation_fn=None, 
     variation_fn=variation_fn, 
@@ -174,6 +175,7 @@ all_metrics = {}
 for i in range(num_loops):
     start_time = time.time()
     # main iterations
+
     (repertoire, emitter_state, random_key,), metrics = jax.lax.scan(
         map_elites.scan_update,
         (repertoire, emitter_state, random_key),
@@ -260,6 +262,8 @@ while not state.done:
     rollout.append(state)
     action = jit_inference_fn(my_params, state.obs)
     state = jit_env_step(state, action)
+
+    print(f"action: {action}")
 
 print(f"The trajectory of this individual contains {len(rollout)} transitions.")
 

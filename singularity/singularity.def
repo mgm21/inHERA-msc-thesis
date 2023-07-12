@@ -32,17 +32,20 @@ From: airl_lab/default/airl_env:qdax_f57720d0
 
    #CLONEHERE
 
-   mkdir -p /git/exp/inHERA-msc-thesis/results/
+   mkdir -p /git/exp/inhera-msc-thesis/results/
 
 %runscript
    # The following line is to understand why this runscript does not work
    echo $PWD
    
    # Enter project
-   cd ../../../git/exp/inHERA-msc-thesis/
+   cd ../../../git/exp/inhera-msc-thesis/
+
+   # The following line is to understand why this runscript does not work
+   echo $PWD
 
    # Run main
-   python main.py 
+   python mapelites-example-main.py
 
 %help
    MAP-Elites example using QDax.
