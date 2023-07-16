@@ -57,7 +57,7 @@ class Hexapod(env.Env):
         survive_reward = jp.float32(1)
 
         # Bryan suggestion: keep only forward_reward
-        reward = forward_reward
+        reward = forward_reward - ctrl_cost - contact_cost + survive_reward
         # reward = forward_reward - ctrl_cost - contact_cost + survive_reward
 
         done = jp.where(qp.pos[0, 2] < 0.05, x=jp.float32(1), y=jp.float32(0))

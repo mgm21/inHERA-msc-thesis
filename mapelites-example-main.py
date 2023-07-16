@@ -13,7 +13,7 @@ import qdax
 
 
 from qdax.core.map_elites import MAPElites
-from qdax.core.containers.mapelites_repertoire import compute_euclidean_centroids, MapElitesRepertoire
+from qdax.core.containers.mapelites_repertoire import compute_cvt_centroids, compute_euclidean_centroids, MapElitesRepertoire
 from qdax import environments
 from qdax.tasks.brax_envs import scoring_function_brax_envs as scoring_function
 from qdax.core.neuroevolution.buffers.buffer import QDTransition
@@ -40,19 +40,19 @@ clear_output()
 
 # Init hyperparameters
 batch_size = 100 #@param {type:"number"}
-env_name = 'hexapod_uni' #@param['ant_uni', 'hopper_uni', 'walker2d_uni', 'halfcheetah_uni', 'humanoid_uni', 'ant_omni', 'humanoid_omni']
-episode_length = 500 #@param {type:"integer"}
-num_iterations = 1000 #@param {type:"integer"}
+env_name = 'ant_uni' #@param['ant_uni', 'hopper_uni', 'walker2d_uni', 'halfcheetah_uni', 'humanoid_uni', 'ant_omni', 'humanoid_omni']
+episode_length = 5 #@param {type:"integer"}
+num_iterations = 5 #@param {type:"integer"}
 seed = 42 #@param {type:"integer"}
 policy_hidden_layer_sizes = (64, 64) #@param {type:"raw"}
 iso_sigma = 0.005 #@param {type:"number"}
 line_sigma = 0.05 #@param {type:"number"}
-num_init_cvt_samples = 50000 #@param {type:"integer"}
-num_centroids = 1024 #@param {type:"integer"}
+# num_init_cvt_samples = 50000 #@param {type:"integer"}
+# num_centroids = 1024 #@param {type:"integer"}
 min_bd = 0. #@param {type:"number"}
-max_bd = 1.0 #@param {type:"number"}
+max_bd = 1. #@param {type:"number"}
 # for higher-dimensional (>2) BD
-grid_shape = [5] * 6
+grid_shape = (4, 4, 4, 4)
 
 # Init environment
 env = environments.create(env_name, episode_length=episode_length)
@@ -143,7 +143,7 @@ map_elites = MAPElites(
     metrics_function=metrics_function,
 )
 
-# # Compute the centroids
+# Compute the centroids
 # centroids, random_key = compute_cvt_centroids(
 #     num_descriptors=env.behavior_descriptor_length,
 #     num_init_cvt_samples=num_init_cvt_samples,
@@ -154,10 +154,13 @@ map_elites = MAPElites(
 # )
 
 centroids = compute_euclidean_centroids(
-    grid_shape = grid_shape,
-    minval = min_bd,
-    maxval = max_bd
+    grid_shape=grid_shape,
+    minval=min_bd,
+    maxval=max_bd
 )
+
+print(f"centroids: {centroids}")
+print(f"jnp.shape(centroids): {jnp.shape(centroids)}")
 
 # Compute initial repertoire and emitter state
 repertoire, emitter_state, random_key = map_elites.init(init_variables, centroids, random_key)
@@ -202,8 +205,8 @@ for i in range(num_loops):
 env_steps = jnp.arange(num_iterations) * episode_length * batch_size
 
 # # create the plots and the grid
-# fig, axes = plot_map_elites_results(env_steps=env_steps, metrics=all_metrics, repertoire=repertoire, min_bd=min_bd, max_bd=max_bd)
-# fig.savefig("example-plots")
+# fig, axes = plot_map_elites_results(env_steps=env_steps, metrics=all_metrics, repertoire=repertoire, min_bd=min_bd, max_bd=max_bd, grid_shape=grid_shape)
+# fig.savefig("example-plots3")
 
 # create the plots and grid for the multidimensional map-elites
 fig, axes = plot_multidimensional_map_elites_grid(
@@ -261,9 +264,8 @@ state = jit_env_reset(rng=rng)
 while not state.done:
     rollout.append(state)
     action = jit_inference_fn(my_params, state.obs)
-    state = jit_env_step(state, action)
-
     print(f"action: {action}")
+    state = jit_env_step(state, action)
 
 print(f"The trajectory of this individual contains {len(rollout)} transitions.")
 

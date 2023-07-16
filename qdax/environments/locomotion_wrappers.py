@@ -15,7 +15,7 @@ FEET_NAMES = {
     "walker2d": ["foot", "foot_left"],
     "hopper": ["foot"],
     "humanoid": ["left_shin", "right_shin"],
-    "hexapod": ["leg_0_1", "leg_0_2", "leg_0_3", "leg_1_1", "leg_1_2", "leg_1_3"],
+    "hexapod": ["leg_0_3", "leg_1_3", "leg_2_3", "leg_3_3", "leg_4_3", "leg_5_3"],
 }
 
 
@@ -154,6 +154,7 @@ COG_NAMES = {
     "hopper": "torso",
     "humanoid": "torso",
     "humanoid_w_trap": "torso",
+    "hexapod": "base_link",
 }
 
 
@@ -290,6 +291,7 @@ FORWARD_REWARD_NAMES = {
     "walker2d": "reward_forward",
     "hopper": "reward_forward",
     "humanoid": "reward_linvel",
+    "hexapod": "forward_reward",
 }
 
 

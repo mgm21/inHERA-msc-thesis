@@ -39,6 +39,7 @@ From: airl_lab/default/airl_env:qdax_f57720d0
    echo $PWD
    
    # Enter project
+   # Check that this is not actually ../../git/exp/inhera-msc-thesis because HPC job failed 
    cd ../../../git/exp/inhera-msc-thesis/
 
    # The following line is to understand why this runscript does not work
