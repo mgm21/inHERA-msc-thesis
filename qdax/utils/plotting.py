@@ -656,14 +656,15 @@ def plot_multidimensional_map_elites_grid(
         dtype=jnp.int32,
     )
 
-    Matteo_increment = (maxval[0] - minval[0]) / len(grid_shape)
+    Matteo_increment = (maxval[0] - minval[0]) / grid_shape[0]
 
     Matteo_descriptors_integers = jnp.digitize(
         x=non_empty_descriptors,
         bins=jnp.arange(start=Matteo_increment, stop=maxval[0], step=Matteo_increment)
     )
 
-    # print(descriptors_integers == Matteo_descriptors_integers)
+    # print(f"descriptors_integers: {descriptors_integers}")
+    # print(f"matteo descriptor: {Matteo_descriptors_integers}")
 
     descriptors_integers = Matteo_descriptors_integers
 

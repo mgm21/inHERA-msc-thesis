@@ -50,9 +50,9 @@ line_sigma = 0.05 #@param {type:"number"}
 # num_init_cvt_samples = 50000 #@param {type:"integer"}
 # num_centroids = 1024 #@param {type:"integer"}
 min_bd = 0. #@param {type:"number"}
-max_bd = 1 #@param {type:"number"}
+max_bd = 1. #@param {type:"number"}
 # for higher-dimensional (>2) BD
-grid_shape = (4, 4, 4, 4)
+grid_shape = (10, 10, 10, 10)
 
 # Init environment
 env = environments.create(env_name, episode_length=episode_length)
