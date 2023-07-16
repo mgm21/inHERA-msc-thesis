@@ -645,13 +645,27 @@ def plot_multidimensional_map_elites_grid(
 
     # convert the descriptors to integer coordinates, depending on the resolution.
     resolutions_array = jnp.array(grid_shape)
-    print(f"resolutions_array: {resolutions_array}")
+    # print(f"resolutions_array: {resolutions_array}")
+    # print(f"minval: {minval}")
+    # print(f"maxval: {maxval}")
+    # print(f"non_empty_descriptors: {non_empty_descriptors}")
     descriptors_integers = jnp.asarray(
         jnp.floor(
             resolutions_array * (non_empty_descriptors - minval) / (maxval - minval)
         ),
         dtype=jnp.int32,
     )
+
+    Matteo_increment = (maxval[0] - minval[0]) / len(grid_shape)
+
+    Matteo_descriptors_integers = jnp.digitize(
+        x=non_empty_descriptors,
+        bins=jnp.arange(start=Matteo_increment, stop=maxval[0], step=Matteo_increment)
+    )
+
+    # print(descriptors_integers == Matteo_descriptors_integers)
+
+    descriptors_integers = Matteo_descriptors_integers
 
     # total number of grid cells along each dimension of the grid
     size_grid_x = np.prod(np.array(grid_shape[0::2]))
@@ -667,17 +681,17 @@ def plot_multidimensional_map_elites_grid(
     # put solutions in the grid according to their projected 2-dimensional coordinates
     for desc, fit in zip(descriptors_integers, non_empty_fitnesses):
         projection_2d = _get_projection_in_2d(desc, grid_shape)
-        print(f"desc: {desc}")
-        print(f"fit: {fit}")
-        print(f"descriptors_integers: {descriptors_integers}")
-        print(f"non_empty_fitnesses: {non_empty_fitnesses}")
-        print(f"len(descriptors_integers): {len(descriptors_integers)}")
-        print(f"len(non_empty_fitnesses): {len(non_empty_fitnesses)}")
-        print(f"zip(descriptors_integers, non_empty_fitnesses): {zip(descriptors_integers, non_empty_fitnesses)}")
-        print(f"projection_2d: {projection_2d}")
-        print(f"grid_2d: {grid_2d}")
-        print(f"jnp.shape(grid_2d): {jnp.shape(grid_2d)}")
-        print(f"fit.item(): {fit.item()}")
+        # print(f"desc: {desc}")
+        # print(f"fit: {fit}")
+        # print(f"descriptors_integers: {descriptors_integers}")
+        # print(f"non_empty_fitnesses: {non_empty_fitnesses}")
+        # print(f"shape of descriptor integer: {jnp.shape(descriptors_integers)}")
+        # print(f"shape of non empty fitnesses: {jnp.shape(non_empty_fitnesses)}")
+        # print(f"zip(descriptors_integers, non_empty_fitnesses): {zip(descriptors_integers, non_empty_fitnesses)}")
+        # print(f"projection_2d: {projection_2d}")
+        # print(f"grid_2d: {grid_2d}")
+        # print(f"jnp.shape(grid_2d): {jnp.shape(grid_2d)}")
+        # print(f"fit.item(): {fit.item()}")
         if jnp.isnan(grid_2d[projection_2d]) or fit.item() > grid_2d[projection_2d]:
             grid_2d[projection_2d] = fit.item()
 

@@ -41,8 +41,8 @@ clear_output()
 # Init hyperparameters
 batch_size = 100 #@param {type:"number"}
 env_name = 'ant_uni' #@param['ant_uni', 'hopper_uni', 'walker2d_uni', 'halfcheetah_uni', 'humanoid_uni', 'ant_omni', 'humanoid_omni']
-episode_length = 5 #@param {type:"integer"}
-num_iterations = 5 #@param {type:"integer"}
+episode_length = 10 #@param {type:"integer"}
+num_iterations = 50 #@param {type:"integer"}
 seed = 42 #@param {type:"integer"}
 policy_hidden_layer_sizes = (64, 64) #@param {type:"raw"}
 iso_sigma = 0.005 #@param {type:"number"}
@@ -50,7 +50,7 @@ line_sigma = 0.05 #@param {type:"number"}
 # num_init_cvt_samples = 50000 #@param {type:"integer"}
 # num_centroids = 1024 #@param {type:"integer"}
 min_bd = 0. #@param {type:"number"}
-max_bd = 1. #@param {type:"number"}
+max_bd = 1 #@param {type:"number"}
 # for higher-dimensional (>2) BD
 grid_shape = (4, 4, 4, 4)
 
@@ -213,7 +213,7 @@ fig, axes = plot_multidimensional_map_elites_grid(
     repertoire=repertoire,
     maxval=jnp.asarray([max_bd]),
     minval=jnp.asarray([min_bd]),
-    grid_shape=tuple(grid_shape)
+    grid_shape=grid_shape
 )
 fig.savefig("example-multidim-plots")
 
