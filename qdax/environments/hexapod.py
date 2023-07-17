@@ -45,6 +45,8 @@ class Hexapod(env.Env):
     def step(self, state: env.State, action: jp.ndarray) -> env.State:
         """Run one timestep of the environment's dynamics."""
 
+        action = action * (jnp.pi/4) * (180/jnp.pi)
+
         qp, info = self.sys.step(state.qp, action)
         obs = self._get_obs(qp, info)
         state.info["bd"] = qp.pos[0, 0:2]

@@ -39,10 +39,10 @@ clear_output()
 
 
 # Init hyperparameters
-batch_size = 100 #@param {type:"number"}
-env_name = 'ant_uni' #@param['ant_uni', 'hopper_uni', 'walker2d_uni', 'halfcheetah_uni', 'humanoid_uni', 'ant_omni', 'humanoid_omni']
-episode_length = 10 #@param {type:"integer"}
-num_iterations = 50 #@param {type:"integer"}
+batch_size = 128 #@param {type:"number"}
+env_name = 'hexapod_uni' #@param['ant_uni', 'hopper_uni', 'walker2d_uni', 'halfcheetah_uni', 'humanoid_uni', 'ant_omni', 'humanoid_omni']
+episode_length = 50 #@param {type:"integer"}
+num_iterations = 1000 #@param {type:"integer"}
 seed = 42 #@param {type:"integer"}
 policy_hidden_layer_sizes = (64, 64) #@param {type:"raw"}
 iso_sigma = 0.005 #@param {type:"number"}
@@ -52,7 +52,7 @@ line_sigma = 0.05 #@param {type:"number"}
 min_bd = 0. #@param {type:"number"}
 max_bd = 1. #@param {type:"number"}
 # for higher-dimensional (>2) BD
-grid_shape = (10, 10, 10, 10)
+grid_shape = (5, 5, 5, 5, 5, 5)
 
 # Init environment
 env = environments.create(env_name, episode_length=episode_length)
@@ -88,6 +88,10 @@ def play_step_fn(env_state, policy_params, random_key,):
     """
 
     actions = policy_network.apply(policy_params, env_state.obs)
+
+    actions = actions * 10
+
+    print(f"type(actions): {type(actions)}")
     
     state_desc = env_state.info["state_descriptor"]
     next_state = env.step(env_state, actions)
@@ -159,8 +163,8 @@ centroids = compute_euclidean_centroids(
     maxval=max_bd
 )
 
-print(f"centroids: {centroids}")
-print(f"jnp.shape(centroids): {jnp.shape(centroids)}")
+# print(f"centroids: {centroids}")
+# print(f"jnp.shape(centroids): {jnp.shape(centroids)}")
 
 # Compute initial repertoire and emitter state
 repertoire, emitter_state, random_key = map_elites.init(init_variables, centroids, random_key)
@@ -204,19 +208,18 @@ for i in range(num_loops):
 # create the x-axis array
 env_steps = jnp.arange(num_iterations) * episode_length * batch_size
 
-# # create the plots and the grid
-# fig, axes = plot_map_elites_results(env_steps=env_steps, metrics=all_metrics, repertoire=repertoire, min_bd=min_bd, max_bd=max_bd, grid_shape=grid_shape)
-# fig.savefig("example-plots3")
+# create the plots and the grid
+fig, axes = plot_map_elites_results(env_steps=env_steps, metrics=all_metrics, repertoire=repertoire, min_bd=min_bd, max_bd=max_bd, grid_shape=grid_shape)
+fig.savefig("example-plots3")
 
-# create the plots and grid for the multidimensional map-elites
-fig, axes = plot_multidimensional_map_elites_grid(
-    repertoire=repertoire,
-    maxval=jnp.asarray([max_bd]),
-    minval=jnp.asarray([min_bd]),
-    grid_shape=grid_shape
-)
-fig.savefig("example-multidim-plots")
-
+# # create the plots and grid for the multidimensional map-elites
+# fig, axes = plot_multidimensional_map_elites_grid(
+#     repertoire=repertoire,
+#     maxval=jnp.asarray([max_bd]),
+#     minval=jnp.asarray([min_bd]),
+#     grid_shape=grid_shape
+# )
+# fig.savefig("example-multidim-plots")
 
 repertoire_path = "./last_repertoire/"
 os.makedirs(repertoire_path, exist_ok=True)
@@ -264,7 +267,7 @@ state = jit_env_reset(rng=rng)
 while not state.done:
     rollout.append(state)
     action = jit_inference_fn(my_params, state.obs)
-    print(f"action: {action}")
+    # print(f"action: {action}")
     state = jit_env_step(state, action)
 
 print(f"The trajectory of this individual contains {len(rollout)} transitions.")
