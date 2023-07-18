@@ -87,14 +87,7 @@ def play_step_fn(env_state, policy_params, random_key,):
     Play an environment step and return the updated state and the transition.
     """
 
-    actions = policy_network.apply(policy_params, env_state.obs)
-
-    # TODO: why did you keep the *10 here !!
-
-    # actions = actions * 10
-
-    # print(f"type(actions): {type(actions)}")
-    
+    actions = policy_network.apply(policy_params, env_state.obs)    
     state_desc = env_state.info["state_descriptor"]
     next_state = env.step(env_state, actions)
 
@@ -277,3 +270,20 @@ print(f"The trajectory of this individual contains {len(rollout)} transitions.")
 # HTML(html.render(env.sys, [s.qp for s in rollout[:500]]))
 
 html.save_html("test.html", env.sys, [s.qp for s in rollout[:500]])
+
+
+
+
+
+
+# UNDERSTANDING HOW TO SCORE GENOTYPES
+
+# # scores the offsprings
+fitnesses, descriptors, extra_scores, random_key = scoring_fn(
+    repertoire.genotypes, random_key
+)
+
+print(fitnesses)
+print(descriptors)
+print(extra_scores)
+print(random_key)
