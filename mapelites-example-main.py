@@ -41,7 +41,7 @@ clear_output()
 # Init hyperparameters
 batch_size = 128 #@param {type:"number"}
 env_name = 'hexapod_uni' #@param['ant_uni', 'hopper_uni', 'walker2d_uni', 'halfcheetah_uni', 'humanoid_uni', 'ant_omni', 'humanoid_omni']
-episode_length = 50 #@param {type:"integer"}
+episode_length = 100 #@param {type:"integer"}
 num_iterations = 1000 #@param {type:"integer"}
 seed = 42 #@param {type:"integer"}
 policy_hidden_layer_sizes = (64, 64) #@param {type:"raw"}
@@ -89,9 +89,11 @@ def play_step_fn(env_state, policy_params, random_key,):
 
     actions = policy_network.apply(policy_params, env_state.obs)
 
-    actions = actions * 10
+    # TODO: why did you keep the *10 here !!
 
-    print(f"type(actions): {type(actions)}")
+    # actions = actions * 10
+
+    # print(f"type(actions): {type(actions)}")
     
     state_desc = env_state.info["state_descriptor"]
     next_state = env.step(env_state, actions)
