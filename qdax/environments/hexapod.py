@@ -45,6 +45,8 @@ class Hexapod(env.Env):
     def step(self, state: env.State, action: jp.ndarray) -> env.State:
         """Run one timestep of the environment's dynamics."""
 
+        # Convert the action into
+        unscaled_action = action
         action = action * (jnp.pi/4) * (180/jnp.pi)
 
         qp, info = self.sys.step(state.qp, action)
@@ -54,12 +56,12 @@ class Hexapod(env.Env):
         x_before = state.qp.pos[0, 0]
         x_after = qp.pos[0, 0]
         forward_reward = (x_after - x_before) / self.sys.config.dt
-        ctrl_cost = 0.5 * jp.sum(jp.square(action))
+        ctrl_cost = 0.5 * jp.sum(jp.square(unscaled_action))
         contact_cost = 0.5 * 1e-3 * jp.sum(jp.square(jp.clip(info.contact.vel, -1, 1)))
         survive_reward = jp.float32(1)
 
         # Bryan suggestion: keep only forward_reward
-        reward = forward_reward - ctrl_cost - contact_cost + survive_reward
+        reward = forward_reward
         # reward = forward_reward - ctrl_cost - contact_cost + survive_reward
 
         done = jp.where(qp.pos[0, 2] < 0.05, x=jp.float32(1), y=jp.float32(0))
