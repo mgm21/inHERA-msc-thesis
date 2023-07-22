@@ -16,7 +16,6 @@ from qdax.core.map_elites import MAPElites
 from qdax.core.containers.mapelites_repertoire import compute_cvt_centroids, compute_euclidean_centroids, MapElitesRepertoire
 from qdax import environments
 from qdax.tasks.brax_envs import scoring_function_brax_envs as scoring_function
-from qdax.tasks.brax_envs import create_brax_scoring_fn
 from qdax.core.neuroevolution.buffers.buffer import QDTransition
 from qdax.core.neuroevolution.networks.networks import MLP
 from qdax.core.emitters.mutation_operators import isoline_variation
@@ -30,6 +29,11 @@ from jax.flatten_util import ravel_pytree
 
 from IPython.display import HTML
 from brax.io import html
+
+# Matteo's personal imports 
+from jax.tree_util import tree_structure
+from qdax.tasks.brax_envs import create_brax_scoring_fn
+
 
 if "COLAB_TPU_ADDR" in os.environ:
   from jax.tools import colab_tpu
@@ -247,12 +251,28 @@ scoring_fn = jax.jit(scoring_fn)
 genotypes = jnp.load(os.path.join(repertoire_path, "genotypes.npy"))
 fitnesses = jnp.load(os.path.join(repertoire_path, "fitnesses.npy"))
 
+
+# To score all the policies that have been populated:
 policies = jax.tree_map(
         lambda x: x[fitnesses != -jnp.inf], jax.vmap(recons_fn)(genotypes)
     )
 
+# To score the best policy that was found in the repertoire
+best_repertoire_policy = jax.tree_map(
+        lambda x: x[fitnesses == jnp.max(fitnesses)], jax.vmap(recons_fn)(genotypes)
+    )
+
+# To score a policy chosen at a random repertoire
+random_key, subkey = jax.random.split(random_key)
+random_policy = jax.tree_map(
+        lambda x: x[fitnesses == jnp.array(jax.random.choice(subkey, fitnesses[fitnesses != -jnp.inf]))
+], jax.vmap(recons_fn)(genotypes)
+    )
+
+# Evaluate a chosen policy
+chosen_policy = random_policy # Change this line!
 eval_fitnesses, descriptors, extra_scores, random_key = scoring_fn(
-            policies, random_key
+            chosen_policy, random_key
         )
 
 print("keep going!")
