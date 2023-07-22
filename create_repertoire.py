@@ -41,8 +41,8 @@ clear_output()
 # Init hyperparameters
 batch_size = 128 #@param {type:"number"}
 env_name = 'hexapod_uni' #@param['ant_uni', 'hopper_uni', 'walker2d_uni', 'halfcheetah_uni', 'humanoid_uni', 'ant_omni', 'humanoid_omni']
-episode_length = 200 #@param {type:"integer"}
-num_iterations = 50 #@param {type:"integer"}
+episode_length = 150 #@param {type:"integer"}
+num_iterations = 150 #@param {type:"integer"}
 seed = 42 #@param {type:"integer"}
 policy_hidden_layer_sizes = (64, 64) #@param {type:"raw"}
 iso_sigma = 0.005 #@param {type:"number"}
@@ -276,14 +276,14 @@ html.save_html("test.html", env.sys, [s.qp for s in rollout[:500]])
 
 
 
-# UNDERSTANDING HOW TO SCORE GENOTYPES
+# # UNDERSTANDING HOW TO SCORE GENOTYPES
 
-# # scores the offsprings
-fitnesses, descriptors, extra_scores, random_key = scoring_fn(
-    repertoire.genotypes, random_key
-)
+# # # scores the offsprings
+# fitnesses, descriptors, extra_scores, random_key = scoring_fn(
+#     repertoire.genotypes, random_key
+# )
 
-print(fitnesses)
-print(descriptors)
-print(extra_scores)
-print(random_key)
+# print(fitnesses)
+# print(descriptors)
+# print(extra_scores)
+# print(random_key)

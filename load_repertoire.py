@@ -16,6 +16,7 @@ from qdax.core.map_elites import MAPElites
 from qdax.core.containers.mapelites_repertoire import compute_cvt_centroids, compute_euclidean_centroids, MapElitesRepertoire
 from qdax import environments
 from qdax.tasks.brax_envs import scoring_function_brax_envs as scoring_function
+from qdax.tasks.brax_envs import create_brax_scoring_fn
 from qdax.core.neuroevolution.buffers.buffer import QDTransition
 from qdax.core.neuroevolution.networks.networks import MLP
 from qdax.core.emitters.mutation_operators import isoline_variation
@@ -101,7 +102,7 @@ N = 5
 best_N_idx = jnp.argpartition(repertoire.fitnesses, -N)[-N:]
 best_N_fitnesses = repertoire.fitnesses[best_N_idx]
 best_N_bds = repertoire.descriptors[best_N_idx]
-print(best_N_bds)
+# print(best_N_bds)
 
 
 my_params = jax.tree_util.tree_map(
@@ -140,56 +141,124 @@ while not state.done:
 
 # print(f"The trajectory of this individual contains {len(rollout)} transitions.")
 
-html.save_html("test-loaded.html", env.sys, [s.qp for s in rollout[:500]])
+# html.save_html("test-loaded.html", env.sys, [s.qp for s in rollout[:500]])
 
 
-# # UNDERSTANDING HOW TO SCORE GENOTYPES
+# UNDERSTANDING HOW TO SCORE GENOTYPES
 
-# # Create the initial environment states
-# random_key, subkey = jax.random.split(random_key)
-# keys = jnp.repeat(jnp.expand_dims(subkey, axis=0), repeats=batch_size, axis=0)
-# reset_fn = jax.jit(jax.vmap(env.reset))
-# init_states = reset_fn(keys)
+# Create the initial environment states
+random_key, subkey = jax.random.split(random_key)
+keys = jnp.repeat(jnp.expand_dims(subkey, axis=0), repeats=batch_size, axis=0)
+reset_fn = jax.jit(jax.vmap(env.reset))
+init_states = reset_fn(keys)
 
-# # Define the function to play a step with the policy in the environment
-# def play_step_fn(env_state, policy_params, random_key,):
-#     """
-#     Play an environment step and return the updated state and the transition.
-#     """
+# Define the function to play a step with the policy in the environment
+def play_step_fn(env_state, policy_params, random_key,):
+    """
+    Play an environment step and return the updated state and the transition.
+    """
 
-#     actions = policy_network.apply(policy_params, env_state.obs)    
-#     state_desc = env_state.info["state_descriptor"]
-#     next_state = env.step(env_state, actions)
+    actions = policy_network.apply(policy_params, env_state.obs)    
+    state_desc = env_state.info["state_descriptor"]
+    next_state = env.step(env_state, actions)
 
-#     transition = QDTransition(
-#         obs=env_state.obs,
-#         next_obs=next_state.obs,
-#         rewards=next_state.reward,
-#         dones=next_state.done,
-#         actions=actions,
-#         truncations=next_state.info["truncation"],
-#         state_desc=state_desc,
-#         next_state_desc=next_state.info["state_descriptor"],
-#     )
+    transition = QDTransition(
+        obs=env_state.obs,
+        next_obs=next_state.obs,
+        rewards=next_state.reward,
+        dones=next_state.done,
+        actions=actions,
+        truncations=next_state.info["truncation"],
+        state_desc=state_desc,
+        next_state_desc=next_state.info["state_descriptor"],
+    )
 
-#     return next_state, policy_params, random_key, transition
+    return next_state, policy_params, random_key, transition
 
-# bd_extraction_fn = environments.behavior_descriptor_extractor[env_name]
+bd_extraction_fn = environments.behavior_descriptor_extractor[env_name]
 
-# scoring_fn = functools.partial(
-#     scoring_function,
-#     init_states=init_states,
-#     episode_length=episode_length,
-#     play_step_fn=play_step_fn,
-#     behavior_descriptor_extractor=bd_extraction_fn,
-# )
+scoring_fn = functools.partial(
+    scoring_function,
+    init_states=init_states,
+    episode_length=episode_length,
+    play_step_fn=play_step_fn,
+    behavior_descriptor_extractor=bd_extraction_fn,
+)
+
+# genotypes_to_test = jnp.array([my_params])
 
 # # scores the offsprings
 # fitnesses, descriptors, extra_scores, random_key = scoring_fn(
-#     repertoire.genotypes, random_key
+#     my_params, random_key
 # )
 
 # print(fitnesses)
 # print(descriptors)
 # print(extra_scores)
 # print(random_key)
+
+
+
+#### Replicating implementation from qd-skill-discovery-benchmark GitHub in hopes that it will work for scoring and will shed some light
+
+random_key = jax.random.PRNGKey(0)
+
+eval_env = environments.create(
+   env_name=env_name,
+   batch_size=1,
+   episode_length=episode_length,
+   auto_reset=True,
+   eval_metrics=True,
+)
+
+# Init policy network
+policy_layer_sizes = tuple(policy_hidden_layer_sizes + (env.action_size,))
+
+policy_network = MLP(
+    layer_sizes=policy_layer_sizes,
+    kernel_init=jax.nn.initializers.lecun_uniform(),
+    final_activation=jnp.tanh,
+)
+
+fake_batch = jnp.zeros(eval_env.observation_size)
+
+random_key, subkey = jax.random.split(random_key)
+
+init_variables = policy_network.init(subkey, fake_batch)
+
+flat, recons_fn = jax.flatten_util.ravel_pytree(init_variables)
+
+bd_extraction_fn = environments.behavior_descriptor_extractor[env_name]
+
+random_key, subkey = jax.random.split(random_key)
+
+scoring_fn, random_key = create_brax_scoring_fn(
+        env=eval_env,
+        policy_network=policy_network,
+        bd_extraction_fn=bd_extraction_fn,
+        random_key=subkey,
+        episode_length=episode_length,
+        deterministic=True,
+    )
+
+scoring_fn = jax.jit(scoring_fn)
+
+
+genotypes = jnp.load(os.path.join(repertoire_path, "genotypes.npy"))
+fitnesses = jnp.load(os.path.join(repertoire_path, "fitnesses.npy"))
+
+policies = jax.tree_map(
+        lambda x: x[fitnesses != -jnp.inf], jax.vmap(recons_fn)(genotypes)
+    )
+
+eval_fitnesses, descriptors, extra_scores, random_key = scoring_fn(
+            policies, random_key
+        )
+
+print("keep going!")
+
+
+
+
+
+
