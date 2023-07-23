@@ -1,8 +1,5 @@
 from all_imports import *
 
-repertoire_creator = RepertoireCreator()
-repertoire_creator.create_repertoire()
-
 # Init hyperparameters
 batch_size = 128 #@param {type:"number"}
 env_name = 'hexapod_uni' #@param['ant_uni', 'hopper_uni', 'walker2d_uni', 'halfcheetah_uni', 'humanoid_uni', 'ant_omni', 'humanoid_omni']

@@ -22,9 +22,9 @@ class GaussianProcess:
         # This line will have to be edited to sum in the adaptive prior
         mu = jnp.matmul(jnp.transpose(vec), alpha)
         v = jnp.linalg.solve(L, vec)
-        std = 1 - jnp.sum(jnp.square(v), axis=0)
+        var = 1 - jnp.sum(jnp.square(v), axis=0)
 
-        return mu, std
+        return mu, var
 
 
 if __name__ == "__main__":

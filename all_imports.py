@@ -38,7 +38,7 @@ if "COLAB_TPU_ADDR" in os.environ:
   from jax.tools import colab_tpu
   colab_tpu.setup_tpu()
 
-clear_output()
+# clear_output()
 
 from typing import Tuple, Any, Dict
 import numpy
