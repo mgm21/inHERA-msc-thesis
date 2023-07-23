@@ -11,7 +11,6 @@ import brax
 import jumanji
 import qdax
 
-
 from qdax.core.map_elites import MAPElites
 from qdax.core.containers.mapelites_repertoire import compute_cvt_centroids, compute_euclidean_centroids, MapElitesRepertoire
 from qdax import environments
@@ -30,8 +29,27 @@ from jax.flatten_util import ravel_pytree
 from IPython.display import HTML
 from brax.io import html
 
+# Matteo's personal imports 
+from jax.tree_util import tree_structure
+from qdax.tasks.brax_envs import create_brax_scoring_fn
+
+
 if "COLAB_TPU_ADDR" in os.environ:
   from jax.tools import colab_tpu
   colab_tpu.setup_tpu()
 
 clear_output()
+
+from typing import Tuple, Any, Dict
+import numpy
+
+import jax
+from functools import partial
+import jax.numpy as jnp
+from jax import jit, vmap, lax,make_jaxpr
+
+import optax
+
+
+import time
+import json 

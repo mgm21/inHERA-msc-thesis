@@ -1,48 +1,13 @@
-import os
+from all_imports import *
 
-from IPython.display import clear_output
-import functools
-import time
-
-import jax
-import jax.numpy as jnp
-
-import brax
-import jumanji
-import qdax
-
-
-from qdax.core.map_elites import MAPElites
-from qdax.core.containers.mapelites_repertoire import compute_cvt_centroids, compute_euclidean_centroids, MapElitesRepertoire
-from qdax import environments
-from qdax.tasks.brax_envs import scoring_function_brax_envs as scoring_function
-from qdax.core.neuroevolution.buffers.buffer import QDTransition
-from qdax.core.neuroevolution.networks.networks import MLP
-from qdax.core.emitters.mutation_operators import isoline_variation
-from qdax.core.emitters.standard_emitters import MixingEmitter
-from qdax.utils.plotting import plot_map_elites_results
-from qdax.utils.plotting import plot_multidimensional_map_elites_grid
-
-from qdax.utils.metrics import CSVLogger, default_qd_metrics
-
-from jax.flatten_util import ravel_pytree
-
-from IPython.display import HTML
-from brax.io import html
-
-if "COLAB_TPU_ADDR" in os.environ:
-  from jax.tools import colab_tpu
-  colab_tpu.setup_tpu()
-
-clear_output()
-
-
+repertoire_creator = RepertoireCreator()
+repertoire_creator.create_repertoire()
 
 # Init hyperparameters
 batch_size = 128 #@param {type:"number"}
 env_name = 'hexapod_uni' #@param['ant_uni', 'hopper_uni', 'walker2d_uni', 'halfcheetah_uni', 'humanoid_uni', 'ant_omni', 'humanoid_omni']
 episode_length = 100 #@param {type:"integer"}
-num_iterations = 100 #@param {type:"integer"}
+num_iterations = 150 #@param {type:"integer"}
 seed = 42 #@param {type:"integer"}
 policy_hidden_layer_sizes = (64, 64) #@param {type:"raw"}
 iso_sigma = 0.005 #@param {type:"number"}
@@ -54,12 +19,48 @@ max_bd = 1. #@param {type:"number"}
 # for higher-dimensional (>2) BD
 grid_shape = (3, 3, 3, 3, 3, 3)
 
-# Init environment
+
+# This dictionary should completely disable (later maybe put a random val between 0 and 0.5?) the right side of the robot
+# key: an actuator, value: strength_multiplier
+
+multiplier = 0
+
+actuator_strength_update_dict = {
+"body_leg_0": multiplier,
+"leg_0_1_2": multiplier,
+"leg_0_2_3": multiplier,
+"body_leg_1": multiplier,
+"leg_1_1_2": multiplier,
+"leg_1_2_3": multiplier,
+"body_leg_2": multiplier,
+"leg_2_1_2": multiplier,
+"leg_2_2_3": multiplier,
+"body_leg_3": multiplier,
+"leg_3_1_2": multiplier,
+"leg_3_2_3": multiplier,
+"body_leg_4": multiplier,
+"leg_4_1_2": multiplier,
+"leg_4_2_3": multiplier,
+"body_leg_5": multiplier,
+"leg_5_1_2": multiplier,
+"leg_5_2_3": multiplier,
+}
+
+
 env = environments.create(env_name, episode_length=episode_length)
 
+env_actuators = env.sys.config.actuators
+
+# Did not iterate over key, vals of actuator_strength_update_dict because the env_actuators is not a Dict and I think one can only naively iterate over them though I will leave this improvement as a TODO: though there are at most 10 limbs this is not where efficiency should be looked for.
+for actuator in env_actuators:
+	if actuator.name in actuator_strength_update_dict.keys():
+		actuator.strength *= actuator_strength_update_dict[actuator.name]
+
+
+# ALL THE CODE BELOW THIS LINE SHOULD BE REPLACED BY THE INSTANTIATION AND METHOD CALL OF CLASS: e.g. REPERTOIRECREATOR 
 # Init a random key
 random_key = jax.random.PRNGKey(seed)
-
+ 
 # Init policy network
 policy_layer_sizes = policy_hidden_layer_sizes + (env.action_size,)
 policy_network = MLP(
@@ -205,7 +206,7 @@ env_steps = jnp.arange(num_iterations) * episode_length * batch_size
 
 # create the plots and the grid
 fig, axes = plot_map_elites_results(env_steps=env_steps, metrics=all_metrics, repertoire=repertoire, min_bd=min_bd, max_bd=max_bd, grid_shape=grid_shape)
-fig.savefig("example-plots3")
+fig.savefig("example-plots-harmed")
 
 # # create the plots and grid for the multidimensional map-elites
 # fig, axes = plot_multidimensional_map_elites_grid(
@@ -269,4 +270,8 @@ print(f"The trajectory of this individual contains {len(rollout)} transitions.")
 
 # HTML(html.render(env.sys, [s.qp for s in rollout[:500]]))
 
-html.save_html("test.html", env.sys, [s.qp for s in rollout[:500]])
+html.save_html("harmed_robot.html", env.sys, [s.qp for s in rollout[:500]])
+
+print(env.sys.config.actuators)
+
+		

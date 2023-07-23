@@ -166,3 +166,7 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Matteo's personal ignores
+ignore-*.py
+repertoire_creator-discard.py
