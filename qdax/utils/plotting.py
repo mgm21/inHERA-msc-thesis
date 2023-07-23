@@ -597,6 +597,8 @@ def plot_multidimensional_map_elites_grid(
     minval: jnp.ndarray,
     maxval: jnp.ndarray,
     grid_shape: Tuple[int, ...],
+    # Matteo: I added this fitnesses field for the time being to input the updated fitnesses or variances. Will think about whether this is the best way later.
+    updated_fitness: Optional[jnp.ndarray]=None,
     ax: Optional[plt.Axes] = None,
     vmin: Optional[float] = None,
     vmax: Optional[float] = None,
@@ -619,7 +621,12 @@ def plot_multidimensional_map_elites_grid(
     """
 
     descriptors = repertoire.descriptors
-    fitnesses = repertoire.fitnesses
+
+    # Matteo: This is where it is decided which value will be plotted on the map (repertoire fitness, updated fitness, variance, etc...
+    if updated_fitness is not None:
+        fitnesses = updated_fitness
+    else:
+        fitnesses = repertoire.fitnesses
 
     is_grid_empty = fitnesses.ravel() == -jnp.inf
     num_descriptors = descriptors.shape[1]
