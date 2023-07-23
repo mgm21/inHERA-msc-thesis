@@ -17,7 +17,7 @@ line_sigma = 0.05 #@param {type:"number"}
 min_bd = 0. #@param {type:"number"}
 max_bd = 1. #@param {type:"number"}
 # for higher-dimensional (>2) BD
-grid_shape = (5, 5, 5, 5, 5, 5)
+grid_shape = (3, 3, 3, 3, 3, 3)
 
 # Init environment
 env = environments.create(env_name, episode_length=episode_length)
@@ -240,6 +240,10 @@ print("keep going!")
 
 # TODO: check why descriptors are not unique. Is it on these that I should be doing all the operations?
 
+# TODO: yes observations are not coherent with their original repertoire basis. But could this be because the scoring functions were defined slightly differnetly?
+#  1st step try to make the scoring functions identical before checking for other reasons that the results differ.
+#  Also putting everything in an OOP setting will allow you to make sure there is a single object for every purpose and not needing to replicate code + being cleaner.
+
 # EVERYTHING UNDERNEATH HAS TO DO WITH GPs
 
 # Initialise the gp
@@ -267,13 +271,24 @@ mu, var = gp.train(x_observed=x_observed,
           y_observed=y_observed,
           x_test=x_test)
 
+fig, _ = plot_multidimensional_map_elites_grid(
+    repertoire=repertoire,
+    updated_fitness=mu,
+    maxval=jnp.asarray([max_bd]),
+    minval=jnp.asarray([min_bd]),
+    grid_shape=tuple(grid_shape),
+)
+
+fig.savefig("example-mu-after-gp-observation")
+
+fig, _ = plot_multidimensional_map_elites_grid(
+    repertoire=repertoire,
+    updated_fitness=var,
+    maxval=jnp.asarray([max_bd]),
+    minval=jnp.asarray([min_bd]),
+    grid_shape=tuple(grid_shape),
+)
+
+fig.savefig("example-var-after-gp-observation")
+
 print("end")
-
-
-
-
-
-
-
-
-
