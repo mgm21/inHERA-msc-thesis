@@ -41,10 +41,6 @@ init_states = reset_fn(keys)
 
 # Define the function to play a step with the policy in the environment
 def play_step_fn(env_state, policy_params, random_key,):
-    """
-    Play an environment step and return the updated state and the transition.
-    """
-
     actions = policy_network.apply(policy_params, env_state.obs)    
     state_desc = env_state.info["state_descriptor"]
     next_state = env.step(env_state, actions)

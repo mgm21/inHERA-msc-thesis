@@ -65,6 +65,8 @@ if __name__ == "__main__":
     #  is now not 0 for the 100 valued one (so the pattern is like so: the second observation never has a 0 uncertainty and the 0 value-d observation is never
     #  exactly 0 in the new mu; maybe this is due to the cholesky method or to jax. Anyhow the values are veruy close so it's probably not a problem)
 
+    # TODO: add different kernels, add different acquisition functions (here? I guess so. You can put in here everything that is in Brochu or Rasmussen)
+
 
 
 

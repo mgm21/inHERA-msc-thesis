@@ -170,3 +170,6 @@ cython_debug/
 # Matteo's personal ignores
 ignore-*.py
 repertoire_creator-discard.py
+*.html
+class_example_repertoire
+class-last_repertoire

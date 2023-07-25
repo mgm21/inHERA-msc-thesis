@@ -53,8 +53,6 @@ for actuator in env_actuators:
 	if actuator.name in actuator_strength_update_dict.keys():
 		actuator.strength *= actuator_strength_update_dict[actuator.name]
 
-
-# ALL THE CODE BELOW THIS LINE SHOULD BE REPLACED BY THE INSTANTIATION AND METHOD CALL OF CLASS: e.g. REPERTOIRECREATOR 
 # Init a random key
 random_key = jax.random.PRNGKey(seed)
  
@@ -271,4 +269,3 @@ html.save_html("harmed_robot.html", env.sys, [s.qp for s in rollout[:500]])
 
 print(env.sys.config.actuators)
 
-		

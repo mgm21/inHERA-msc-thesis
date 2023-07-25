@@ -160,11 +160,9 @@ scoring_fn = functools.partial(
 # print(extra_scores)
 # print(random_key)
 
-
-
 #### Replicating implementation from qd-skill-discovery-benchmark GitHub in hopes that it will work for scoring and will shed some light
 
-random_key = jax.random.PRNGKey(0)
+random_key = jax.random.PRNGKey(42)
 
 eval_env = environments.create(
    env_name=env_name,
@@ -205,7 +203,6 @@ scoring_fn, random_key = create_brax_scoring_fn(
     )
 
 scoring_fn = jax.jit(scoring_fn)
-
 
 genotypes = jnp.load(os.path.join(repertoire_path, "genotypes.npy"))
 fitnesses = jnp.load(os.path.join(repertoire_path, "fitnesses.npy"))
