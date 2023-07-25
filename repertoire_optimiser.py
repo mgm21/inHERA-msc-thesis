@@ -12,7 +12,8 @@ class RepertoireOptimiser:
                  line_sigma=0.05,
                  min_bd=0.,
                  max_bd=1.,
-                 grid_shape=tuple([3]) * 6,):
+                 grid_shape=tuple([3]) * 6,
+                 env=None):
         
         self.batch_size = batch_size
         self.env_name = env_name
@@ -25,8 +26,11 @@ class RepertoireOptimiser:
         self.min_bd = min_bd
         self.max_bd = max_bd
         self.grid_shape = grid_shape
+        self.env = env
 
-        self.env = environments.create(env_name, episode_length=episode_length)
+        # If a custom env has not been passed
+        if self.env == None:
+            self.env = environments.create(env_name, episode_length=episode_length)
 
     def optimise_repertoire(self,
                             repertoire_path="./class_example_repertoire/",
