@@ -1,10 +1,5 @@
 # Note: could change Task name, just gave it because Environment would lead to a confusion with brax/qdax envs
-# TODO: To test if Task works, replace all the variables in repertoire_optimiser by the ones defined in a Task object
-# See if you get the same results.
-
-# TODO: maybe include everything in the init if the method is always called after the init?
-
-from all_imports import *
+from src.all_imports import *
 from dataclasses import dataclass
 
 @dataclass

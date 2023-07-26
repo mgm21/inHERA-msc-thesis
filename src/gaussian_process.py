@@ -1,6 +1,6 @@
 # This GP class was inspired by Rasmussen's GPs for ML book (mainly algo on p. 19) and Antoine Cully's unpublished implementation of GPs
 
-from all_imports import *
+from src.all_imports import *
 
 class GaussianProcess:
     def __init__(self):

@@ -1,4 +1,4 @@
-from all_imports import *
+from src.all_imports import *
 
 # Init hyperparameters
 batch_size = 128 #@param {type:"number"}

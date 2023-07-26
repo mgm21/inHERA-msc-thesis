@@ -1,11 +1,11 @@
-from all_imports import *
+from src.all_imports import *
 
-from task import Task
-from repertoire_loader import RepertoireLoader
-from adaptive_agent import AdaptiveAgent
-from gaussian_process import GaussianProcess
-import hexapod_damage_dicts
-from repertoire_optimiser import RepertoireOptimiser
+from src.task import Task
+from src.repertoire_loader import RepertoireLoader
+from src.adaptive_agent import AdaptiveAgent
+from src.gaussian_process import GaussianProcess
+import src.hexapod_damage_dicts as hexapod_damage_dicts
+from src.repertoire_optimiser import RepertoireOptimiser
 
 # TODO: All problems pertaining to random keys flowing in the program. 
 #  I am a little unsure about if I am passing keys correctly and globally unsure about 2 concepts:
@@ -25,9 +25,6 @@ task = Task(episode_length=50, num_iterations=50)
 
 # OPTIMISE A REPERTOIRE IN SIMULATION (hopefully passing the RepertoireOptimiser a Task object so that it does not repeat
 # code)
-# TODO: pass the task object to the RepertoireOptimiser so there is no code repeat ultimately
-# TODO: I think that in the end Task should only include data (be like a data class (not functions, will have to com
-# pute a new one for each agent))
 
 # repertoire_optimsier = RepertoireOptimiser(task=task)
 
@@ -62,9 +59,7 @@ gp = GaussianProcess()
 # need to find a good way for it to test its policies. Doing it through fitness values is not robust (could have
 # multiple BDs with the same fitness and it is trying to test a BD not a fitness value))
 
-# TODO: Acquisition function query from Gaussian Process (using mu and var of the agent)
-
-# TODO: Test the policy that the GP has asked for (testing a BD)
+# Test the policy that the GP has asked for (testing a BD)
 
 # Update the mu and var of the agent
 

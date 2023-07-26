@@ -1,5 +1,5 @@
-from all_imports import *
-from task import Task
+from src.all_imports import *
+from src.task import Task
 
 class RepertoireOptimiser:
     def __init__(self,
@@ -222,12 +222,11 @@ class RepertoireOptimiser:
 
         
 if __name__ == "__main__":
-    from adaptive_agent import AdaptiveAgent
-    from task import Task
-    import hexapod_damage_dicts
+    from src.adaptive_agent import AdaptiveAgent
+    from src.task import Task
+    import src.hexapod_damage_dicts as hexapod_damage_dicts
 
     task = Task(num_iterations=10, episode_length=10)
-    
 
     # TODO: Change to an index dict input such as damage_indices = {3: 0, 5: 0} # Much quicker than what I have below
     # Then damage_dict = hexapod_damage_dicts.get_damage_dict({3: 0, 5: 0})

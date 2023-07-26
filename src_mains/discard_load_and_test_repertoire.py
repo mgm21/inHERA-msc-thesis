@@ -1,5 +1,5 @@
-from all_imports import *
-from gaussian_process import GaussianProcess
+from src.all_imports import *
+from src.gaussian_process import GaussianProcess
 
 repertoire_path = "./last_repertoire/"
 
@@ -237,7 +237,7 @@ print("keep going!")
 
 # TODO: check why descriptors are not unique. Is it on these that I should be doing all the operations?
 
-# TODO: yes observations are not coherent with their original repertoire basis. But could this be because the scoring functions were defined slightly differnetly?
+# [now they are] yes observations are not coherent with their original repertoire basis. But could this be because the scoring functions were defined slightly differnetly?
 #  1st step try to make the scoring functions identical before checking for other reasons that the results differ.
 #  Also putting everything in an OOP setting will allow you to make sure there is a single object for every purpose and not needing to replicate code + being cleaner.
 

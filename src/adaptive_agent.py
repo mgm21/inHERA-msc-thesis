@@ -1,4 +1,4 @@
-from all_imports import *
+from src.all_imports import *
 
 # Temporarily
 from qdax.environments import hexapod
@@ -91,7 +91,8 @@ class AdaptiveAgent:
  
     def define_task_functions(self):
         # TODO: Am I sure that redefining things is the best / best done in the following manner?
-        #  pertaining to policy_net, recons_fn, bd_extraction_fn and scoring_fn
+        #  pertaining to policy_net, recons_fn, bd_extraction_fn and scoring_fn (can delete some from memory
+        # I guess?)
         random_key = jax.random.PRNGKey(1)
 
         policy_layer_sizes = tuple(self.task.policy_hidden_layer_sizes + (self.env.action_size,))
@@ -101,13 +102,11 @@ class AdaptiveAgent:
             final_activation=jnp.tanh,
         )
 
-        # Define the reconstruction function (# TODO: is it okay just like this? Check its uses)
         fake_batch = jnp.zeros(self.env.observation_size)
         random_key, subkey = jax.random.split(random_key)
         init_variables = policy_network.init(subkey, fake_batch)
         _, recons_fn = jax.flatten_util.ravel_pytree(init_variables)
 
-        # Define the bd_extraction function (# TODO: is it okay just like this? Check its uses)
         bd_extraction_fn = environments.behavior_descriptor_extractor[self.task.env_name]
         random_key, subkey = jax.random.split(random_key)
         scoring_fn, random_key = create_brax_scoring_fn(
@@ -123,9 +122,9 @@ class AdaptiveAgent:
         self.scoring_fn, self.recons_fn = scoring_fn, recons_fn
 
 if __name__ == "__main__":
-    from task import Task
-    from repertoire_loader import RepertoireLoader
-    import hexapod_damage_dicts
+    from src.task import Task
+    from src.repertoire_loader import RepertoireLoader
+    import src.hexapod_damage_dicts as hexapod_damage_dicts
 
     # These lines do not change and cannot be the problem
     repertoire_loader = RepertoireLoader()

@@ -1,4 +1,4 @@
-from all_imports import *
+from src.all_imports import *
 
 class RepertoireLoader:
     def load_repertoire(self, repertoire_path="./last_repertoire/"):
