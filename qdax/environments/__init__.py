@@ -145,7 +145,7 @@ def create(
     elif env_name in _qdax_custom_envs.keys():
         base_env_name = _qdax_custom_envs[env_name]["env"]
         if base_env_name == "hexapod":
-            env = Hexapod(legacy_spring=True, **kwargs)
+            env = Hexapod(legacy_spring=False, **kwargs)
         else:
             env = brax.envs._envs[base_env_name](legacy_spring=True, **kwargs)
     else:
