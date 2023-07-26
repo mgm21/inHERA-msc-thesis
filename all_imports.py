@@ -29,11 +29,6 @@ from jax.flatten_util import ravel_pytree
 from IPython.display import HTML
 from brax.io import html
 
-# Matteo's personal imports 
-from jax.tree_util import tree_structure
-from qdax.tasks.brax_envs import create_brax_scoring_fn
-
-
 if "COLAB_TPU_ADDR" in os.environ:
   from jax.tools import colab_tpu
   colab_tpu.setup_tpu()
@@ -53,3 +48,7 @@ import optax
 
 import time
 import json 
+
+# Matteo's personal imports 
+from jax.tree_util import tree_structure
+from qdax.tasks.brax_envs import create_brax_scoring_fn

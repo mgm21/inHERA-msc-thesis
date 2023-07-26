@@ -235,7 +235,7 @@ if __name__ == "__main__":
 
     task = Task()
 
-    # Change to an index dict input such as damage_indices = {3: 0, 5: 0} # Much quicker than what I have below
+    # TODO: Change to an index dict input such as damage_indices = {3: 0, 5: 0} # Much quicker than what I have below
     # Then damage_dict = hexapod_damage_dicts.get_damage_dict({3: 0, 5: 0})
     damage_dict = hexapod_damage_dicts.get_damage_dict(jnp.array([0, 0, 0, 0, 0, 0, 0, 0, 0,
                                                                  200, 200, 200, 200, 200, 200, 200, 200, 200]))
@@ -244,9 +244,9 @@ if __name__ == "__main__":
                                  damage_dictionary=damage_dict)
     
 
-    repertoire_opt = RepertoireOptimiser(episode_length=100,
-                                         num_iterations=150,
+    repertoire_opt = RepertoireOptimiser(episode_length=10,
+                                         num_iterations=10,
                                          env=broken_agent.env)
     
-    repertoire_opt.optimise_repertoire(plot_path="by_setting_half_the_actuators_to_0",
-                                       html_path="by_setting_half_the_actuators_to_0.html")
+    repertoire_opt.optimise_repertoire(plot_path="by_setting_half_the_actuators_to_0-20",
+                                       html_path="by_setting_half_the_actuators_to_0-20.html")

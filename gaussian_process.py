@@ -28,6 +28,7 @@ class GaussianProcess:
         return mu, var
     
     def acqusition_function(self, mu, var, kappa=0.05):
+        # kappa is a measure of how much uncertainty is valued
         # Should return the index of the policy to test given mu and var
         return jnp.argmax(mu + kappa*var)
 
@@ -50,13 +51,17 @@ if __name__ == "__main__":
     x_observed = jnp.array([[0, 0, 0],
                             [1, 1, 1]])
     
-    y_observed = jnp.array([0, 100])
+    y_observed = jnp.array([0, 1])
 
-    results = gp.train(x_observed=x_observed,
+    mu, var = gp.train(x_observed=x_observed,
                        y_observed=y_observed,
                        x_test=x_test)
     
-    print(results)
+    # kappa is a measure of how much uncertainty is valued
+    # increase it to see that it no longer chooses the next point as the one with the highest mu
+    index_to_test_next = gp.acqusition_function(mu, var, kappa=2)
+
+    print(index_to_test_next)
     
     # To check that kernel function is working appropriately
     # TODO: put unit tests throughout the code base later
