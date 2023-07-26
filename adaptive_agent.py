@@ -42,12 +42,9 @@ class AdaptiveAgent:
         # Damage the robot
         self.damage_env()
 
-        # TODO: Get the specific functions for this agent (only the scoring fn may be needed to be specific 
-        # can change later)
         self.define_task_functions()
 
     
-    # TODO: this fitness as an input should be changed to descriptor as described in example_main's TODO no. 2
     def test_descriptor(self, index, random_key):
         # TODO: isn't it the opposite random key and subkey (also why are we passing random key to the function below)
         random_key, subkey = jax.random.split(random_key)
@@ -93,11 +90,10 @@ class AdaptiveAgent:
         qdax.environments.hexapod._SYSTEM_CONFIG = intact_CONFIG
  
     def define_task_functions(self):
-        # TODO: only the scoring function has to be redefined can fix that by putting these in the task.py later
-        # Fix this seed
+        # TODO: Am I sure that redefining things is the best / best done in the following manner?
+        #  pertaining to policy_net, recons_fn, bd_extraction_fn and scoring_fn
         random_key = jax.random.PRNGKey(1)
 
-        # Define the policy network (# TODO: is it okay just like this? Check its uses)
         policy_layer_sizes = tuple(self.task.policy_hidden_layer_sizes + (self.env.action_size,))
         policy_network = MLP(
             layer_sizes=policy_layer_sizes,

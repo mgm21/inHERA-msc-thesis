@@ -1,42 +1,35 @@
 from all_imports import *
+from task import Task
 
 class RepertoireOptimiser:
     def __init__(self,
-                 batch_size=128,
-                 env_name='hexapod_uni',
-                 episode_length=100,
-                 num_iterations=100,
-                 seed=42,
-                 policy_hidden_layer_sizes=(64, 64),
-                 iso_sigma=0.005,
-                 line_sigma=0.05,
-                 min_bd=0.,
-                 max_bd=1.,
-                 grid_shape=tuple([3]) * 6,
+                 task=Task(),
                  env=None):
         
-        self.batch_size = batch_size
-        self.env_name = env_name
-        self.episode_length = episode_length
-        self.num_iterations = num_iterations
-        self.seed = seed
-        self.policy_hidden_layer_sizes = policy_hidden_layer_sizes
-        self.iso_sigma = iso_sigma
-        self.line_sigma = line_sigma
-        self.min_bd = min_bd
-        self.max_bd = max_bd
-        self.grid_shape = grid_shape
-        self.env = env
+        # Data coming from class dataclass
+        self.batch_size = task.batch_size
+        self.env_name = task.env_name
+        self.episode_length = task.episode_length
+        self.num_iterations = task.num_iterations
+        self.seed = task.seed
+        self.policy_hidden_layer_sizes = task.policy_hidden_layer_sizes
+        self.iso_sigma = task.iso_sigma
+        self.line_sigma = task.line_sigma
+        self.min_bd = task.min_bd
+        self.max_bd = task.max_bd
+        self.grid_shape = task.grid_shape
 
         # If a custom env has not been passed, create a standard intact environment
+        self.env = env
         if self.env == None:
-            self.env = environments.create(env_name, episode_length=episode_length)
+            self.env = environments.create(task.env_name, episode_length=task.episode_length)
 
     def optimise_repertoire(self,
                             repertoire_path="./class_example_repertoire/",
                             csv_results_path="./results/class_mapelites_logs.csv",
                             plot_path="./class_example_plots",
                             html_path="./class_best_policy_in_map.html"):
+        
         # Temporarily not to change the below implementation
         batch_size = self.batch_size
         env_name = self.env_name 
@@ -233,7 +226,8 @@ if __name__ == "__main__":
     from task import Task
     import hexapod_damage_dicts
 
-    task = Task()
+    task = Task(num_iterations=10, episode_length=10)
+    
 
     # TODO: Change to an index dict input such as damage_indices = {3: 0, 5: 0} # Much quicker than what I have below
     # Then damage_dict = hexapod_damage_dicts.get_damage_dict({3: 0, 5: 0})
@@ -244,9 +238,7 @@ if __name__ == "__main__":
                                  damage_dictionary=damage_dict)
     
 
-    repertoire_opt = RepertoireOptimiser(episode_length=10,
-                                         num_iterations=10,
-                                         env=broken_agent.env)
+    repertoire_opt = RepertoireOptimiser(task=task, env=broken_agent.env)
     
     repertoire_opt.optimise_repertoire(plot_path="by_setting_half_the_actuators_to_0-20",
                                        html_path="by_setting_half_the_actuators_to_0-20.html")

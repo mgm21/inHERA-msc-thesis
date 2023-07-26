@@ -7,27 +7,21 @@ from gaussian_process import GaussianProcess
 import hexapod_damage_dicts
 from repertoire_optimiser import RepertoireOptimiser
 
-# TODO: will need to make sure that the random keys are passed through the methods for the program flow to keep
-# keys passing consistently
-
-# TODO: make functions that are modular to get a quick html of a policy from an old repertoire but for a new robot
-
-# TODO: I am a little unsure about if I am passing keys correctly and globally unsure about 2 concepts:
+# TODO: All problems pertaining to random keys flowing in the program. 
+#  I am a little unsure about if I am passing keys correctly and globally unsure about 2 concepts:
 #  1. Where random is taking effect (for this go over all qdax code and see when keys are necessary)
 #  2. How resetting works and how I would implement RTE, for example
 
-# TODO: find a way to query the testing function just using a behavioural descriptor array AND just using an descriptor index
-#  Because if you just do it through the fitness function (it's possible that multiple BDs have the same fitness...)
+# TODO: make functions that are modular to get a quick html of a policy from an old repertoire but for a new robot
 
 # TODO: should I as soon as the MAP-Elites grid is formed, trim all the sim_repertoire_arrays to only include the indices
 #  where fitness is not -inf (like: genotypes[fitnesses != -jnp.inf]) etc...
 
-# TODO: (PRIORITY FOR TODAY) refactorings left to do: make Task object a part of the RepertoireOptimiser and make a full flow here. Also find
-#  a good way to test a policy at a particular index (see second TODO from top).
+# TODO: (PRIORITY FOR TODAY) refactorings left to do: make Task object a part of the RepertoireOptimiser and make a full flow here.
 # 1st part could be as simple as inputting task to RepertoireOptimiser and extracting all its attributes AND FUNCTIONS
 
 # DEFINE THE TASK
-task = Task()
+task = Task(episode_length=50, num_iterations=50)
 
 # OPTIMISE A REPERTOIRE IN SIMULATION (hopefully passing the RepertoireOptimiser a Task object so that it does not repeat
 # code)
@@ -35,8 +29,7 @@ task = Task()
 # TODO: I think that in the end Task should only include data (be like a data class (not functions, will have to com
 # pute a new one for each agent))
 
-# repertoire_optimsier = RepertoireOptimiser(episode_length=100,
-#                                            num_iterations=100)
+# repertoire_optimsier = RepertoireOptimiser(task=task)
 
 # repertoire_optimsier.optimise_repertoire(repertoire_path="./example_main_repertoire/",
 #                                          plot_path="./example_main",

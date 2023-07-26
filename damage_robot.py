@@ -48,7 +48,6 @@ env = environments.create(env_name, episode_length=episode_length)
 
 env_actuators = env.sys.config.actuators
 
-# Did not iterate over key, vals of actuator_strength_update_dict because the env_actuators is not a Dict and I think one can only naively iterate over them though I will leave this improvement as a TODO: though there are at most 10 limbs this is not where efficiency should be looked for.
 for actuator in env_actuators:
 	if actuator.name in actuator_strength_update_dict.keys():
 		actuator.strength *= actuator_strength_update_dict[actuator.name]
