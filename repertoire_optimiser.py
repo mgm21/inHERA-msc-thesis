@@ -28,7 +28,7 @@ class RepertoireOptimiser:
         self.grid_shape = grid_shape
         self.env = env
 
-        # If a custom env has not been passed
+        # If a custom env has not been passed, create a standard intact environment
         if self.env == None:
             self.env = environments.create(env_name, episode_length=episode_length)
 
@@ -229,5 +229,24 @@ class RepertoireOptimiser:
 
         
 if __name__ == "__main__":
-    repertoire_opt = RepertoireOptimiser(episode_length=50, num_iterations=50)
-    repertoire_opt.optimise_repertoire()
+    from adaptive_agent import AdaptiveAgent
+    from task import Task
+    import hexapod_damage_dicts
+
+    task = Task()
+
+    # Change to an index dict input such as damage_indices = {3: 0, 5: 0} # Much quicker than what I have below
+    # Then damage_dict = hexapod_damage_dicts.get_damage_dict({3: 0, 5: 0})
+    damage_dict = hexapod_damage_dicts.get_damage_dict(jnp.array([0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                                                 200, 200, 200, 200, 200, 200, 200, 200, 200]))
+
+    broken_agent = AdaptiveAgent(task=task,
+                                 damage_dictionary=damage_dict)
+    
+
+    repertoire_opt = RepertoireOptimiser(episode_length=100,
+                                         num_iterations=150,
+                                         env=broken_agent.env)
+    
+    repertoire_opt.optimise_repertoire(plot_path="by_setting_half_the_actuators_to_0",
+                                       html_path="by_setting_half_the_actuators_to_0.html")
