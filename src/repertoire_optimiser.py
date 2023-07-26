@@ -25,10 +25,10 @@ class RepertoireOptimiser:
             self.env = environments.create(task.env_name, episode_length=task.episode_length)
 
     def optimise_repertoire(self,
-                            repertoire_path="./class_example_repertoire/",
+                            repertoire_path="./results/class_example_repertoire/",
                             csv_results_path="./results/class_mapelites_logs.csv",
-                            plot_path="./class_example_plots",
-                            html_path="./class_best_policy_in_map.html"):
+                            plot_path="./results/class_example_plots",
+                            html_path="./results/class_best_policy_in_map.html"):
         
         # Temporarily not to change the below implementation
         batch_size = self.batch_size
@@ -239,5 +239,5 @@ if __name__ == "__main__":
 
     repertoire_opt = RepertoireOptimiser(task=task, env=broken_agent.env)
     
-    repertoire_opt.optimise_repertoire(plot_path="by_setting_half_the_actuators_to_0-20",
-                                       html_path="by_setting_half_the_actuators_to_0-20.html")
+    repertoire_opt.optimise_repertoire(plot_path="results/by_setting_half_the_actuators_to_0-20",
+                                       html_path="results/by_setting_half_the_actuators_to_0-20.html")
