@@ -4,6 +4,7 @@ from all_imports import *
 
 class GaussianProcess:
     def __init__(self):
+        # TODO: careful see what the relationship between this noise and the one in AdaptiveAgent.init is
         self.obs_noise = 0
         self.length_scale = 1
 
@@ -25,6 +26,10 @@ class GaussianProcess:
         var = 1 - jnp.sum(jnp.square(v), axis=0)
 
         return mu, var
+    
+    def acqusition_function(self, mu, var, kappa=0.05):
+        # Should return the index of the policy to test given mu and var
+        return jnp.argmax(mu + kappa*var)
 
 
 if __name__ == "__main__":
