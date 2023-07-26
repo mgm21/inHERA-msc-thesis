@@ -54,6 +54,9 @@ class AdaptiveAgent:
 
         # Get the policy at index
         policy = jax.vmap(self.recons_fn)(self.sim_genotypes[index:index+1])
+
+        # This way also works to keep correct shapes for the scoring function
+        # policy = jax.vmap(self.recons_fn)(jnp.array([self.sim_genotypes[index]]))
         
         # Observe a point
         observed_fitness, observed_descriptor, extra_scores, random_key = self.scoring_fn(
