@@ -3,6 +3,7 @@ from src.all_imports import *
 # Temporarily
 from qdax.environments import hexapod
 
+# TODO: is the signature and constructor really the best?
 class AdaptiveAgent:
     def __init__(self,
                  task,
@@ -11,12 +12,12 @@ class AdaptiveAgent:
                                         jnp.array([]),
                                         jnp.array([])),
                  damage_dictionary={},
+                 sim_noise=0.001,
                  name="some_name",
                  x_observed=jnp.array([]),
                  y_observed=jnp.array([]),
                  mu=None,
-                 var=None,
-                 sim_noise=0.001):
+                 var=None,):
         
         self.task = task
         self.sim_descriptors = sim_repertoire_arrays[1]
@@ -33,7 +34,9 @@ class AdaptiveAgent:
             self.mu = mu
         
         if var == None:
-            self.var = jnp.array([sim_noise] * len(self.sim_fitnesses))
+            # TODO: think about how to initialise variance with kernel(x, x) + sim_noise (should it be in the GP)
+            # because we don't have the kernel here... maybe a method in GaussianProcess
+            self.var = jnp.array([1 + sim_noise] * len(self.sim_fitnesses))
         else:
             self.var = var
 
@@ -44,7 +47,7 @@ class AdaptiveAgent:
 
         self.define_task_functions()
 
-    
+    # TODO: could refactor this to observe_descriptor(descriptor, random_key) and maybe this automatically adds to x_observed and y_observed
     def test_descriptor(self, index, random_key):
         # TODO: isn't it the opposite random key and subkey (also why are we passing random key to the function below)
         random_key, subkey = jax.random.split(random_key)

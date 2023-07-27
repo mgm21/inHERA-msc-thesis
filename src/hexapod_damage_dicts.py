@@ -47,4 +47,3 @@ all_actuators_broken = get_damage_dict([0] * 18)
 if __name__ == "__main__":
     import jax.numpy as jnp
     print(get_damage_dict({1: 0, 5:0}))
-    # print(all_actuators_broken)
