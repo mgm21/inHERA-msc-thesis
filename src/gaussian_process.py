@@ -7,9 +7,15 @@ class GaussianProcess:
         # TODO: careful see what the relationship between this noise and the one in AdaptiveAgent.init is
         self.obs_noise = 0
         self.length_scale = 1
+        self.rho = 0.4
 
         # TODO: check why the sum below? Is it required in higher-dims?
         self.kernel = lambda x1, x2: jnp.exp(-jnp.sum((x1 - x2) ** 2 / (2*self.length_scale**2)))
+
+        # From ITE paper:
+        self.d = lambda x1, x2: jnp.linalg.norm(x2-x1)
+        self.kernel = lambda x1, x2: (1 + ((jnp.sqrt(5)*self.d(x1, x2)) / (self.rho)) 
+                                      + ((5*self.d(x1, x2)**2) / (3*self.rho**2))) * jnp.exp((-jnp.sqrt(5) * self.d(x1, x2))/(self.rho))
 
     def train(self,
               x_observed,
@@ -63,9 +69,9 @@ if __name__ == "__main__":
 
     print(index_to_test_next)
     
-    # To check that kernel function is working appropriately
-    # TODO: put unit tests throughout the code base later
-    # print(gp.kernel(x1=jnp.array([0, 0, 0]),
+    # # To check that kernel function is working appropriately
+    # # TODO: put unit tests throughout the code base later
+    # print(gp.kernel(x1=jnp.array([1, 1, 1]),
     #                 x2=jnp.array([1, 1, 1])))
 
     # TODO: note that I'm getting a "v: jnp.DeviceArray" output and I'm not sure why

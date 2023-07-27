@@ -124,6 +124,26 @@ class AdaptiveAgent:
 
         self.scoring_fn, self.recons_fn = scoring_fn, recons_fn
 
+        
+    # TODO: remove from this class and ultimately put in the right place (the agent does not plot its own repertoire?)    
+    def plot_repertoire(self, quantity="mu", path_to_base_repertoire="results/ite_experiment/", path_to_save_to="example_agent_repertoire"):
+
+        repertoire = MapElitesRepertoire.load(reconstruction_fn=agent.recons_fn, path=path_to_base_repertoire)
+
+        if quantity == "mu":
+            updated_fitness = self.mu
+        elif quantity == "var":
+            updated_fitness = self.var
+
+        fig, _ = plot_multidimensional_map_elites_grid(
+        repertoire=repertoire,
+        updated_fitness=updated_fitness,
+        maxval=jnp.asarray([self.task.max_bd]),
+        minval=jnp.asarray([self.task.min_bd]),
+        grid_shape=tuple(self.task.grid_shape),)
+
+        fig.savefig(path_to_save_to)
+
 if __name__ == "__main__":
     from src.task import Task
     from src.repertoire_loader import RepertoireLoader
