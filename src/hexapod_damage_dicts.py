@@ -1,7 +1,18 @@
 import jax.numpy as jnp
 # Stores some common damage dictionaries for the hexapod
 
-def get_damage_dict(arr):
+def get_damage_dict(in_var):
+    # If user specifies damage with a dictionary
+    if type(in_var) == dict:
+        arr = [200.0] * 18
+
+        for index in in_var.keys():
+            arr[index] = in_var[index]
+    
+    # If user specifies damage with an array
+    else:
+        arr = in_var
+
     damage_dict = {
             "body_leg_0": float(arr[0]),
             "leg_0_1_2": float(arr[1]),
@@ -31,9 +42,9 @@ def get_damage_dict(arr):
     return damage_dict
 
 # Some common damage_dicts
-all_actuators_broken = get_damage_dict(jnp.array([0] * 18))
+all_actuators_broken = get_damage_dict([0] * 18)
 
 if __name__ == "__main__":
     import jax.numpy as jnp
-    print(get_damage_dict(jnp.array([10] * 18)))
+    print(get_damage_dict({1: 0, 5:0}))
     # print(all_actuators_broken)
