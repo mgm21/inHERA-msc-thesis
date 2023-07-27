@@ -1,4 +1,4 @@
-from src.all_imports import *
+from utils.all_imports import *
 
 class ITE():
     # TODO: maybe inputting task object is unnecessary
@@ -59,7 +59,7 @@ class ITE():
             #                                                             self.agent.y_observed,
             #                                                             self.agent.sim_descriptors[self.agent.sim_fitnesses != -jnp.inf])
 
-            print("ok")
+            
             
 
 if __name__ == "__main__":
@@ -68,9 +68,9 @@ if __name__ == "__main__":
     from src.repertoire_loader import RepertoireLoader
     from src.adaptive_agent import AdaptiveAgent
     from src.gaussian_process import GaussianProcess
-    import src.hexapod_damage_dicts
+    import utils.hexapod_damage_dicts
     from src.repertoire_optimiser import RepertoireOptimiser
-    from src.visualiser import Visualiser
+    from utils.visualiser import Visualiser
 
     # Define all the objects that are fed to ITE constructor:
     # Define an overall task (true for the whole family simulated and adaptive)
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     simu_arrs = repertoire_loader.load_repertoire(repertoire_path="results/ite_example/sim_repertoire", remove_empty_bds=False)
 
     # Define an Adaptive Agent wihch inherits from the task and gets its mu and var set to the simulated repertoire's mu and var
-    damage_dict = src.hexapod_damage_dicts.all_actuators_broken
+    damage_dict = utils.hexapod_damage_dicts.all_actuators_broken
     agent = AdaptiveAgent(task=task, sim_repertoire_arrays=simu_arrs, damage_dictionary=damage_dict)
 
     # Define a GP

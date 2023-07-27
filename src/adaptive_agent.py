@@ -1,4 +1,4 @@
-from src.all_imports import *
+from utils.all_imports import *
 
 # Temporarily
 from qdax.environments import hexapod
@@ -147,7 +147,7 @@ class AdaptiveAgent:
 if __name__ == "__main__":
     from src.task import Task
     from src.repertoire_loader import RepertoireLoader
-    import src.hexapod_damage_dicts as hexapod_damage_dicts
+    import utils.hexapod_damage_dicts as hexapod_damage_dicts
 
     # These lines do not change and cannot be the problem
     repertoire_loader = RepertoireLoader()
