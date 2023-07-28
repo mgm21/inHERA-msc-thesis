@@ -1,4 +1,4 @@
-from utils.all_imports import *
+from src.utils.all_imports import *
 
 # TODO: check that it is okay to remove the empty bds as shown below
 class RepertoireLoader:

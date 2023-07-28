@@ -1,12 +1,12 @@
-from utils.all_imports import *
+from src.utils.all_imports import *
 
 class ITE():
-    # TODO: maybe inputting task object is unnecessary
-    def __init__(self, task, agent, gaussian_process, alpha=0.9):
-        self.task = task
+    def __init__(self, agent, gaussian_process, alpha=0.9):
         self.agent = agent
         self.gaussian_process = gaussian_process
         self.alpha = alpha
+
+        self.y_prior = self.agent.sim_fitnesses
 
     def run(self):
         # TODO: randomness check is this how it should be used? 
@@ -17,6 +17,8 @@ class ITE():
 
         # TODO: add an option to save results (to a file specified in constructor?)
         counter = 0
+
+        y_prior_at_obs = jnp.array([])
 
         # Repeat the following while the algorithm has not terminated
         while counter < 10 and jnp.max(self.agent.y_observed, initial=-jnp.inf) < self.alpha*jnp.max(self.agent.mu):
@@ -45,13 +47,17 @@ class ITE():
             print(f"agent's x_observed: {self.agent.x_observed}")
             print(f"agent's y_observed: {self.agent.y_observed}")
 
+            # Define the mean function
+            y_prior_at_obs = jnp.append(y_prior_at_obs, self.y_prior[index_to_test]) 
+
             # Update the beliefs of thea agent about mu and var
             # TODO: How to best deal with the fact that the -inf fitnessed descriptors are also be updated meaning the acquisition could query one of those
             # policies which is empty? Clip them upon receiving them in the loader? E.g. as soon as the loader receives them trim all the arrays of their
             # -inf BDs. Then these clipped arrays will be passed to all the children.
             self.agent.mu, self.agent.var = self.gaussian_process.train(self.agent.x_observed,
-                                                                        self.agent.y_observed,
-                                                                        self.agent.sim_descriptors)
+                                                                        self.agent.y_observed - y_prior_at_obs,
+                                                                        self.agent.sim_descriptors,
+                                                                        y_prior=self.y_prior)
             
             # # Could try to not update the values with -inf in them for fitness with:
             # When I tried this the plotting did not work
@@ -60,17 +66,15 @@ class ITE():
             #                                                             self.agent.sim_descriptors[self.agent.sim_fitnesses != -jnp.inf])
 
             
-            
-
 if __name__ == "__main__":
     # Import all the necessary libraries
     from src.task import Task
     from src.repertoire_loader import RepertoireLoader
     from src.adaptive_agent import AdaptiveAgent
     from src.gaussian_process import GaussianProcess
-    import utils.hexapod_damage_dicts
+    from src.utils import hexapod_damage_dicts
     from src.repertoire_optimiser import RepertoireOptimiser
-    from utils.visualiser import Visualiser
+    from src.utils.visualiser import Visualiser
 
     # Define all the objects that are fed to ITE constructor:
     # Define an overall task (true for the whole family simulated and adaptive)
@@ -85,14 +89,14 @@ if __name__ == "__main__":
     simu_arrs = repertoire_loader.load_repertoire(repertoire_path="results/ite_example/sim_repertoire", remove_empty_bds=False)
 
     # Define an Adaptive Agent wihch inherits from the task and gets its mu and var set to the simulated repertoire's mu and var
-    damage_dict = utils.hexapod_damage_dicts.all_actuators_broken
+    damage_dict = hexapod_damage_dicts.all_actuators_broken
     agent = AdaptiveAgent(task=task, sim_repertoire_arrays=simu_arrs, damage_dictionary=damage_dict)
 
     # Define a GP
     gp = GaussianProcess()
 
     # Create an ITE object with previous objects as inputs
-    ite = ITE(task=task, agent=agent, gaussian_process=gp, alpha=0.99)
+    ite = ITE(agent=agent, gaussian_process=gp, alpha=0.99)
 
     # Define a Visualiser
     visualiser = Visualiser()

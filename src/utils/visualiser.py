@@ -1,4 +1,4 @@
-from utils.all_imports import *
+from src.utils.all_imports import *
 
 class Visualiser:
     def plot_repertoire(self, agent, quantity, path_to_base_repertoire, path_to_save_to):

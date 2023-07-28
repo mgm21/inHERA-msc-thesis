@@ -1,6 +1,6 @@
 # This GP class was inspired by Rasmussen's GPs for ML book (mainly algo on p. 19) and Antoine Cully's unpublished implementation of GPs
 
-from utils.all_imports import *
+from src.utils.all_imports import *
 
 class GaussianProcess:
     def __init__(self):
@@ -20,14 +20,16 @@ class GaussianProcess:
     def train(self,
               x_observed,
               y_observed,
-              x_test):
+              x_test,
+              y_prior,):
         
         K = vmap(lambda x : vmap(lambda y: self.kernel(x, y))(x_observed))(x_observed) + self.obs_noise*jnp.eye(x_observed.shape[0])
         vec = vmap(lambda x: vmap(lambda y: self.kernel(x, y))(x_test))(x_observed)
         L = jnp.linalg.cholesky(K)
         alpha = jnp.linalg.solve(jnp.transpose(L), jnp.linalg.solve(L, y_observed))
+
         # This line will have to be edited to sum in the adaptive prior
-        mu = jnp.matmul(jnp.transpose(vec), alpha)
+        mu = y_prior + jnp.matmul(jnp.transpose(vec), alpha)
         v = jnp.linalg.solve(L, vec)
         var = 1 - jnp.sum(jnp.square(v), axis=0)
 

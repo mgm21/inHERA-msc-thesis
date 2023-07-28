@@ -1,4 +1,4 @@
-from utils.all_imports import *
+from src.utils.all_imports import *
 from src.gaussian_process import GaussianProcess
 
 repertoire_path = "./last_repertoire/"

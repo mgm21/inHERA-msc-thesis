@@ -1,10 +1,10 @@
-from utils.all_imports import *
+from src.utils.all_imports import *
 
 from src.task import Task
 from src.repertoire_loader import RepertoireLoader
 from src.adaptive_agent import AdaptiveAgent
 from src.gaussian_process import GaussianProcess
-import utils.hexapod_damage_dicts as hexapod_damage_dicts
+import src.utils.hexapod_damage_dicts as hexapod_damage_dicts
 from src.repertoire_optimiser import RepertoireOptimiser
 
 # TODO: All problems pertaining to random keys flowing in the program. 
