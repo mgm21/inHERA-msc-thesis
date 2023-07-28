@@ -3,7 +3,9 @@ from src.utils.all_imports import *
 # Temporarily
 from qdax.environments import hexapod
 
-# TODO: is the signature and constructor really the best?
+# TODO: Improve the signature and constructor.
+# TODO: ultimately remove path to base/simulated repertoire and remove even the sim_repertoire_arrays for example.
+# Could just give a repertoire path. Then the algorithm can extract the parent arrays and can locate the repertoire.
 class AdaptiveAgent:
     def __init__(self,
                  task,
@@ -17,13 +19,15 @@ class AdaptiveAgent:
                  x_observed=jnp.array([]),
                  y_observed=jnp.array([]),
                  mu=None,
-                 var=None,):
+                 var=None,
+                 path_to_base_repertoire="results/ite_example/sim_repertoire/"):
         
         self.task = task
         self.sim_descriptors = sim_repertoire_arrays[1]
         self.sim_fitnesses = sim_repertoire_arrays[2]
         self.sim_genotypes = sim_repertoire_arrays[3]
 
+        self.path_to_base_repertoire = path_to_base_repertoire
         self.name = name
         self.x_observed = x_observed
         self.y_observed = y_observed
@@ -126,9 +130,11 @@ class AdaptiveAgent:
 
         
     # TODO: remove from this class and ultimately put in the right place (the agent does not plot its own repertoire?)    
-    def plot_repertoire(self, quantity="mu", path_to_base_repertoire="results/ite_experiment/", path_to_save_to="example_agent_repertoire"):
+    def plot_repertoire(self, 
+                        quantity="mu",
+                        path_to_save_to="example_agent_repertoire"):
 
-        repertoire = MapElitesRepertoire.load(reconstruction_fn=agent.recons_fn, path=path_to_base_repertoire)
+        repertoire = MapElitesRepertoire.load(reconstruction_fn=self.recons_fn, path=self.path_to_base_repertoire)
 
         if quantity == "mu":
             updated_fitness = self.mu
@@ -151,7 +157,7 @@ if __name__ == "__main__":
 
     # These lines do not change and cannot be the problem
     repertoire_loader = RepertoireLoader()
-    sim_repertoire_arrays = _, descriptors, sim_fitnesses, genotypes = repertoire_loader.load_repertoire(repertoire_path="./last_repertoire/")
+    sim_repertoire_arrays = _, descriptors, sim_fitnesses, genotypes = repertoire_loader.load_repertoire(repertoire_path="./results/ite_example/sim_repertoire/")
 
     # Define the agent's damage
     # These lines have been checked and do work to set all the strengths to 0
@@ -164,13 +170,15 @@ if __name__ == "__main__":
                           sim_repertoire_arrays=sim_repertoire_arrays,
                           damage_dictionary=damage_dictionary,)
     
-    # Define random key
-    seed = 1
-    random_key = jax.random.PRNGKey(seed)
-    random_key, subkey = jax.random.split(random_key)
+    # # Define random key
+    # seed = 1
+    # random_key = jax.random.PRNGKey(seed)
+    # random_key, subkey = jax.random.split(random_key)
 
-    # Test a behaviour in the damaged environment
-    observed_fitness, observed_descriptor, extra_scores, random_key = agent.test_descriptor(index=jnp.argmax(sim_fitnesses), random_key=random_key)
+    # # Test a behaviour in the damaged environment
+    # observed_fitness, observed_descriptor, extra_scores, random_key = agent.test_descriptor(index=jnp.argmax(sim_fitnesses), random_key=random_key)
 
-    print(observed_fitness)
-    print(observed_descriptor)
+    # print(observed_fitness)
+    # print(observed_descriptor)
+
+    agent.plot_all_repertoires(path_to_save_to="results/ite_example/")

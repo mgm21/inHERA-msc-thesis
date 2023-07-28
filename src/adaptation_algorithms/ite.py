@@ -1,12 +1,14 @@
 from src.utils.all_imports import *
 
 class ITE():
-    def __init__(self, agent, gaussian_process, alpha=0.9):
+    def __init__(self, agent, gaussian_process, alpha=0.9, path_to_results="results/ite_example", plot_repertoires=True):
         self.agent = agent
         self.gaussian_process = gaussian_process
         self.alpha = alpha
 
         self.y_prior = self.agent.sim_fitnesses
+        self.path_to_results = path_to_results
+        self.plot_repertoires = plot_repertoires
 
     def run(self):
         # TODO: randomness check is this how it should be used? 
@@ -22,10 +24,14 @@ class ITE():
 
         # Repeat the following while the algorithm has not terminated
         while counter < 10 and jnp.max(self.agent.y_observed, initial=-jnp.inf) < self.alpha*jnp.max(self.agent.mu):
-            print(f"iteration: {counter}")
             counter += 1
+
+            print(f"iteration: {counter}")
         
             # Query the GPs acquisition function based on the agent's mu and var
+            # TODO: make it so that the acquisition function can only return points that are not -inf fitness
+            # Though I am guessing they are not returned because the acquisition function would NEVER think they
+            # are a better solution to try
             index_to_test = gp.acqusition_function(mu=self.agent.mu, var=self.agent.var)
             print(f"index_to_test: {index_to_test}")
 
@@ -54,17 +60,16 @@ class ITE():
             # TODO: How to best deal with the fact that the -inf fitnessed descriptors are also be updated meaning the acquisition could query one of those
             # policies which is empty? Clip them upon receiving them in the loader? E.g. as soon as the loader receives them trim all the arrays of their
             # -inf BDs. Then these clipped arrays will be passed to all the children.
+
+            # TODO: check with Antoine that the way I did the GP with prior makes sense
             self.agent.mu, self.agent.var = self.gaussian_process.train(self.agent.x_observed,
                                                                         self.agent.y_observed - y_prior_at_obs,
                                                                         self.agent.sim_descriptors,
                                                                         y_prior=self.y_prior)
-            
-            # # Could try to not update the values with -inf in them for fitness with:
-            # When I tried this the plotting did not work
-            # self.agent.mu, self.agent.var = self.gaussian_process.train(self.agent.x_observed,
-            #                                                             self.agent.y_observed,
-            #                                                             self.agent.sim_descriptors[self.agent.sim_fitnesses != -jnp.inf])
-
+            if self.plot_repertoires:
+                # Save the plots of the repertoires
+                self.agent.plot_repertoire(quantity="mu", path_to_save_to=self.path_to_results + f"_mu{counter}")
+                self.agent.plot_repertoire(quantity="var", path_to_save_to=self.path_to_results + f"_var{counter}")
             
 if __name__ == "__main__":
     # Import all the necessary libraries
@@ -98,30 +103,5 @@ if __name__ == "__main__":
     # Create an ITE object with previous objects as inputs
     ite = ITE(agent=agent, gaussian_process=gp, alpha=0.99)
 
-    # Define a Visualiser
-    visualiser = Visualiser()
-    path_to_base_repertoire = "results/ite_example/sim_repertoire/"
-
-    visualiser.plot_repertoire(agent=agent,
-                               quantity="mu",
-                               path_to_base_repertoire=path_to_base_repertoire,
-                               path_to_save_to="results/ite_example/mu-1")
-    
-    visualiser.plot_repertoire(agent=agent,
-                               quantity="var",
-                               path_to_base_repertoire=path_to_base_repertoire,
-                               path_to_save_to="results/ite_example/var-1")
-    
-
     # Run the ITE algorithm
     ite.run()
-
-    visualiser.plot_repertoire(agent=agent,
-                               quantity="mu",
-                               path_to_base_repertoire=path_to_base_repertoire,
-                               path_to_save_to="results/ite_example/mu-2")
-
-    visualiser.plot_repertoire(agent=agent,
-                               quantity="var",
-                               path_to_base_repertoire=path_to_base_repertoire,
-                               path_to_save_to="results/ite_example/var-2")
