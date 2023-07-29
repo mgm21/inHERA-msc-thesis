@@ -14,11 +14,6 @@ from src.repertoire_optimiser import RepertoireOptimiser
 
 # TODO: make functions that are modular to get a quick html of a policy from an old repertoire but for a new robot
 
-# TODO: should I as soon as the MAP-Elites grid is formed, trim all the sim_repertoire_arrays to only include the indices
-#  where fitness is not -inf (like: genotypes[fitnesses != -jnp.inf]) etc...
-
-# TODO: (PRIORITY FOR TODAY) refactorings left to do: make Task object a part of the RepertoireOptimiser and make a full flow here.
-# 1st part could be as simple as inputting task to RepertoireOptimiser and extracting all its attributes AND FUNCTIONS
 
 # DEFINE THE TASK
 task = Task(episode_length=50, num_iterations=50)
@@ -42,8 +37,6 @@ random_key = jax.random.PRNGKey(seed)
 random_key, subkey = jax.random.split(random_key)
 
 # INSTANTIATE AN ADAPTIVE AGENT
-
-# TODO: change damage indices to a dictionary
 damage_indices = [0, 0, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200]
 damage_dict = hexapod_damage_dicts.get_damage_dict(damage_indices)
 

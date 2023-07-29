@@ -1,6 +1,5 @@
 from src.utils.all_imports import *
 
-# TODO: check that it is okay to remove the empty bds as shown below
 class RepertoireLoader:
     def load_repertoire(self, repertoire_path="./results/last_repertoire/", remove_empty_bds=False):
         centroids = jnp.load(os.path.join(repertoire_path, "centroids.npy"))

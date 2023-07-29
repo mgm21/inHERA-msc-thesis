@@ -39,7 +39,7 @@ class AdaptiveAgent:
         
         if var == None:
             # TODO: think about how to initialise variance with kernel(x, x) + sim_noise (should it be in the GP)
-            # because we don't have the kernel here... maybe a method in GaussianProcess
+            # because we don't have the kernel here... maybe a method in GaussianProcess. Or we leave it at 1.
             self.var = jnp.array([1 + sim_noise] * len(self.sim_fitnesses))
         else:
             self.var = var
@@ -129,7 +129,7 @@ class AdaptiveAgent:
         self.scoring_fn, self.recons_fn = scoring_fn, recons_fn
 
         
-    # TODO: remove from this class and ultimately put in the right place (the agent does not plot its own repertoire?)    
+    # TODO: Could plot somewhere else    
     def plot_repertoire(self, 
                         quantity="mu",
                         path_to_save_to="example_agent_repertoire"):
@@ -150,39 +150,6 @@ class AdaptiveAgent:
 
         fig.savefig(path_to_save_to)
 
-    # def create_policy_html(self, idx=None, html_path="example_agent_policy"):
-    #     # Define a Policy Network
-    #     # TODO: same issue as everywhere with randomness
-    #     policy_layer_sizes = tuple(self.task.policy_hidden_layer_sizes + (self.env.action_size,))
-    #     policy_network = MLP(
-    #         layer_sizes=policy_layer_sizes,
-    #         kernel_init=jax.nn.initializers.lecun_uniform(),
-    #         final_activation=jnp.tanh,
-    #     )
-
-    #     if idx == None:
-    #         idx = jnp.argmax(self.sim_fitnesses)
-
-    #     my_params = jax.tree_util.tree_map(
-    #         lambda x: x[idx],
-    #         self.sim_genotypes
-    #     )
-
-    #     jit_env_reset = jax.jit(self.env.reset)
-    #     jit_env_step = jax.jit(self.env.step)
-    #     jit_inference_fn = jax.jit(policy_network.apply)
-
-    #     rollout = []
-    #     rng = jax.random.PRNGKey(seed=1)
-    #     state = jit_env_reset(rng=rng)
-    #     while not state.done:
-    #         rollout.append(state)
-    #         action = jit_inference_fn(my_params, state.obs)
-    #         state = jit_env_step(state, action)
-
-    #     print(f"The trajectory of this individual contains {len(rollout)} transitions.")
-
-    #     html.save_html(html_path, self.env.sys, [s.qp for s in rollout[:500]])
 
 if __name__ == "__main__":
     from src.task import Task

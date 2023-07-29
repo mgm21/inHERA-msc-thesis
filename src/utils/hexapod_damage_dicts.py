@@ -49,8 +49,10 @@ leg_2_broken = get_damage_dict({6:0, 7:0, 8:0})
 leg_3_broken = get_damage_dict({9:0, 10:0, 11:0})
 leg_4_broken = get_damage_dict({12:0, 13:0, 14:0})
 leg_5_broken = get_damage_dict({15:0, 16:0, 17:0})
+intact = get_damage_dict({})
 
 
 if __name__ == "__main__":
     import jax.numpy as jnp
-    print(get_damage_dict({1: 0, 5:0}))
+    # print(get_damage_dict({1: 0, 5:0}))
+    print(intact)

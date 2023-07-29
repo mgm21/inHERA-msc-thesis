@@ -228,8 +228,6 @@ if __name__ == "__main__":
 
     task = Task(num_iterations=10, episode_length=10)
 
-    # TODO: Change to an index dict input such as damage_indices = {3: 0, 5: 0} # Much quicker than what I have below
-    # Then damage_dict = hexapod_damage_dicts.get_damage_dict({3: 0, 5: 0})
     damage_dict = hexapod_damage_dicts.get_damage_dict(jnp.array([0, 0, 0, 0, 0, 0, 0, 0, 0,
                                                                  200, 200, 200, 200, 200, 200, 200, 200, 200]))
 
