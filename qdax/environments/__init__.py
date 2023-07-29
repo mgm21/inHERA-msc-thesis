@@ -36,7 +36,7 @@ reward_offset = {
     "walker2d_uni": 1.413,
     "hexapod_omni": 3.6,
     # Maybe the offset for uni is different (will check if rewards are always positive when running experiments)
-    "hexapod_uni": 0,
+    "hexapod_uni": 3.6,
 }
 
 behavior_descriptor_extractor = {
