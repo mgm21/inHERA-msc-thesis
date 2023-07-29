@@ -174,3 +174,4 @@ repertoire_creator-discard.py
 *.html
 class_example_repertoire
 class-last_repertoire
+results/*
