@@ -27,7 +27,7 @@ class GaussianProcess:
         vec = vmap(lambda x: vmap(lambda y: self.kernel(x, y))(x_test))(x_observed)
         L = jnp.linalg.cholesky(K)
         alpha = jnp.linalg.solve(jnp.transpose(L), jnp.linalg.solve(L, y_observed))
-
+        
         # This line will have to be edited to sum in the adaptive prior
         mu = y_prior + jnp.matmul(jnp.transpose(vec), alpha)
         v = jnp.linalg.solve(L, vec)
@@ -35,7 +35,7 @@ class GaussianProcess:
 
         return mu, var
     
-    def acqusition_function(self, mu, var, kappa=0.05):
+    def acquisition_function(self, mu, var, kappa=0.05):
         # kappa is a measure of how much uncertainty is valued
         # Should return the index of the policy to test given mu and var
         return jnp.argmax(mu + kappa*var)
@@ -57,19 +57,28 @@ if __name__ == "__main__":
                         [1, 1, 1],])
     
     x_observed = jnp.array([[0, 0, 0],
-                            [1, 1, 1]])
+                            [0, 0, 0]])
     
-    y_observed = jnp.array([0, 1])
+    y_observed = jnp.array([0, 2])
+
+    y_prior = jnp.zeros(shape=x_test.shape)
+    print(y_prior)
 
     mu, var = gp.train(x_observed=x_observed,
                        y_observed=y_observed,
-                       x_test=x_test)
+                       x_test=x_test,
+                       y_prior=y_prior)
+    
+    
+    
+    # print(mu)
+    # print(var)
     
     # kappa is a measure of how much uncertainty is valued
     # increase it to see that it no longer chooses the next point as the one with the highest mu
-    index_to_test_next = gp.acqusition_function(mu, var, kappa=2)
+    # index_to_test_next = gp.acquisition_function(mu, var, kappa=2)
 
-    print(index_to_test_next)
+    # print(index_to_test_next)
     
     # # To check that kernel function is working appropriately
     # # TODO: put unit tests throughout the code base later
