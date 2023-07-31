@@ -1,6 +1,5 @@
 # Note: could change Task name, just gave it because Environment would lead to a confusion with brax/qdax envs
 from src.utils.all_imports import *
-from dataclasses import dataclass
 
 @dataclass
 class Task:
