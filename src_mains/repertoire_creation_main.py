@@ -3,9 +3,7 @@ from src.adaptive_agent import AdaptiveAgent
 from src.task import Task
 from src.repertoire_optimiser import RepertoireOptimiser
 
-task = Task(episode_length=150,
-            num_iterations=500,
-            grid_shape=tuple([4]*6))
+task = Task(episode_length=150, num_iterations=500, grid_shape=tuple([4]*6))
 
 agent = AdaptiveAgent(task=task,)
 

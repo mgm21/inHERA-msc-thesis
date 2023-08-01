@@ -22,6 +22,9 @@ class GaussianProcess:
     # returning functional expressions for both and then can query from those if need be (and can create repertoires at the very end if need be)
     # TODO: Also, please note that here y_priors is the mean value of the prior function (nothing to do with ancestors, only with simu repertoire)
     # TODO: Instead of setting y_observed = y_observed - y_prior@x_observed as I do in ite.py, simply set y_observed = y_observed -y_prior@x_observed in this method at the top (so imports make more sense)
+    # TODO: It could be confusing that both this method's y_priors and optimise_W's y_priors have the same name when they refer to different objects.
+    #  y_priors in train refers to the value of the simulated repertoire at x_observed
+    #  y_priors in optimise_W refers to the value of the ancestor mus at x_observed put in a matrix
     def train(self,
               x_observed,
               y_observed,

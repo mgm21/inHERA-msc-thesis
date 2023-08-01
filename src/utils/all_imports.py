@@ -40,6 +40,7 @@ import numpy
 
 import jax
 from functools import partial
+from functools import partialmethod
 import jax.numpy as jnp
 from jax import jit, vmap, lax,make_jaxpr
 

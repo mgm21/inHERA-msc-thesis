@@ -11,7 +11,7 @@ class ITE():
         self.save_res_arrs = save_res_arrs
         self.verbose = verbose
 
-    def run(self, counter_thresh=10):
+    def run(self, num_iter=10):
         # TODO: randomness check is this how it should be used? 
         # Define random key
         seed = 1
@@ -22,20 +22,20 @@ class ITE():
         counter = 0
 
         # Define the array of the prior mean function at the observations
-        y_prior_at_obs = jnp.full(shape=counter_thresh, fill_value=jnp.nan)
+        y_prior_at_obs = jnp.full(shape=num_iter, fill_value=jnp.nan)
 
         # Define array of the BDs observed by the agent
         # TODO: left the "6" hard-coded here, but modularise with the self.agent.env at some point
-        self.agent.x_observed = jnp.full(shape=(counter_thresh, 6), fill_value=jnp.nan)
+        self.agent.x_observed = jnp.full(shape=(num_iter, 6), fill_value=jnp.nan)
 
         # Define array of the fitnesses observed by the agent
-        self.agent.y_observed = jnp.full(shape=counter_thresh, fill_value=jnp.nan)
+        self.agent.y_observed = jnp.full(shape=num_iter, fill_value=jnp.nan)
 
         # Jit functions
         jitted_acquisition = jax.jit(self.gaussian_process.acquisition_function)
 
         # Repeat the following while the algorithm has not terminated
-        while counter < counter_thresh and jnp.max(self.agent.y_observed[:counter], initial=-jnp.inf) < self.alpha*jnp.max(self.agent.mu):
+        while counter < num_iter and jnp.max(self.agent.y_observed[:counter], initial=-jnp.inf) < self.alpha*jnp.max(self.agent.mu):
             if self.verbose: print(f"iteration: {counter}")
         
             # Query the GPs acquisition function based on the agent's mu and var
@@ -44,7 +44,7 @@ class ITE():
 
             # Agent tests the result of the acquisition function
             observed_fitness, _, _, random_key = self.agent.test_descriptor(index=index_to_test, random_key=random_key)
-            if self.verbose: print(f"observed_fitness: {observed_fitness}")
+            if self.verbose: print(f"observed_fitness: {observed_fitness} compared to original fitness: {self.agent.sim_fitnesses[index_to_test]}")
 
             # Update agent's x_observed and y_observed
             self.agent.x_observed = self.agent.x_observed.at[counter].set(self.agent.sim_descriptors[index_to_test])
@@ -60,7 +60,7 @@ class ITE():
             self.agent.mu, self.agent.var = self.gaussian_process.train(self.agent.x_observed[:counter+1],
                                                                         self.agent.y_observed[:counter+1] - y_prior_at_obs[:counter+1],
                                                                         self.agent.sim_descriptors,
-                                                                        y_prior=self.y_prior)
+                                                                        y_priors=self.y_prior)
             if self.plot_repertoires:
                 # Save the plots of the repertoires
                 self.agent.plot_repertoire(quantity="mu", path_to_save_to=self.path_to_results + f"mu{counter}")
@@ -87,9 +87,8 @@ if __name__ == "__main__":
     from src.repertoire_optimiser import RepertoireOptimiser
     from src.utils.visualiser import Visualiser
 
-    # Define all the objects that are fed to ITE constructor:
     # Define an overall task (true for the whole family simulated and adaptive)
-    task = Task()
+    task = Task(episode_length=150, num_iterations=500, grid_shape=tuple([4]*6))
 
     # # Define a repertoire optimiser
     # repertoire_optimiser = RepertoireOptimiser(task=task)
@@ -97,13 +96,13 @@ if __name__ == "__main__":
         
     # Define a simulated repertoire 
     repertoire_loader = RepertoireLoader()
-    simu_arrs = repertoire_loader.load_repertoire(repertoire_path="results/ite_example/sim_repertoire", remove_empty_bds=False)
+    simu_arrs = repertoire_loader.load_repertoire(repertoire_path="results/family_0/repertoire", remove_empty_bds=False)
 
     # To figure out the smallest element of the simulated fitnesses
     # print(jnp.min(simu_arrs[2][simu_arrs[2] != -jnp.inf]))
 
     # Define an Adaptive Agent wihch inherits from the task and gets its mu and var set to the simulated repertoire's mu and var
-    damage_dict = hexapod_damage_dicts.leg_1_broken
+    damage_dict = hexapod_damage_dicts.intact
     agent = AdaptiveAgent(task=task, sim_repertoire_arrays=simu_arrs, damage_dictionary=damage_dict)
 
     # Define a GP
@@ -112,8 +111,11 @@ if __name__ == "__main__":
     # Create an ITE object with previous objects as inputs
     ite = ITE(agent=agent,
               gaussian_process=gp,
-              alpha=0.99,
-              plot_repertoires=False,)
+              alpha=0.9,
+              plot_repertoires=False,
+              verbose=True)
 
     # # Run the ITE algorithm
-    ite.run(counter_thresh=5)
+    ite.run(num_iter=5)
+
+    # TODO: issue with newly scored and repertoire scored fitnesses not being equal for family_0/repertoire case (actually better in the newly scored case which is strange).

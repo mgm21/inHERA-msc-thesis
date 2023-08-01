@@ -172,6 +172,7 @@ ignore-*.py
 ignore*
 repertoire_creator-discard.py
 *.html
+results/*
 class_example_repertoire
 class-last_repertoire
-results/*
+mapelites-logs.csv
