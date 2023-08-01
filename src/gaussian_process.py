@@ -105,23 +105,27 @@ if __name__ == "__main__":
     
     y_observed = jnp.array([0, 2])
 
-    # mu, var = gp.train(x_observed=x_observed,
-    #                    y_observed=y_observed,
-    #                    x_test=x_test,
-    #                    y_priors=y_priors)
+    y_prior = jnp.zeros(shape=x_test.shape[0])
 
+    mu, var = gp.train(x_observed=x_observed,
+                       y_observed=y_observed,
+                       x_test=x_test,
+                       y_priors=y_prior)
+    
+    print(f"mu: {mu}")
+    print(f"var: {var}")
 
     # Prior values of the ancestors at the observed points
     # The last one is exactly the y_observed and should "explain" our current points the best
     y_priors = jnp.array([[0, 1], [1, 0], [1, 0], [0, 2]])
     print(gp.optimise_W(x_observed=x_observed, y_observed=y_observed, y_priors=y_priors))
 
-    # # Testing the _get_likelihood method alone
+    # # Tested the _get_likelihood method alone
     # # Check that it works by varying the parameters here and observing that giving the last weight all the importance
     # # should yield the lowest neg llh
-    # W = jnp.array([0.09, 0.01, 0, 0.9])
-    # K = gp._get_K(x_observed)
-    # print(gp._get_likelihood(W, K, y_observed, y_priors))
+    W = jnp.array([0.09, 0.01, 0, 0.9])
+    K = gp._get_K(x_observed)
+    print(gp._get_likelihood(W, K, y_observed, y_priors))
     
 
     
