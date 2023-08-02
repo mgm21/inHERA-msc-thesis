@@ -48,7 +48,8 @@ class GaussianProcess:
     def acquisition_function(self, mu, var, kappa=0.05):
         # kappa is a measure of how much uncertainty is valued
         # Should return the index of the policy to test given mu and var
-        return jnp.argmax(mu + kappa*var)
+        # nan argmax ignores nan values (or else they would be considered the max values)
+        return jnp.nanargmax(mu + kappa*var)
     
     @partial(jit, static_argnums=(0,))
     def optimise_W(self, x_observed, y_observed, y_priors,):
@@ -68,8 +69,8 @@ class GaussianProcess:
         W = opt_res.x
         # print(f"W: {W}")
 
-        # Normalise W between [0, -1] # TODO: could change the way W is normalised
-        W = W / jnp.sum(jnp.abs(W))
+        # # Normalise W between [0, -1] # TODO: could change the way W is normalised
+        # W = W / jnp.sum(jnp.abs(W))
         # print(f"W: {W}")
 
         return W
