@@ -11,7 +11,9 @@ class Family:
 
         # Define the family ancestors' mu and var
         ancestors_loader = AncestorsLoader()
-        self.ancestor_mus, self.ancestors_vars, self.ancestors_names = ancestors_loader.load_ancestors(path_to_ancestors=f"{path_to_family}/ancestors")
+        self.ancestor_mus, self.ancestors_vars, self.ancestors_names, self.damage_dicts = ancestors_loader.load_ancestors(path_to_ancestors=f"{path_to_family}/ancestors")
+
+        # Define the family ancestor's 
 
 if __name__ == "__main__":
     fam = Family(path_to_family="results/family_0")

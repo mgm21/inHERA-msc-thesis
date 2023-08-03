@@ -70,12 +70,17 @@ class ITE():
             counter += 1
 
         if self.save_res_arrs:
+            
             if not os.path.exists(path=f"{self.path_to_results}"):
                 os.makedirs(name=f"{self.path_to_results}")
+
             jnp.save(file=f"{self.path_to_results}mu", arr=self.agent.mu)
             jnp.save(file=f"{self.path_to_results}var", arr=self.agent.var)
             jnp.save(file=f"{self.path_to_results}x_observed", arr=self.agent.x_observed)
             jnp.save(file=f"{self.path_to_results}y_observed", arr=self.agent.y_observed)
+
+            with open(f"{self.path_to_results}damage_dict.txt", "w") as file_path:
+                json.dump(self.agent.damage_dictionary, file_path)
             
 if __name__ == "__main__":
     # Import all the necessary libraries
@@ -102,7 +107,7 @@ if __name__ == "__main__":
     # print(jnp.min(simu_arrs[2][simu_arrs[2] != -jnp.inf]))
 
     # Define an Adaptive Agent wihch inherits from the task and gets its mu and var set to the simulated repertoire's mu and var
-    damage_dict = hexapod_damage_dicts.intact
+    damage_dict = hexapod_damage_dicts.leg_0_broken
     agent = AdaptiveAgent(task=task, sim_repertoire_arrays=simu_arrs, damage_dictionary=damage_dict)
 
     # Define a GP
