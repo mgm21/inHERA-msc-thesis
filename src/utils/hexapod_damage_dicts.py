@@ -1,3 +1,4 @@
+from src.utils.all_imports import *
 import jax.numpy as jnp
 # Stores some common damage dictionaries for the hexapod
 
@@ -43,16 +44,30 @@ def get_damage_dict(in_var):
 
 # Some common damage_dicts
 all_actuators_broken = get_damage_dict([0] * 18)
-leg_0_broken = get_damage_dict({0:0, 1:0, 2:0})
-leg_1_broken = get_damage_dict({3:0, 4:0, 5:0})
-leg_2_broken = get_damage_dict({6:0, 7:0, 8:0})
-leg_3_broken = get_damage_dict({9:0, 10:0, 11:0})
-leg_4_broken = get_damage_dict({12:0, 13:0, 14:0})
-leg_5_broken = get_damage_dict({15:0, 16:0, 17:0})
+
+shortform_damage0 = {0:0, 1:0, 2:0}
+shortform_damage1 = {3:0, 4:0, 5:0}
+shortform_damage2 = {6:0, 7:0, 8:0}
+shortform_damage3 = {9:0, 10:0, 11:0}
+shortform_damage4 = {12:0, 13:0, 14:0}
+shortform_damage5 = {15:0, 16:0, 17:0}
+
+shortform_damage_list = [shortform_damage0, shortform_damage1, shortform_damage2,
+                         shortform_damage3, shortform_damage4, shortform_damage5]
+
+leg_0_broken = get_damage_dict(shortform_damage0)
+leg_1_broken = get_damage_dict(shortform_damage1)
+leg_2_broken = get_damage_dict(shortform_damage2)
+leg_3_broken = get_damage_dict(shortform_damage3)
+leg_4_broken = get_damage_dict(shortform_damage4)
+leg_5_broken = get_damage_dict(shortform_damage5)
 intact = get_damage_dict({})
 
 
 if __name__ == "__main__":
     import jax.numpy as jnp
-    # print(get_damage_dict({1: 0, 5:0}))
-    print(intact)
+    # # print(get_damage_dict({1: 0, 5:0}))
+    # # print(intact)
+    # print(leg_5_broken)
+    # print(list(itertools.combinations([0, 1, 2, 3, 4, 5], 2)))
+    print(dict(**leg_0_broken))
