@@ -5,12 +5,12 @@ from jax.scipy import optimize
 
 class GaussianProcess:
     def __init__(self, verbose=False):
-        self.obs_noise = 0
+        self.obs_noise = 0.01
         self.length_scale = 1
         self.rho = 0.4
         self.verbose = verbose
 
-        # TODO: check why the sum below? Is it required in higher-dims?
+        # TODO: check why the sum below?
         self.kernel = lambda x1, x2: jnp.exp(-jnp.sum((x1 - x2) ** 2 / (2*self.length_scale**2)))
 
         # From ITE paper:
@@ -44,6 +44,27 @@ class GaussianProcess:
 
         return mu, var
     
+    # Naive method which does not use Cholesky decomposition to make sure that GP is implemented correctly
+    def train2(self,
+              x_observed,
+              y_observed,
+              x_test,
+              y_priors,):
+        
+        # Calculate K
+        K = self._get_K(x_observed)
+
+        # Calculate k vector
+        k = vmap(lambda x: vmap(lambda y: self.kernel(x, y))(x_test))(x_observed)
+
+        # Calculate mu
+        mu = y_priors + k.T @ jnp.linalg.inv(K) @ y_observed
+
+        # Calculate var
+        var = vmap(lambda test_point: self.kernel(test_point, test_point).T - (vmap(lambda x_obs: self.kernel(test_point, x_obs))(x_observed)).T @ jnp.linalg.inv(K) @ vmap(lambda x_obs: self.kernel(test_point, x_obs))(x_observed))(x_test)
+
+        return mu, var
+
     # TODO: this could be made more efficient by inputting functions for mu and var as opposed to arrays and inputting a range over which the max is looked for
     def acquisition_function(self, mu, var, kappa=0.05):
         # kappa is a measure of how much uncertainty is valued
@@ -90,6 +111,7 @@ class GaussianProcess:
 
 
 if __name__ == "__main__":
+    # Following toy problem to make sure that the GP works as expected
     gp = GaussianProcess()
 
     # Toy variables to debug the GP
@@ -116,20 +138,54 @@ if __name__ == "__main__":
                        x_test=x_test,
                        y_priors=y_prior)
     
+    mu2, var2 = gp.train2(x_observed=x_observed,
+                       y_observed=y_observed,
+                       x_test=x_test,
+                       y_priors=y_prior)
+    
     print(f"mu: {mu}")
+    print(f"mu2: {mu2}")
     print(f"var: {var}")
+    print(f"var2: {var2}")
+    
+    x_observed = jnp.array([[0, 0, 0], [1, 0, 0], [1, 1, 1], [0, 0, 0]])
+    y_observed = jnp.array([0, 2, 5, 0.5])
+
+    # mu, var = gp.train(x_observed=x_observed,
+    #                    y_observed=y_observed,
+    #                    x_test=x_test,
+    #                    y_priors=y_prior)
+    
+    mu2, var2 = gp.train2(x_observed=x_observed,
+                       y_observed=y_observed,
+                       x_test=x_test,
+                       y_priors=y_prior)
+    
+    print(f"mu: {mu}")
+    print(f"mu2: {mu2}")
+    print(f"var: {var}")
+    print(f"var2: {var2}")
 
     # Prior values of the ancestors at the observed points
     # The last one is exactly the y_observed and should "explain" our current points the best
-    y_priors = jnp.array([[0, 1], [1, 0], [1, 0], [0, 2]])
+    y_priors = jnp.array([[0, 1, 3, 4], [1, 0, 2, 1], [1, 0, 1, 2], [0, 2, 5, 6]])
+    print("result of likelihood optimisation:")
     print(gp.optimise_W(x_observed=x_observed, y_observed=y_observed, y_priors=y_priors))
 
     # # Tested the _get_likelihood method alone
     # # Check that it works by varying the parameters here and observing that giving the last weight all the importance
     # # should yield the lowest neg llh
-    W = jnp.array([0.09, 0.01, 0, 0.9])
+    W = jnp.array([0, 0.0, 1, 0.1])
     K = gp._get_K(x_observed)
+    print("result of calculating an arbitrary likelihood:")
     print(gp._get_likelihood(W, K, y_observed, y_priors))
+
+    # TODO: potential problem with the GP:
+    # Get negative values for the variance sometimes,
+    # Cannot input the same input twice.
+
+    # Best might be to re-write the GP train method in the more traditional way and see the difference in results on this toy problem
+    # Especially to see if it solves some of the problems above.
     
 
     
