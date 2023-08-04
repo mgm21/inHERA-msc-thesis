@@ -12,7 +12,7 @@ task = Task(episode_length=150,
             grid_shape=tuple([4]*6))
 
 # CHANGE THIS
-family_name = "family_0"
+family_name = "ignore-family"
 damage_dict = hexapod_damage_dicts.leg_5_broken
 robot_name = "harmed5"
 
@@ -39,7 +39,7 @@ ite = ITE(agent=agent,
           save_res_arrs=True,
           path_to_results=f"results/{family_name}/{agent.name}/",
           verbose=True,
-          )
+          norm_params=None)
 
 # # Run the ITE algorithm
 ite.run(counter_thresh=20)

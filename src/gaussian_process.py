@@ -45,7 +45,7 @@ class GaussianProcess:
         return mu, var
     
     # Naive method which does not use Cholesky decomposition to make sure that GP is implemented correctly
-    def train2(self,
+    def train_naive(self,
               x_observed,
               y_observed,
               x_test,
@@ -138,7 +138,7 @@ if __name__ == "__main__":
                        x_test=x_test,
                        y_priors=y_prior)
     
-    mu2, var2 = gp.train2(x_observed=x_observed,
+    mu2, var2 = gp.train_naive(x_observed=x_observed,
                        y_observed=y_observed,
                        x_test=x_test,
                        y_priors=y_prior)
@@ -151,12 +151,12 @@ if __name__ == "__main__":
     x_observed = jnp.array([[0, 0, 0], [1, 0, 0], [1, 1, 1], [0, 0, 0]])
     y_observed = jnp.array([0, 2, 5, 0.5])
 
-    # mu, var = gp.train(x_observed=x_observed,
-    #                    y_observed=y_observed,
-    #                    x_test=x_test,
-    #                    y_priors=y_prior)
+    mu, var = gp.train(x_observed=x_observed,
+                       y_observed=y_observed,
+                       x_test=x_test,
+                       y_priors=y_prior)
     
-    mu2, var2 = gp.train2(x_observed=x_observed,
+    mu2, var2 = gp.train_naive(x_observed=x_observed,
                        y_observed=y_observed,
                        x_test=x_test,
                        y_priors=y_prior)
@@ -186,6 +186,12 @@ if __name__ == "__main__":
 
     # Best might be to re-write the GP train method in the more traditional way and see the difference in results on this toy problem
     # Especially to see if it solves some of the problems above.
+
+
+    # TODO: if the values of mu are super high, will variance ever really be taken into account?
+    # Will the GP not only ever go for the highest predicted mu which would then make the whole uncertainty component irrelevant
+    # And could lead to being stuck in an undesirable optimum.
+    # Therefore must either scale the mus or must scale the variance up to be on the same scale. THIS IS THE PROBLEM.
     
 
     

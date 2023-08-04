@@ -56,3 +56,4 @@ from qdax.tasks.brax_envs import create_brax_scoring_fn
 from datetime import datetime
 from dataclasses import dataclass
 import itertools
+import matplotlib.pyplot as plt
