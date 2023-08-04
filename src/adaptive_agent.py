@@ -67,6 +67,8 @@ class AdaptiveAgent:
                     policy, random_key
                 )
         
+        # TODO: maybe you should normalise here instead of in the GPCF/inHERA/ITE algorithms???
+
         return observed_fitness, observed_descriptor, extra_scores, random_key
 
     def damage_env(self):

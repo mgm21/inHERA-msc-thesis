@@ -6,12 +6,21 @@
 from src.utils.all_imports import *
 
 class GPCF:
-    def __init__(self, family, agent, gaussian_process, alpha=0.9, verbose=False,):
+    def __init__(self, family, agent, gaussian_process, alpha=0.9, verbose=False,
+                 path_to_results="results/ite_example/", save_res_arrs=True, norm_params=(0, 40)):
+        
         self.family = family
         self.agent = agent
         self.alpha = alpha
         self.verbose = verbose
         self.gaussian_process = gaussian_process
+
+        self.path_to_results = path_to_results
+        self.save_res_arrs = save_res_arrs
+
+        self.norm_params = norm_params
+
+        print(self.family.ancestors_names)
 
     def run(self, num_iter=10):
         # Pre-loop setup
@@ -33,29 +42,22 @@ class GPCF:
         # Main loop
         # Repeat the following while the algorithm has not terminated
         # TODO: must decide which stop condition is appropriate here (problems when second one is used because mu gets decreased and it always considers the first solution to be the best)??? Investigate!
-        while counter < num_iter: #and jnp.max(self.agent.y_observed[:counter+1], initial=-jnp.inf) < self.alpha*jnp.max(self.agent.mu):
-            if self.verbose: print(f"counter: {counter}")
+        while counter < num_iter: # and jnp.max(self.agent.y_observed[:counter+1], initial=-jnp.inf) < self.alpha*jnp.max(self.agent.mu):
+            if self.verbose: print(f"{counter: {counter}}")
             # Query the acquisition function for the next policy to test
             index_to_test = jitted_acquisition(mu=self.agent.mu, var=self.agent.var)
 
-            # If index_to_test has already been tested then stop the loop
-            if index_to_test in tested_indices: break
+            # # TODO: only needed if the first condition only is used.
+            # # If index_to_test has already been tested then stop the loop
+            # if index_to_test in tested_indices: break
 
             tested_indices = tested_indices.at[counter].set(index_to_test)
             if self.verbose: print(f"index_to_test: {index_to_test}")
             if self.verbose: print(f"tested_indices: {tested_indices}")
 
-            # debugging1 = self.agent.sim_fitnesses[199]
-            # debugging2 = self.family.sim_fitnesses[199]
-
-            # print(f"debugging1: {debugging1}")
-            # print(f"debugging2: {debugging2}")
-
-            # debugging, _, _, _ = self.agent.test_descriptor(index=199, random_key=random_key)
-            # print(f"debugging: {debugging}")
-
             # Test the policy on the current agent
             observed_fitness, _, _, random_key = self.agent.test_descriptor(index=index_to_test, random_key=random_key)
+            observed_fitness = (observed_fitness - self.norm_params[0])/(self.norm_params[1] - self.norm_params[0])
             if self.verbose: print(f"observed_fitness: {observed_fitness} compared to repertoire fitness: {self.family.sim_fitnesses[index_to_test]}")
 
             # Add the new observation to the agent's observation arrays
@@ -78,20 +80,31 @@ class GPCF:
 
             # Calculate the new mean func at the observations
             mean_func_at_obs = mean_func_at_obs.at[counter].set(jnp.squeeze(ancestor_mus_at_obs[:, counter:counter+1].T @ W))
-            print(f"mean_func_at_obs: {mean_func_at_obs}")
+            if self.verbose: print(f"mean_func_at_obs: {mean_func_at_obs}")
 
             # Calculate the new mean func for all of x_test (i.e. agent.sim_descriptors)
             mean_func_at_x_test = self.family.ancestor_mus.T @ W
-            print(f"mean_func_at_x_test: {mean_func_at_x_test}")
+            if self.verbose: print(f"mean_func_at_x_test: {mean_func_at_x_test}")
 
             # Update the gaussian process of the agent
             self.agent.mu, self.agent.var = self.gaussian_process.train(self.agent.x_observed[:counter+1],
                                                                         self.agent.y_observed[:counter+1] - mean_func_at_obs[:counter+1],
                                                                         self.agent.sim_descriptors,
                                                                         y_priors=mean_func_at_x_test)
-
             # Increment the counter
             counter += 1
+
+            if self.save_res_arrs:
+                if not os.path.exists(path=f"{self.path_to_results}"):
+                    os.makedirs(name=f"{self.path_to_results}")
+
+                jnp.save(file=f"{self.path_to_results}mu", arr=self.agent.mu)
+                jnp.save(file=f"{self.path_to_results}var", arr=self.agent.var)
+                jnp.save(file=f"{self.path_to_results}x_observed", arr=self.agent.x_observed)
+                jnp.save(file=f"{self.path_to_results}y_observed", arr=self.agent.y_observed)
+
+                with open(f"{self.path_to_results}damage_dict.txt", "w") as file_path:
+                    json.dump(self.agent.damage_dictionary, file_path)
 
 if __name__ == "__main__":
     from src.family import Family

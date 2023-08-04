@@ -1,7 +1,8 @@
 from src.utils.all_imports import *
 
 class ITE():
-    def __init__(self, agent, gaussian_process, alpha=0.9, path_to_results="results/ite_example/", plot_repertoires=False, save_res_arrs=True, verbose=False):
+    def __init__(self, agent, gaussian_process, alpha=0.9, path_to_results="results/ite_example/", plot_repertoires=False, save_res_arrs=True, verbose=False,
+                 norm_params=(0, 40)):
         self.agent = agent
         self.gaussian_process = gaussian_process
         self.alpha = alpha
@@ -10,6 +11,7 @@ class ITE():
         self.plot_repertoires = plot_repertoires
         self.save_res_arrs = save_res_arrs
         self.verbose = verbose
+        self.norm_params = norm_params
 
     def run(self, num_iter=10):
         # TODO: randomness check is this how it should be used? 
@@ -44,6 +46,7 @@ class ITE():
 
             # Agent tests the result of the acquisition function
             observed_fitness, _, _, random_key = self.agent.test_descriptor(index=index_to_test, random_key=random_key)
+            observed_fitness = (observed_fitness - self.norm_params[0])/(self.norm_params[1] - self.norm_params[0])
             if self.verbose: print(f"observed_fitness: {observed_fitness} compared to original fitness: {self.agent.sim_fitnesses[index_to_test]}")
 
             # Update agent's x_observed and y_observed
@@ -93,7 +96,8 @@ if __name__ == "__main__":
     from src.utils.visualiser import Visualiser
 
     # Define an overall task (true for the whole family simulated and adaptive)
-    task = Task(episode_length=150, num_iterations=500, grid_shape=tuple([4]*6))
+    from results.family_3 import family_task
+    task = family_task.task
 
     # # Define a repertoire optimiser
     # repertoire_optimiser = RepertoireOptimiser(task=task)
@@ -101,24 +105,28 @@ if __name__ == "__main__":
         
     # Define a simulated repertoire 
     repertoire_loader = RepertoireLoader()
-    simu_arrs = repertoire_loader.load_repertoire(repertoire_path="results/family_0/repertoire", remove_empty_bds=False)
+    simu_arrs = repertoire_loader.load_repertoire(repertoire_path="results/family_3/repertoire", remove_empty_bds=False)
 
     # To figure out the smallest element of the simulated fitnesses
     # print(jnp.min(simu_arrs[2][simu_arrs[2] != -jnp.inf]))
 
     # Define an Adaptive Agent wihch inherits from the task and gets its mu and var set to the simulated repertoire's mu and var
-    damage_dict = hexapod_damage_dicts.leg_0_broken
+    damage_dict = hexapod_damage_dicts.intact
     agent = AdaptiveAgent(task=task, sim_repertoire_arrays=simu_arrs, damage_dictionary=damage_dict)
 
     # Define a GP
     gp = GaussianProcess()
+
+    # Load norm_params
+    norm_params = jnp.load("results/family_3/norm_params.npy")
 
     # Create an ITE object with previous objects as inputs
     ite = ITE(agent=agent,
               gaussian_process=gp,
               alpha=0.9,
               plot_repertoires=False,
-              verbose=True)
+              verbose=True,
+              norm_params=norm_params)
 
     # # Run the ITE algorithm
     ite.run(num_iter=5)
