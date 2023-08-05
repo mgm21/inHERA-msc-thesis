@@ -37,7 +37,7 @@ class ITE():
         jitted_acquisition = jax.jit(self.gaussian_process.acquisition_function)
 
         # Repeat the following while the algorithm has not terminated
-        while counter < num_iter and jnp.max(self.agent.y_observed[:counter], initial=-jnp.inf) < self.alpha*jnp.max(self.agent.mu):
+        while counter < num_iter: # and jnp.max(self.agent.y_observed[:counter], initial=-jnp.inf) < self.alpha*jnp.max(self.agent.mu):
             if self.verbose: print(f"iteration: {counter}")
         
             # Query the GPs acquisition function based on the agent's mu and var
@@ -87,13 +87,13 @@ class ITE():
             
 if __name__ == "__main__":
     # Import all the necessary libraries
-    from src.task import Task
-    from src.repertoire_loader import RepertoireLoader
-    from src.adaptive_agent import AdaptiveAgent
-    from src.gaussian_process import GaussianProcess
+    from src.core.task import Task
+    from src.loaders.repertoire_loader import RepertoireLoader
+    from src.core.adaptive_agent import AdaptiveAgent
+    from src.core.gaussian_process import GaussianProcess
     from src.utils import hexapod_damage_dicts
-    from src.repertoire_optimiser import RepertoireOptimiser
-    from src.utils.visualiser import Visualiser
+    from src.core.repertoire_optimiser import RepertoireOptimiser
+    from src.utils.repertoire_visualiser import Visualiser
 
     # Define an overall task (true for the whole family simulated and adaptive)
     from results.family_3 import family_task

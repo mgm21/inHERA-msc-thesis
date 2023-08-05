@@ -1,5 +1,5 @@
 from src.utils.all_imports import *
-from src.task import Task
+from src.core.task import Task
 
 class RepertoireOptimiser:
     def __init__(self,
@@ -222,8 +222,8 @@ class RepertoireOptimiser:
 
         
 if __name__ == "__main__":
-    from src.adaptive_agent import AdaptiveAgent
-    from src.task import Task
+    from src.core.adaptive_agent import AdaptiveAgent
+    from src.core.task import Task
     import src.utils.hexapod_damage_dicts as hexapod_damage_dicts
 
     task = Task(num_iterations=10, episode_length=10)

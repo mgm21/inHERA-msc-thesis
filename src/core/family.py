@@ -1,6 +1,6 @@
 from src.utils.all_imports import *
-from src.repertoire_loader import RepertoireLoader
-from src.ancestors_loader import AncestorsLoader
+from src.loaders.repertoire_loader import RepertoireLoader
+from src.loaders.ancestors_loader import AncestorsLoader
 
 class Family:
     def __init__(self, path_to_family="results/family_0"):

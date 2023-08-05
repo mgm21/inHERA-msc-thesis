@@ -7,8 +7,10 @@ from src.utils.all_imports import *
 
 class GPCF:
     def __init__(self, family, agent, gaussian_process, alpha=0.9, verbose=False,
-                 path_to_results="results/ite_example/", save_res_arrs=True, norm_params=(0, 40)):
+                 path_to_results="results/ite_example/", save_res_arrs=True, norm_params=(0, 40), kappa=0.005):
         
+        self.kappa = kappa
+
         self.family = family
         self.agent = agent
         self.alpha = alpha
@@ -45,7 +47,7 @@ class GPCF:
         while counter < num_iter: # and jnp.max(self.agent.y_observed[:counter+1], initial=-jnp.inf) < self.alpha*jnp.max(self.agent.mu):
             if self.verbose: print(f"{counter: {counter}}")
             # Query the acquisition function for the next policy to test
-            index_to_test = jitted_acquisition(mu=self.agent.mu, var=self.agent.var)
+            index_to_test = jitted_acquisition(mu=self.agent.mu, var=self.agent.var, kappa=self.kappa)
 
             # # TODO: only needed if the first condition only is used.
             # # If index_to_test has already been tested then stop the loop
@@ -107,11 +109,11 @@ class GPCF:
                     json.dump(self.agent.damage_dictionary, file_path)
 
 if __name__ == "__main__":
-    from src.family import Family
-    from src.adaptive_agent import AdaptiveAgent
-    from src.task import Task
+    from src.core.family import Family
+    from src.core.adaptive_agent import AdaptiveAgent
+    from src.core.task import Task
     from src.utils import hexapod_damage_dicts
-    from src.gaussian_process import GaussianProcess
+    from src.core.gaussian_process import GaussianProcess
 
     fam = Family(path_to_family="results/family_0")
     task = Task(episode_length=150, num_iterations=500, grid_shape=tuple([4]*6))

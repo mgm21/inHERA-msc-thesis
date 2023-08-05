@@ -1,9 +1,9 @@
 from src.utils.all_imports import *
 from src.utils.hexapod_damage_dicts import get_damage_dict, shortform_damage_list
-from src.adaptive_agent import AdaptiveAgent
-from src.gaussian_process import GaussianProcess
+from src.core.adaptive_agent import AdaptiveAgent
+from src.core.gaussian_process import GaussianProcess
 from src.adaptation_algorithms.ite import ITE
-from src.repertoire_loader import RepertoireLoader
+from src.loaders.repertoire_loader import RepertoireLoader
 
 class AncestorsGenerator:
     def __init__(self, path_to_family, task, shortform_damage_list=shortform_damage_list, ite_alpha=0.9, ite_num_iter=20, verbose=False, norm_params=(0, 40)):

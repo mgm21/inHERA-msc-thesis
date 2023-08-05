@@ -1,11 +1,11 @@
 from src.utils.all_imports import *
-from src.adaptive_agent import AdaptiveAgent
-from src.task import Task
-from src.repertoire_optimiser import RepertoireOptimiser
+from src.core.adaptive_agent import AdaptiveAgent
+from src.core.task import Task
+from src.core.repertoire_optimiser import RepertoireOptimiser
 from src.adaptation_algorithms.ite import ITE
-from src.repertoire_loader import RepertoireLoader
+from src.loaders.repertoire_loader import RepertoireLoader
 from src.utils import hexapod_damage_dicts
-from src.gaussian_process import GaussianProcess
+from src.core.gaussian_process import GaussianProcess
 
 task = Task(episode_length=150,
             num_iterations=500,

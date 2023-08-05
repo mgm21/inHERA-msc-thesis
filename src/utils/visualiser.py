@@ -52,7 +52,7 @@ class Visualiser:
         ax.legend()
         fig.savefig(f'{path_to_res}/maxfit_vs_iter.png', dpi=100)
     
-    def get_mean_and_var_plot(self, means, vars, names, path_to_res="."):
+    def get_mean_and_var_plot(self, means, vars, names, path_to_res=".", rolling_max=False):
         plt.style.use(self.plt_style)
         fig, ax = plt.subplots()
 
@@ -64,8 +64,7 @@ class Visualiser:
 
             rolling_max_mean = jnp.array([jnp.nanmax(mean[:i+1]) for i in range(mean.shape[0])])
 
-            # COMMENT/UNCOMMENT this line to see both the mean and the rolling max mean
-            # rolling_max_mean = mean
+            if not rolling_max: rolling_max_mean = mean
 
             print(rolling_max_mean)
 

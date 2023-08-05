@@ -154,8 +154,8 @@ class AdaptiveAgent:
 
 
 if __name__ == "__main__":
-    from src.task import Task
-    from src.repertoire_loader import RepertoireLoader
+    from src.core.task import Task
+    from src.loaders.repertoire_loader import RepertoireLoader
     import src.utils.hexapod_damage_dicts as hexapod_damage_dicts
 
     # These lines do not change and cannot be the problem
