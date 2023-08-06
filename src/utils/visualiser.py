@@ -52,34 +52,35 @@ class Visualiser:
         ax.legend()
         fig.savefig(f'{path_to_res}/maxfit_vs_iter.png', dpi=100)
     
-    def get_mean_and_var_plot(self, means, vars, names, path_to_res=".", rolling_max=False):
+    def get_mean_and_var_plot(self, means, vars, names, path_to_res="."):
         plt.style.use(self.plt_style)
         fig, ax = plt.subplots()
+        fig2, ax2 = plt.subplots()
 
         for i in range(len(means)):
-
             mean = means[i]
-
             var = vars[i]
 
             rolling_max_mean = jnp.array([jnp.nanmax(mean[:i+1]) for i in range(mean.shape[0])])
-
-            if not rolling_max: rolling_max_mean = mean
-
-            print(rolling_max_mean)
-
             num_iter = jnp.array(list(range(1, mean.shape[0]+1))) 
 
             ax.plot(num_iter, rolling_max_mean, label=names[i])
+            ax2.plot(num_iter, mean, label=names[i])
 
             ax.fill_between(num_iter, rolling_max_mean-var, rolling_max_mean+var, alpha=0.4)
+            ax2.fill_between(num_iter, mean-var, mean+var, alpha=0.4)
         
         ax.set_xlabel('Adaptation steps')
         ax.set_ylabel('Maximum fitness')
 
-        ax.legend()
-        fig.savefig(f'{path_to_res}/maxfit_vs_iter.png', dpi=200)
+        ax2.set_xlabel('Adaptation steps')
+        ax2.set_ylabel('Maximum fitness')
 
+        ax.legend()
+        ax2.legend()
+
+        fig.savefig(f'{path_to_res}/fit_vs_iter_rollingmax.png', dpi=200)
+        fig2.savefig(f'{path_to_res}/fit_vs_iter_mean.png', dpi=200)
 
 
 # TODO: you may get issues because of the nan values, make sure to only save up till counter got from now on in ITE.
