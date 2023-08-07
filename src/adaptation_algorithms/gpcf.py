@@ -7,10 +7,8 @@ from src.utils.all_imports import *
 
 class GPCF:
     def __init__(self, family, agent, gaussian_process, alpha=0.9, verbose=False,
-                 path_to_results="results/ite_example/", save_res_arrs=True, norm_params=(0, 40), kappa=0.005):
+                 path_to_results="results/ite_example/", save_res_arrs=True, norm_params=(0, 40)):
         
-        self.kappa = kappa
-
         self.family = family
         self.agent = agent
         self.alpha = alpha
@@ -22,7 +20,8 @@ class GPCF:
 
         self.norm_params = norm_params
 
-        print(self.family.ancestors_names)
+        if self.verbose: print(f"These are the GPCF ancestors: {self.family.ancestors_names}")
+        if self.verbose: print(f"This is the current child: {self.agent.name}")
 
     def run(self, num_iter=10):
         # Pre-loop setup
@@ -31,13 +30,14 @@ class GPCF:
         random_key, subkey = jax.random.split(random_key)
 
         counter = 0
+        # TODO: eventually remove hard coding of 6
         self.agent.x_observed = jnp.full(shape=(num_iter, 6), fill_value=jnp.nan)
         self.agent.y_observed = jnp.full(shape=num_iter, fill_value=-jnp.inf)
         sim_vals_at_obs = jnp.full(shape=num_iter, fill_value=jnp.nan)
         tested_indices = jnp.full(shape=num_iter, fill_value=jnp.nan, dtype=int)
         num_ancestors = len(self.family.ancestor_mus)
         ancestor_mus_at_obs = jnp.full(shape=(num_ancestors, num_iter), fill_value=jnp.nan)
-        mean_func_at_obs = jnp.full(shape=num_iter, fill_value=jnp.nan)
+        # mean_func_at_obs = jnp.full(shape=num_iter, fill_value=jnp.nan)
         
         jitted_acquisition = jax.jit(self.gaussian_process.acquisition_function)
 
@@ -47,7 +47,7 @@ class GPCF:
         while counter < num_iter: # and jnp.max(self.agent.y_observed[:counter+1], initial=-jnp.inf) < self.alpha*jnp.max(self.agent.mu):
             if self.verbose: print(f"{counter: {counter}}")
             # Query the acquisition function for the next policy to test
-            index_to_test = jitted_acquisition(mu=self.agent.mu, var=self.agent.var, kappa=self.kappa)
+            index_to_test = jitted_acquisition(mu=self.agent.mu, var=self.agent.var)
 
             # # TODO: only needed if the first condition only is used.
             # # If index_to_test has already been tested then stop the loop
@@ -78,21 +78,28 @@ class GPCF:
             W = self.gaussian_process.optimise_W(x_observed=self.agent.x_observed[:counter+1],
                                                   y_observed=self.agent.y_observed[:counter+1],
                                                   y_priors=ancestor_mus_at_obs[:, :counter+1])
+            
             if self.verbose: print(f"W: {W}")
 
             # Calculate the new mean func at the observations
-            mean_func_at_obs = mean_func_at_obs.at[counter].set(jnp.squeeze(ancestor_mus_at_obs[:, counter:counter+1].T @ W))
+            mean_func_at_obs = ancestor_mus_at_obs[:, :counter+1].T @ W
             if self.verbose: print(f"mean_func_at_obs: {mean_func_at_obs}")
 
             # Calculate the new mean func for all of x_test (i.e. agent.sim_descriptors)
             mean_func_at_x_test = self.family.ancestor_mus.T @ W
             if self.verbose: print(f"mean_func_at_x_test: {mean_func_at_x_test}")
-
+            if self.verbose: print(f"x observations passed to gp: {self.agent.x_observed[:counter+1]}")
+            if self.verbose: print(f"y observations passed to gp: {self.agent.y_observed[:counter+1] - mean_func_at_obs[:counter+1]}")
+            if self.verbose: print(f"y priors passed to gp: {mean_func_at_x_test}")
             # Update the gaussian process of the agent
             self.agent.mu, self.agent.var = self.gaussian_process.train(self.agent.x_observed[:counter+1],
                                                                         self.agent.y_observed[:counter+1] - mean_func_at_obs[:counter+1],
                                                                         self.agent.sim_descriptors,
                                                                         y_priors=mean_func_at_x_test)
+            
+            if self.verbose: print(f"mu @ x_observed: {self.agent.mu[tested_indices]}")
+            if self.verbose: print(f"y_observed values: {self.agent.y_observed}")
+
             # Increment the counter
             counter += 1
 
@@ -114,16 +121,34 @@ if __name__ == "__main__":
     from src.core.task import Task
     from src.utils import hexapod_damage_dicts
     from src.core.gaussian_process import GaussianProcess
+    from src.loaders.repertoire_loader import RepertoireLoader
 
-    fam = Family(path_to_family="results/family_0")
-    task = Task(episode_length=150, num_iterations=500, grid_shape=tuple([4]*6))
+    path_to_family = "results/family_4_1"
+    from results.family_4_1 import family_task
+    
+    fam = Family(path_to_family=path_to_family)
+
+    # print(fam.ancestor_mus[:, 600])
+
+    task = family_task.task
+    norm_params = jnp.load(f"{path_to_family}/norm_params.npy")
+
     damage_dict = hexapod_damage_dicts.leg_0_broken
-    print(fam.ancestors_names)
-    simu_arrs = fam.centroids, fam.descriptors, fam.sim_fitnesses, fam.genotypes
-    agent = AdaptiveAgent(task=task, sim_repertoire_arrays=simu_arrs, damage_dictionary=damage_dict)
+
+    rep_loader = RepertoireLoader()
+
+    simu_arrs = rep_loader.load_repertoire(repertoire_path=f"{path_to_family}/repertoire",)
+
+    agent = AdaptiveAgent(task=task,
+                      sim_repertoire_arrays=simu_arrs,
+                      damage_dictionary=damage_dict)
+
     gp = GaussianProcess()
-    gpcf = GPCF(family=fam, agent=agent, gaussian_process=gp, verbose=True)
-    gpcf.run(num_iter=5)
+
+    # Run the GPCF algorithm
+    gpcf = GPCF(family=fam, agent=agent, gaussian_process=gp, verbose=True, norm_params=norm_params, save_res_arrs=True)
+    gpcf.run(num_iter=3)
+
 
     # TODO: find a better way to automatically let the agent know its family's repertoire without the whole simu_arrs input above.
     # maybe a method in family to generate an agent so that it already has its arrays in the scope
