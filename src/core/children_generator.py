@@ -11,12 +11,16 @@ from src.core.family import Family
 #  make a super class
 
 class ChildrenGenerator:
-    def __init__(self, algorithms_to_test, path_to_family, task, shortform_damage_list=shortform_damage_list, ite_alpha=0.9, ite_num_iter=20, verbose=False, norm_params=(0, 40)):
+    def __init__(self, algorithms_to_test, path_to_family, task, shortform_damage_list=shortform_damage_list,
+                  ite_alpha=0.9, ite_num_iter=20, verbose=False, norm_params=(0, 40),
+                  gpcf_kappa=0.05):
         
         # Difference with AncestorsGenerator
         self.algorithms_to_test = algorithms_to_test
 
         self.family = Family(path_to_family=path_to_family)
+
+        self.gpcf_kappa = gpcf_kappa
 
         
         self.path_to_repertoire = f"{path_to_family}/repertoire"
@@ -84,7 +88,7 @@ class ChildrenGenerator:
                       damage_dictionary=damage_dict)
 
 
-        gp = GaussianProcess()
+        gp = GaussianProcess(kappa=self.gpcf_kappa)
         
         if "GPCF" in self.algorithms_to_test:
             # Create an ITE object with previous objects as inputs
@@ -129,7 +133,6 @@ if __name__ == "__main__":
     
     # CHANGE THIS
     from results.family_3 import family_task
-
     norm_params = jnp.load("results/family_3/norm_params.npy")
 
     # CHANGE PATH!

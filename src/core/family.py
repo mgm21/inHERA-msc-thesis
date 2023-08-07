@@ -16,7 +16,8 @@ class Family:
         # Define the family ancestor's 
 
 if __name__ == "__main__":
-    fam = Family(path_to_family="results/family_0")
+    fam = Family(path_to_family="results/family_4_1")
     print(fam.ancestors_names)
     print(fam.ancestor_mus.shape)
+    print(fam.ancestor_mus[:, 600])
 

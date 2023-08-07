@@ -3,12 +3,19 @@
 from src.utils.all_imports import *
 from jax.scipy import optimize
 
+
+# 06/08/2023 Trying different optimisation libraries
+from scipy import optimize as scipy_optimize
+from jaxopt import ProjectedGradient
+from jaxopt.projection import projection_non_negative
+
 class GaussianProcess:
-    def __init__(self, verbose=False):
-        self.obs_noise = 0.01
-        self.length_scale = 1
-        self.rho = 0.4
+    def __init__(self, verbose=False, obs_noise=0.01, length_scale=1, rho=0.4, kappa=0.05):
+        self.obs_noise = obs_noise
+        self.length_scale = length_scale
+        self.rho = rho
         self.verbose = verbose
+        self.kappa = kappa
 
         # TODO: check why the sum below?
         self.kernel = lambda x1, x2: jnp.exp(-jnp.sum((x1 - x2) ** 2 / (2*self.length_scale**2)))
@@ -25,6 +32,7 @@ class GaussianProcess:
     # TODO: It could be confusing that both this method's y_priors and optimise_W's y_priors have the same name when they refer to different objects.
     #  y_priors in train refers to the value of the simulated repertoire at x_observed
     #  y_priors in optimise_W refers to the value of the ancestor mus at x_observed put in a matrix
+    # TODO: SET ONE OF THE TWO FOLLOWING ONES TO train FOT THAT TO BE THE ONE THAT IS USED
     def train(self,
               x_observed,
               y_observed,
@@ -45,7 +53,7 @@ class GaussianProcess:
         return mu, var
     
     # Naive method which does not use Cholesky decomposition to make sure that GP is implemented correctly
-    def train_naive(self,
+    def _train(self,
               x_observed,
               y_observed,
               x_test,
@@ -66,13 +74,14 @@ class GaussianProcess:
         return mu, var
 
     # TODO: this could be made more efficient by inputting functions for mu and var as opposed to arrays and inputting a range over which the max is looked for
-    def acquisition_function(self, mu, var, kappa=0.05):
+    def acquisition_function(self, mu, var):
         # kappa is a measure of how much uncertainty is valued
         # Should return the index of the policy to test given mu and var
         # nan argmax ignores nan values (or else they would be considered the max values)
-        return jnp.nanargmax(mu + kappa*var)
+        return jnp.nanargmax(mu + self.kappa*var)
     
-    @partial(jit, static_argnums=(0,))
+    # TODO: uncomment to use jit
+    # @partial(jit, static_argnums=(0,))
     def optimise_W(self, x_observed, y_observed, y_priors,):
         W0 = jnp.full(shape=len(y_priors), fill_value=1/len(x_observed))
         # print(f"W0: {W0}")
@@ -83,16 +92,22 @@ class GaussianProcess:
         partial_likelihood = partial(self._get_likelihood, K=K, y_observed=y_observed, y_priors=y_priors)
         # print(f"partial_likelihood: {partial_likelihood}")
 
-        # TODO: may not need partial above because optimize.minimize supports args tuple (see https://jax.readthedocs.io/en/latest/_autosummary/jax.scipy.optimize.minimize.html)
-        opt_res = optimize.minimize(fun=partial_likelihood, x0=W0, method="BFGS")
-        # print(f"opt_res: {opt_res}")
+        # # TODO: may not need partial above because optimize.minimize supports args tuple (see https://jax.readthedocs.io/en/latest/_autosummary/jax.scipy.optimize.minimize.html)
+        # TODO: the below is to use jax.scipy.optimize.minimize
+        # opt_res = optimize.minimize(fun=partial_likelihood, x0=W0, method="BFGS",)
+        # W = opt_res.x
 
-        W = opt_res.x
-        # print(f"W: {W}")
+        # TODO: the below is to use optax
+        pg = ProjectedGradient(fun=partial_likelihood, projection=projection_non_negative)
+        pg_sol = pg.run(W0).params
+        W = pg_sol
 
-        # # Normalise W between [0, -1] # TODO: could change the way W is normalised
-        # W = W / jnp.sum(jnp.abs(W))
-        # print(f"W: {W}")
+        print(f"unnormalised W: {W}")
+
+        # TODO: the below is to transform into one-hot encoding
+        idx_max = jnp.nanargmax(W)
+        W = jnp.zeros(W.shape)
+        W = W.at[idx_max].set(1)
 
         return W
     
@@ -149,7 +164,7 @@ if __name__ == "__main__":
     print(f"var2: {var2}")
     
     x_observed = jnp.array([[0, 0, 0], [1, 0, 0], [1, 1, 1], [0, 0, 0]])
-    y_observed = jnp.array([0, 2, 5, 0.5])
+    y_observed = jnp.array([0, 2, 5, 6])
 
     mu, var = gp.train(x_observed=x_observed,
                        y_observed=y_observed,
@@ -186,7 +201,6 @@ if __name__ == "__main__":
 
     # Best might be to re-write the GP train method in the more traditional way and see the difference in results on this toy problem
     # Especially to see if it solves some of the problems above.
-
 
     # TODO: if the values of mu are super high, will variance ever really be taken into account?
     # Will the GP not only ever go for the highest predicted mu which would then make the whole uncertainty component irrelevant
