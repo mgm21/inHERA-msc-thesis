@@ -16,7 +16,8 @@ class AlgorithmComparator:
             verbose=False,
             ite_alpha=0.9,
             gpcf_kappa=0.05,
-            algorithms_to_plot=["ITE", "GPCF"]):
+            algorithms_to_plot=["ITE", "GPCF"],
+            children_in_ancestors=True):
         
         self.algorithms_to_test = algorithms_to_test
         self.path_to_family = path_to_family
@@ -29,9 +30,9 @@ class AlgorithmComparator:
         self.ite_alpha = ite_alpha
         self.gpcf_kappa = gpcf_kappa
         self.algorithms_to_plot = algorithms_to_plot
+        self.children_in_ancestors = children_in_ancestors
 
     def run(self,):
-    
         self.generate_ancestors()
         self.generate_children()
         means, vars = self.get_algo_means_and_var()
@@ -63,7 +64,8 @@ class AlgorithmComparator:
                                          ite_num_iter=self.algo_num_iter,
                                          verbose=self.verbose,
                                          norm_params=self.norm_params,
-                                         gpcf_kappa=self.gpcf_kappa)
+                                         gpcf_kappa=self.gpcf_kappa,
+                                         children_in_ancestors=self.children_in_ancestors)
         
         for i in range(len(self.children_num_legs_damaged)):
             children_gen.generate_auto_children(num_broken_limbs=self.children_num_legs_damaged[i])
@@ -120,18 +122,19 @@ class AlgorithmComparator:
 
 if __name__ == "__main__":
     # Choose hyper parameters for comparison experiment
-    from results.family_7 import family_task
-    path_to_family = "results/family_7"
+    from results.family_8 import family_task
+    path_to_family = "results/family_8"
     task = family_task.task
     norm_params = jnp.load(f"{path_to_family}/norm_params.npy")
     algo_num_iter = 20
-    ancest_num_legs_damaged = (1, 2, 3, 4, 5,)
-    children_num_legs_damaged = (1, 2, 3, 4, 5,)
+    ancest_num_legs_damaged = (1, 2, 3, 4, 5)
+    children_num_legs_damaged = (1, 2, 3, 4, 5)
     algorithms_to_test = ["ITE", "GPCF"]
     algorithms_to_plot = ["ITE", "GPCF"]
     verbose = True
     ite_alpha = 0.9
     gpcf_kappa = 0.05
+    children_in_ancestors = False
 
     # DEFINE AN ALGORITHM COMPARATOR
     algo_comp = AlgorithmComparator(algorithms_to_test=algorithms_to_test,
@@ -144,7 +147,8 @@ if __name__ == "__main__":
                   verbose=verbose,
                   ite_alpha=ite_alpha,
                   gpcf_kappa=gpcf_kappa,
-                  algorithms_to_plot=algorithms_to_plot)
+                  algorithms_to_plot=algorithms_to_plot,
+                  children_in_ancestors=children_in_ancestors)
 
     # # # TO RUN THE FULL FLOW
     # algo_comp.run()
@@ -152,8 +156,8 @@ if __name__ == "__main__":
     # # TO ONLY GENERATE THE ANCESTORS
     # algo_comp.generate_ancestors()
 
-    # # # # TO ONLY MAKE THE CHILDREN ADAPT
-    # algo_comp.generate_children()
+    # # # TO ONLY MAKE THE CHILDREN ADAPT
+    algo_comp.generate_children()
 
     # TO ONLY PRODUCE AND SAVE THE OVERALL PLOTS
     means, vars = algo_comp.get_algo_means_and_var()

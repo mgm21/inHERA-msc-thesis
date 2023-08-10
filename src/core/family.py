@@ -13,8 +13,6 @@ class Family:
         ancestors_loader = AncestorsLoader()
         self.ancestor_mus, self.ancestors_vars, self.ancestors_names, self.damage_dicts = ancestors_loader.load_ancestors(path_to_ancestors=f"{path_to_family}/ancestors")
 
-        print(self.ancestors_names)
-
         # Save a copy of the original ancestor arrays
         self._save_copy_of_init_ancest_arrs()
 
@@ -63,6 +61,7 @@ class Family:
 
 if __name__ == "__main__":
     fam = Family(path_to_family="results/family_4_1")
+    print(fam.ancestors_names)
     print(fam.ancestor_mus)
 
     fam.remove_ancestor_from_ancest_arrs(ancest_name="damaged_0")
@@ -73,7 +72,10 @@ if __name__ == "__main__":
 
     fam.remove_ancestor_from_ancest_arrs(ancest_name="")
     print(fam.ancestor_mus)
+    print(fam.ancestors_names)
 
+    fam.reset_the_ancestor_arrs()
+    print(fam.ancestors_names)
 
 
 
