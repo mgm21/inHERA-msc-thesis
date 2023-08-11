@@ -16,6 +16,8 @@ class AdaptationAlgorithm:
         self.run_setup(num_iter)
 
         for counter in range(num_iter):
+            if self.verbose: print(f"Iteration: {counter}")
+
             self.observe_acquisition_point(counter)
             self.update_mean_function(counter)
             self.train_gaussian_process(counter)
@@ -38,8 +40,6 @@ class AdaptationAlgorithm:
         self.tested_indices = jnp.full(shape=num_iter, fill_value=jnp.nan, dtype=int)
     
     def observe_acquisition_point(self, counter):
-            if self.verbose: print(f"Iteration: {counter}")
-
             index_to_test = self.jitted_gp_acquisition(mu=self.agent.mu, var=self.agent.var)
             self.tested_indices = self.tested_indices.at[counter].set(index_to_test)
             if self.verbose: print(f"index_to_test: {index_to_test}")
@@ -51,11 +51,9 @@ class AdaptationAlgorithm:
 
             self.update_agent_arrays(counter, index_to_test, observed_fitness)
     
-    def update_mean_function(self, counter):
-        # Override this method if there is need to update the mean function (prior)
-        self.mean_func = jnp.zeros(shape=self.agent.sim_fitnesses.shape)
-        self.mean_func_at_obs = self.mean_func_at_obs.at[counter].set(0)
-        if self.verbose: print(f"mean_func_at_obs: {self.mean_func_at_obs}")
+    def update_mean_function(self, counter,):
+        """Populate the self.mean_func (array of funcval at all the tested x points) and self.mean_func_at_obs attributes."""
+        raise NotImplementedError
 
     def train_gaussian_process(self, counter):
         self.agent.mu, self.agent.var = self.gaussian_process.train(x_observed=self.agent.x_observed[:counter+1],
@@ -83,15 +81,11 @@ class AdaptationAlgorithm:
         if self.verbose: print(f"agent's y_observed: {self.agent.y_observed}") 
     
 
-
 if __name__ == "__main__":
-    from src.core.task import Task
     from src.loaders.repertoire_loader import RepertoireLoader
     from src.core.adaptive_agent import AdaptiveAgent
     from src.core.gaussian_process import GaussianProcess
     from src.utils import hexapod_damage_dicts
-    from src.core.repertoire_optimiser import RepertoireOptimiser
-    from src.utils.repertoire_visualiser import Visualiser
 
     from results.family_3 import family_task
     path_to_family = "results/family_3"
