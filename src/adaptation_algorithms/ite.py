@@ -1,134 +1,37 @@
 from src.utils.all_imports import *
+from src.adaptation_algorithms.adaptation_algorithm import AdaptationAlgorithm
 
-class ITE():
-    def __init__(self, agent, gaussian_process, alpha=0.9, path_to_results="results/ite_example/", plot_repertoires=False, save_res_arrs=True, verbose=False,
-                 norm_params=(0, 40)):
-        self.agent = agent
-        self.gaussian_process = gaussian_process
-        self.alpha = alpha
-        self.y_prior = self.agent.sim_fitnesses
-        self.path_to_results = path_to_results
-        self.plot_repertoires = plot_repertoires
-        self.save_res_arrs = save_res_arrs
-        self.verbose = verbose
-        self.norm_params = norm_params
+class ITE(AdaptationAlgorithm):
+    def __init__(self, agent, gaussian_process, alpha=0.9, verbose=False,
+                 path_to_results="results/algorithm_example/", save_res_arrs=True, norm_params=(0, 40), plot_repertoires=False):
+        super().__init__(agent, gaussian_process, alpha, verbose,
+                 path_to_results, save_res_arrs, norm_params, plot_repertoires)
+    
+        self.mean_func = self.agent.sim_fitnesses
+    
+    def update_mean_function(self, counter):
+        self.mean_func_at_obs = self.mean_func_at_obs.at[counter].set(self.mean_func[self.tested_indices[counter]])
+        if self.verbose: print(f"mean_func_at_obs: {self.mean_func_at_obs}")
 
-    def run(self, num_iter=10):
-        # TODO: randomness check is this how it should be used? 
-        # Define random key
-        seed = 1
-        random_key = jax.random.PRNGKey(seed)
-        random_key, subkey = jax.random.split(random_key)
-
-        # Initialise the counter variable
-        counter = 0
-
-        # Define the array of the prior mean function at the observations
-        y_prior_at_obs = jnp.full(shape=num_iter, fill_value=jnp.nan)
-
-        # Define array of the BDs observed by the agent
-        # TODO: left the "6" hard-coded here, but modularise with the self.agent.env at some point
-        self.agent.x_observed = jnp.full(shape=(num_iter, 6), fill_value=jnp.nan)
-
-        # Define array of the fitnesses observed by the agent
-        self.agent.y_observed = jnp.full(shape=num_iter, fill_value=jnp.nan)
-
-        # Jit functions
-        jitted_acquisition = jax.jit(self.gaussian_process.acquisition_function)
-
-        # Repeat the following while the algorithm has not terminated
-        while counter < num_iter: # and jnp.max(self.agent.y_observed[:counter], initial=-jnp.inf) < self.alpha*jnp.max(self.agent.mu):
-            if self.verbose: print(f"iteration: {counter}")
-        
-            # Query the GPs acquisition function based on the agent's mu and var
-            index_to_test = jitted_acquisition(mu=self.agent.mu, var=self.agent.var)
-            if self.verbose: print(f"index_to_test: {index_to_test}")
-
-            # Agent tests the result of the acquisition function
-            observed_fitness, _, _, random_key = self.agent.test_descriptor(index=index_to_test, random_key=random_key)
-            observed_fitness = (observed_fitness - self.norm_params[0])/(self.norm_params[1] - self.norm_params[0])
-            if self.verbose: print(f"observed_fitness: {observed_fitness} compared to original fitness: {self.agent.sim_fitnesses[index_to_test]}")
-
-            # Update agent's x_observed and y_observed
-            self.agent.x_observed = self.agent.x_observed.at[counter].set(self.agent.sim_descriptors[index_to_test])
-            self.agent.y_observed = self.agent.y_observed.at[counter].set(observed_fitness.item())
-            if self.verbose: print(f"agent's x_observed: {self.agent.x_observed}")
-            if self.verbose: print(f"agent's y_observed: {self.agent.y_observed}")
-
-            # Define the mean function
-            y_prior_at_obs = y_prior_at_obs.at[counter].set(self.y_prior[index_to_test])
-            if self.verbose: print(f"y_prior_at_obs: {y_prior_at_obs}")
-
-            # TODO: check with Antoine that the way I did the GP with prior makes sense
-            self.agent.mu, self.agent.var = self.gaussian_process.train(self.agent.x_observed[:counter+1],
-                                                                        self.agent.y_observed[:counter+1] - y_prior_at_obs[:counter+1],
-                                                                        self.agent.sim_descriptors,
-                                                                        y_priors=self.y_prior)
-            if self.plot_repertoires:
-                # Save the plots of the repertoires
-                self.agent.plot_repertoire(quantity="mu", path_to_save_to=self.path_to_results + f"mu{counter}")
-                self.agent.plot_repertoire(quantity="var", path_to_save_to=self.path_to_results + f"var{counter}")
-            
-            # Move onto the next iteration
-            counter += 1
-
-        if self.save_res_arrs:
-            
-            if not os.path.exists(path=f"{self.path_to_results}"):
-                os.makedirs(name=f"{self.path_to_results}")
-
-            jnp.save(file=f"{self.path_to_results}mu", arr=self.agent.mu)
-            jnp.save(file=f"{self.path_to_results}var", arr=self.agent.var)
-            jnp.save(file=f"{self.path_to_results}x_observed", arr=self.agent.x_observed)
-            jnp.save(file=f"{self.path_to_results}y_observed", arr=self.agent.y_observed)
-
-            with open(f"{self.path_to_results}damage_dict.txt", "w") as file_path:
-                json.dump(self.agent.damage_dictionary, file_path)
-            
 if __name__ == "__main__":
-    # Import all the necessary libraries
-    from src.core.task import Task
     from src.loaders.repertoire_loader import RepertoireLoader
     from src.core.adaptive_agent import AdaptiveAgent
     from src.core.gaussian_process import GaussianProcess
     from src.utils import hexapod_damage_dicts
-    from src.core.repertoire_optimiser import RepertoireOptimiser
-    from src.utils.repertoire_visualiser import Visualiser
 
-    # Define an overall task (true for the whole family simulated and adaptive)
     from results.family_3 import family_task
+    path_to_family = "results/family_3"
     task = family_task.task
-
-    # # Define a repertoire optimiser
-    # repertoire_optimiser = RepertoireOptimiser(task=task)
-    # repertoire_optimiser.optimise_repertoire(repertoire_path="./results/ite_example/sim_repertoire")
-        
-    # Define a simulated repertoire 
     repertoire_loader = RepertoireLoader()
-    simu_arrs = repertoire_loader.load_repertoire(repertoire_path="results/family_3/repertoire", remove_empty_bds=False)
-
-    # To figure out the smallest element of the simulated fitnesses
-    # print(jnp.min(simu_arrs[2][simu_arrs[2] != -jnp.inf]))
-
-    # Define an Adaptive Agent wihch inherits from the task and gets its mu and var set to the simulated repertoire's mu and var
-    damage_dict = hexapod_damage_dicts.intact
+    simu_arrs = repertoire_loader.load_repertoire(repertoire_path=f"{path_to_family}/repertoire", remove_empty_bds=False)
+    damage_dict = hexapod_damage_dicts.leg_1_broken
     agent = AdaptiveAgent(task=task, sim_repertoire_arrays=simu_arrs, damage_dictionary=damage_dict)
-
-    # Define a GP
     gp = GaussianProcess()
+    norm_params = jnp.load(f"{path_to_family}/norm_params.npy")
 
-    # Load norm_params
-    norm_params = jnp.load("results/family_3/norm_params.npy")
-
-    # Create an ITE object with previous objects as inputs
     ite = ITE(agent=agent,
               gaussian_process=gp,
-              alpha=0.9,
-              plot_repertoires=False,
               verbose=True,
               norm_params=norm_params)
-
-    # # Run the ITE algorithm
+    
     ite.run(num_iter=5)
-
-    # TODO: issue with newly scored and repertoire scored fitnesses not being equal for family_0/repertoire case (actually better in the newly scored case which is strange).
