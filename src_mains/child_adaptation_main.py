@@ -8,9 +8,9 @@ from src.adaptation_algorithms.gpcf import GPCF
 from src.core.gaussian_process import GaussianProcess
 from src.core.family import Family
 
-path_to_family = f"results/family_3"
-from results.family_3 import family_task
-norm_params = jnp.load("results/family_3/norm_params.npy")
+path_to_family = f"families/family_3"
+from families.family_3 import family_task
+norm_params = jnp.load("families/family_3/norm_params.npy")
 task = family_task.task
 
 rep_loader = RepertoireLoader()

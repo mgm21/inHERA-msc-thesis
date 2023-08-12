@@ -152,17 +152,17 @@ if __name__ == "__main__":
     visu = Visualiser()
 
     # LOAD THE ITE RESULTS
-    ite_fits = jnp.array([jnp.load("results/family_3/ancestors/damaged_0_1_2_3_4/y_observed.npy"),
-                jnp.load("results/family_3/ancestors/damaged_0_1_2_3_5/y_observed.npy"),
-                jnp.load("results/family_3/ancestors/damaged_0_1_2_4_5/y_observed.npy"),
-                jnp.load("results/family_3/ancestors/damaged_0_1_3_4_5/y_observed.npy"),
-                jnp.load("results/family_3/ancestors/damaged_1_2_3_4_5/y_observed.npy")])
+    ite_fits = jnp.array([jnp.load("families/family_3/ancestors/damaged_0_1_2_3_4/y_observed.npy"),
+                jnp.load("families/family_3/ancestors/damaged_0_1_2_3_5/y_observed.npy"),
+                jnp.load("families/family_3/ancestors/damaged_0_1_2_4_5/y_observed.npy"),
+                jnp.load("families/family_3/ancestors/damaged_0_1_3_4_5/y_observed.npy"),
+                jnp.load("families/family_3/ancestors/damaged_1_2_3_4_5/y_observed.npy")])
 
-    gpcf_fits = jnp.array([jnp.load("results/family_3/new_agents/damaged_0_1_2_3_4/GPCF/y_observed.npy"),
-                jnp.load("results/family_3/new_agents/damaged_0_1_2_3_5/GPCF/y_observed.npy"),
-                jnp.load("results/family_3/new_agents/damaged_0_1_2_4_5/GPCF/y_observed.npy"),
-                jnp.load("results/family_3/new_agents/damaged_0_1_3_4_5/GPCF/y_observed.npy"),
-                jnp.load("results/family_3/new_agents/damaged_1_2_3_4_5/GPCF/y_observed.npy")])
+    gpcf_fits = jnp.array([jnp.load("families/family_3/new_agents/damaged_0_1_2_3_4/GPCF/y_observed.npy"),
+                jnp.load("families/family_3/new_agents/damaged_0_1_2_3_5/GPCF/y_observed.npy"),
+                jnp.load("families/family_3/new_agents/damaged_0_1_2_4_5/GPCF/y_observed.npy"),
+                jnp.load("families/family_3/new_agents/damaged_0_1_3_4_5/GPCF/y_observed.npy"),
+                jnp.load("families/family_3/new_agents/damaged_1_2_3_4_5/GPCF/y_observed.npy")])
     
     # print(f"ite_fits: {ite_fits}")
     # print(f"gpcf_fits: {gpcf_fits}")

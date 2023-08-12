@@ -18,7 +18,7 @@ robot_name = "harmed5"
 
 # Load the simulated repertoire 
 repertoire_loader = RepertoireLoader()
-simu_arrs = repertoire_loader.load_repertoire(repertoire_path=f"results/{family_name}/repertoire", remove_empty_bds=False)
+simu_arrs = repertoire_loader.load_repertoire(repertoire_path=f"families/{family_name}/repertoire", remove_empty_bds=False)
 
 # Define an Adaptive Agent which inherits from the task and gets its mu and var set to the simulated repertoire's mu and var
 agent = AdaptiveAgent(task=task,
@@ -37,7 +37,7 @@ ite = ITE(agent=agent,
           alpha=0.9,
           plot_repertoires=False,
           save_res_arrs=True,
-          path_to_results=f"results/{family_name}/{agent.name}/",
+          path_to_results=f"families/{family_name}/{agent.name}/",
           verbose=True,
           norm_params=None)
 

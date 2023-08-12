@@ -20,7 +20,7 @@ class AdaptiveAgent:
                  y_observed=jnp.array([]),
                  mu=None,
                  var=None,
-                 path_to_base_repertoire="results/ite_example/sim_repertoire/"):
+                 path_to_base_repertoire="families/ite_example/sim_repertoire/"):
         
         self.task = task
         self.sim_descriptors = sim_repertoire_arrays[1]
@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     # These lines do not change and cannot be the problem
     repertoire_loader = RepertoireLoader()
-    sim_repertoire_arrays = _, descriptors, sim_fitnesses, genotypes = repertoire_loader.load_repertoire(repertoire_path="./results/ite_example/sim_repertoire/")
+    sim_repertoire_arrays = _, descriptors, sim_fitnesses, genotypes = repertoire_loader.load_repertoire(repertoire_path="./families/ite_example/sim_repertoire/")
 
     # Define the agent's damage
     # These lines have been checked and do work to set all the strengths to 0

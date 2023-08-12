@@ -1,6 +1,6 @@
 from src.utils.all_imports import *
 
-f = jnp.load("results/family_2/repertoire/fitnesses.npy")
+f = jnp.load("families/family_2/repertoire/fitnesses.npy")
 
 # Normalisation routine
 fmax = jnp.nanmax(f[f != -jnp.inf])

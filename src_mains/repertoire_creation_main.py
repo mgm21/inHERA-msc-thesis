@@ -12,7 +12,7 @@ repertoire_opt = RepertoireOptimiser(task=task, env=agent.env)
 # Location to store results
 now = datetime.now()
 dt_string = now.strftime("%m_%d-%H_%M_%S")
-res_path = f"./results/{dt_string}"
+res_path = f"./families/{dt_string}"
 os.mkdir(path=res_path)
 
 repertoire_opt.optimise_repertoire(repertoire_path=f"{res_path}/repertoire/",

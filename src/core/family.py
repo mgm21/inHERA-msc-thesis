@@ -3,7 +3,7 @@ from src.loaders.repertoire_loader import RepertoireLoader
 from src.loaders.ancestors_loader import AncestorsLoader
 
 class Family:
-    def __init__(self, path_to_family="results/family_0"):
+    def __init__(self, path_to_family="families/family_0"):
         # Define the family's simulation repertoire
         rep_load = RepertoireLoader()
         rep_arrs = rep_load.load_repertoire(repertoire_path=f"{path_to_family}/repertoire")
@@ -60,7 +60,7 @@ class Family:
 
 
 if __name__ == "__main__":
-    fam = Family(path_to_family="results/family_4_1")
+    fam = Family(path_to_family="families/family_4")
     print(fam.ancestors_names)
     print(fam.ancestor_mus)
 

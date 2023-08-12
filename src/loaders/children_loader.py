@@ -1,7 +1,7 @@
 from src.utils.all_imports import *
 
 class ChildrenLoader:
-    def load_children(self, path_to_family="results/family_4", algos=["ITE", "GPCF"]):
+    def load_children(self, path_to_family="families/family_4", algos=["ITE", "GPCF"]):
         path_to_children = f"{path_to_family}/children"
 
         res_dict = {}
@@ -21,7 +21,7 @@ class ChildrenLoader:
         
         return res_dict
     
-    def load_children_by_num_broken_legs(self, path_to_family="results/family_4", algos=["ITE", "GPCF"],):
+    def load_children_by_num_broken_legs(self, path_to_family="families/family_4", algos=["ITE", "GPCF"],):
         path_to_children = f"{path_to_family}/children"
 
         res_dict = {}
@@ -49,7 +49,7 @@ class ChildrenLoader:
 
 if __name__ == "__main__":
     algos = ["ITE", "GPCF"]
-    path_to_family = "results/family_6"
+    path_to_family = "families/family_6"
 
     children_loader = ChildrenLoader()
     res_dict = children_loader.load_children_by_num_broken_legs(path_to_family=path_to_family, algos=algos)

@@ -83,12 +83,12 @@ if __name__ == "__main__":
     # Will automate this later. Perhaps json/pickle the task object and put it in the family so that everyone can refer to a unique task.
     
     # CHANGE THIS
-    from results.family_3 import family_task
+    from families.family_3 import family_task
 
-    norm_params = jnp.load("results/family_3/norm_params.npy")
+    norm_params = jnp.load("families/family_3/norm_params.npy")
 
     # CHANGE PATH!
-    ancest_gen = AncestorsGenerator(path_to_family='results/family_3',
+    ancest_gen = AncestorsGenerator(path_to_family='families/family_3',
                                     task = family_task.task,
                                     shortform_damage_list=shortform_damage_list,
                                     ite_alpha=0.99,

@@ -3,7 +3,7 @@ from src.adaptation_algorithms.adaptation_algorithm import AdaptationAlgorithm
 
 class ITE(AdaptationAlgorithm):
     def __init__(self, agent, gaussian_process, alpha=0.9, verbose=False,
-                 path_to_results="results/algorithm_example/", save_res_arrs=True, norm_params=(0, 40), plot_repertoires=False):
+                 path_to_results="families/algorithm_example/", save_res_arrs=True, norm_params=(0, 40), plot_repertoires=False):
         super().__init__(agent, gaussian_process, alpha, verbose,
                  path_to_results, save_res_arrs, norm_params, plot_repertoires)
     
@@ -19,8 +19,8 @@ if __name__ == "__main__":
     from src.core.gaussian_process import GaussianProcess
     from src.utils import hexapod_damage_dicts
 
-    from results.family_3 import family_task
-    path_to_family = "results/family_3"
+    from families.family_3 import family_task
+    path_to_family = "families/family_3"
     task = family_task.task
     repertoire_loader = RepertoireLoader()
     simu_arrs = repertoire_loader.load_repertoire(repertoire_path=f"{path_to_family}/repertoire", remove_empty_bds=False)

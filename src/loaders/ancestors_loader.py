@@ -1,7 +1,7 @@
 from src.utils.all_imports import *
 
 class AncestorsLoader:
-    def load_ancestors(self, path_to_ancestors="results/family_0/ancestors"):
+    def load_ancestors(self, path_to_ancestors="families/family_0/ancestors"):
         ancestor_mus = []
         ancestor_vars = []
         ancestor_names = []

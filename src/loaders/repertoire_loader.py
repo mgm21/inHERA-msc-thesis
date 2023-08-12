@@ -1,7 +1,7 @@
 from src.utils.all_imports import *
 
 class RepertoireLoader:
-    def load_repertoire(self, repertoire_path="./results/last_repertoire/", remove_empty_bds=False):
+    def load_repertoire(self, repertoire_path="./families/last_repertoire/", remove_empty_bds=False):
         centroids = jnp.load(os.path.join(repertoire_path, "centroids.npy"))
         descriptors = jnp.load(os.path.join(repertoire_path, "descriptors.npy"))
         fitnesses = jnp.load(os.path.join(repertoire_path, "fitnesses.npy"))
@@ -20,6 +20,6 @@ class RepertoireLoader:
 if __name__ == "__main__":
     repertoire_loader = RepertoireLoader()
     
-    rep_arrs_1 = repertoire_loader.load_repertoire(repertoire_path="./results//last_repertoire/")
-    rep_arrs_2 = repertoire_loader.load_repertoire(repertoire_path="./results//class-last_repertoire/")
-    rep_arrs_3 = repertoire_loader.load_repertoire(repertoire_path="./results//class_example_repertoire/")    
+    rep_arrs_1 = repertoire_loader.load_repertoire(repertoire_path="./families//last_repertoire/")
+    rep_arrs_2 = repertoire_loader.load_repertoire(repertoire_path="./families//class-last_repertoire/")
+    rep_arrs_3 = repertoire_loader.load_repertoire(repertoire_path="./families//class_example_repertoire/")    
