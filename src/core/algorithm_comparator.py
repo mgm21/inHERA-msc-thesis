@@ -122,19 +122,19 @@ class AlgorithmComparator:
 
 if __name__ == "__main__":
     # Choose hyper parameters for comparison experiment
-    from results.family_8 import family_task
-    path_to_family = "results/family_8"
+    from results.family_4_1 import family_task
+    path_to_family = "results/family_4_1"
     task = family_task.task
     norm_params = jnp.load(f"{path_to_family}/norm_params.npy")
     algo_num_iter = 20
-    ancest_num_legs_damaged = (1, 2, 3, 4, 5)
-    children_num_legs_damaged = (1, 2, 3, 4, 5)
-    algorithms_to_test = ["ITE", "GPCF"]
-    algorithms_to_plot = ["ITE", "GPCF"]
+    ancest_num_legs_damaged = (1,)
+    children_num_legs_damaged = (1,)
+    algorithms_to_test = ["ITE", "GPCF", "GPCF-1trust"] # ITE, GPCF, GPCF-1trust, 
+    algorithms_to_plot = ["ITE", "GPCF", "GPCF-1trust"] # ITE, GPCF, GPCF-1trust,
     verbose = True
     ite_alpha = 0.9
     gpcf_kappa = 0.05
-    children_in_ancestors = False
+    children_in_ancestors = True
 
     # DEFINE AN ALGORITHM COMPARATOR
     algo_comp = AlgorithmComparator(algorithms_to_test=algorithms_to_test,
@@ -159,12 +159,12 @@ if __name__ == "__main__":
     # # # TO ONLY MAKE THE CHILDREN ADAPT
     algo_comp.generate_children()
 
-    # TO ONLY PRODUCE AND SAVE THE OVERALL PLOTS
-    means, vars = algo_comp.get_algo_means_and_var()
-    algo_comp.savefig_algos_comparison_results(means, vars,)
+    # # TO ONLY PRODUCE AND SAVE THE OVERALL PLOTS
+    # means, vars = algo_comp.get_algo_means_and_var()
+    # algo_comp.savefig_algos_comparison_results(means, vars,)
 
-    # TO PRODUCE THE PLOTS PER DAMAGE LEVEL
-    means_dict, vars_dict = algo_comp.get_damage_specific_algo_means_and_vars()
-    algo_comp.savefig_per_damage_algos_comparison_results(means_dict, vars_dict,)
+    # # TO PRODUCE THE PLOTS PER DAMAGE LEVEL
+    # means_dict, vars_dict = algo_comp.get_damage_specific_algo_means_and_vars()
+    # algo_comp.savefig_per_damage_algos_comparison_results(means_dict, vars_dict,)
 
     

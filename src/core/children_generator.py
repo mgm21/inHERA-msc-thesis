@@ -4,6 +4,7 @@ from src.core.adaptive_agent import AdaptiveAgent
 from src.core.gaussian_process import GaussianProcess
 from src.adaptation_algorithms.ite import ITE
 from src.adaptation_algorithms.gpcf import GPCF
+from src.adaptation_algorithms.gpcf_1trust import GPCF1Trust
 from src.loaders.repertoire_loader import RepertoireLoader
 from src.core.family import Family
 
@@ -53,26 +54,22 @@ class ChildrenGenerator:
             self.generate_child(damage_dict, name=f"custom{count}")
 
     def generate_child(self, damage_dict, name):
-
-        # DIFFERENT TO ANCESTORSGEN
-
-        # Make sure to remove agent from family before collaboration algorithm
+        # Make sure to remove agent from family before collaboration algorithms (does not affect single agent algos)
         if not self.children_in_ancestors: 
             # This means that the child being generated should not use itself as an ancestor (i.e. an agent with the exact same damage)
             if self.verbose: print(self.family.ancestors_names)
             self.family.remove_ancestor_from_ancest_arrs(ancest_name=name)
             if self.verbose: print(self.family.ancestors_names)
-            
-
-        agent = AdaptiveAgent(task=self.task,
+        
+        if "ITE" in self.algorithms_to_test:
+            agent = AdaptiveAgent(task=self.task,
                       name=name,
                       sim_repertoire_arrays=self.simu_arrs,
                       damage_dictionary=damage_dict)
         
-        # Define a GP
-        gp = GaussianProcess()
+            # Define a GP
+            gp = GaussianProcess()
 
-        if "ITE" in self.algorithms_to_test:
             # Create an ITE object with previous objects as inputs
             ite = ITE(agent=agent,
                     gaussian_process=gp,
@@ -87,18 +84,18 @@ class ChildrenGenerator:
             # Run the ITE algorithm which saves the arrays TODO: could later decouple responsibilities here
             ite.run(num_iter=self.ite_num_iter)
         
-        # Memory concern 
-        del gp
-
-        agent = AdaptiveAgent(task=self.task,
-                      name=name,
-                      sim_repertoire_arrays=self.simu_arrs,
-                      damage_dictionary=damage_dict)
-
-
-        gp = GaussianProcess(kappa=self.gpcf_kappa)
+            # Memory concern 
+            del gp, agent
         
         if "GPCF" in self.algorithms_to_test:
+            agent = AdaptiveAgent(task=self.task,
+                        name=name,
+                        sim_repertoire_arrays=self.simu_arrs,
+                        damage_dictionary=damage_dict)
+
+
+            gp = GaussianProcess(kappa=self.gpcf_kappa)
+
             # Create an ITE object with previous objects as inputs
             gpcf = GPCF(agent=agent,
                     gaussian_process=gp,
@@ -110,13 +107,35 @@ class ChildrenGenerator:
                     family=self.family,
                     )
 
-            # Run the ITE algorithm which saves the arrays TODO: could later decouple responsibilities here
             gpcf.run(num_iter=self.ite_num_iter)
         
-        # Memory concern
-        del gp
+            # Memory concern
+            del gp, agent
+        
+        if "GPCF-1trust" in self.algorithms_to_test:
+            agent = AdaptiveAgent(task=self.task,
+                        name=name,
+                        sim_repertoire_arrays=self.simu_arrs,
+                        damage_dictionary=damage_dict)
+            
+            gp = gp = GaussianProcess(kappa=self.gpcf_kappa)
 
-        # Make sure to reset after collaborative algorithm have taken place
+            # Create an ITE object with previous objects as inputs
+            gpcf_1trust = GPCF1Trust(agent=agent,
+                    gaussian_process=gp,
+                    alpha=self.ite_alpha,
+                    save_res_arrs=True,
+                    path_to_results=f"{self.path_to_children}/{agent.name}/GPCF-1trust/",
+                    verbose=self.verbose,
+                    norm_params=self.norm_params,
+                    family=self.family,
+                    )
+            
+            gpcf_1trust.run(num_iter=self.ite_num_iter)
+
+            del gp, agent
+
+        # Make sure to reset only after all collaborative algorithms have taken place
         if not self.children_in_ancestors:
             self.family.reset_the_ancestor_arrs()
 
