@@ -9,7 +9,7 @@ from jaxopt import ProjectedGradient
 from jaxopt.projection import projection_non_negative
 
 class GaussianProcess:
-    def __init__(self, verbose=False, obs_noise=0.01, length_scale=1, rho=0.4, kappa=0.05, l1_regularisation_weight=0.01, invmax_regularisation_weight=0.01):
+    def __init__(self, verbose=False, obs_noise=0.01, length_scale=1, rho=0.4, kappa=0.05, l1_regularisation_weight=0.01, invmax_regularisation_weight=0.1):
         self.obs_noise = obs_noise
         self.length_scale = length_scale
         self.rho = rho
@@ -103,8 +103,6 @@ class GaussianProcess:
         pg_sol = pg.run(W0).params
         W = pg_sol
 
-        print(f"unnormalised W: {W}")
-
         # # TODO: the below is to transform into one-hot encoding
         # idx_max = jnp.nanargmax(W)
         # W = jnp.zeros(W.shape)
@@ -118,7 +116,7 @@ class GaussianProcess:
     def _get_likelihood(self, W, K, y_observed, y_priors):
         A = y_observed - y_priors.T @ W
         llh = -0.5 * A.T @ jnp.linalg.inv(K) @ A - 0.5 * jnp.log(jnp.linalg.det(K))
-        # jax.debug.print("{}", llh)
+        jax.debug.print("likelihood: {}", llh)
         return -llh
     
     @partial(jit, static_argnums=(0,))
@@ -137,6 +135,8 @@ class GaussianProcess:
     def loss_regularised_invmax(self, W, K, y_observed, y_priors):
         """Return the likelihood regularised with the inverse of the max of the weights"""
         loss = self._get_likelihood(W, K, y_observed, y_priors) + self.invmax_regularisation_weight * (1/jnp.max(W))
+        jax.debug.print("regularisation term: {}", self.invmax_regularisation_weight * (1/jnp.max(W)))
+        jax.debug.print("regularised loss: {}", loss)
         return loss
 
     # TODO: this function can be removed if/when Cholesky method for likelihood is used

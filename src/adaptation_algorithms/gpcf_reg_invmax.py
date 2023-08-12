@@ -1,12 +1,14 @@
 from src.utils.all_imports import *
 from src.adaptation_algorithms.experience_sharing_algorithm import ExperienceSharingAlgorithm
 
-class GPCF(ExperienceSharingAlgorithm):
+class GPCFRegInvMax(ExperienceSharingAlgorithm):
     def __init__(self, family, agent, gaussian_process, alpha=0.9, verbose=False,
                  path_to_results="families/ite_example/", save_res_arrs=True, norm_params=(0, 40), plot_repertoires=False):
         
         super().__init__(family, agent, gaussian_process, alpha, verbose,
                  path_to_results, save_res_arrs, norm_params, plot_repertoires)
+        
+        self.gaussian_process.loss = self.gaussian_process.loss_regularised_invmax
     
     def get_ancestor_weights(self, counter):
         W = self.gaussian_process.optimise_W(x_observed=self.agent.x_observed[:counter+1],
@@ -36,7 +38,7 @@ if __name__ == "__main__":
                       damage_dictionary=damage_dict)
     gp = GaussianProcess()
 
-    gpcf = GPCF(family=fam,
+    gpcf = GPCFRegInvMax(family=fam,
                 agent=agent,
                 gaussian_process=gp,
                 verbose=True,
