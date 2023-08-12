@@ -3,20 +3,20 @@
 from src.utils.all_imports import *
 from jax.scipy import optimize
 
-
 # 06/08/2023 Trying different optimisation libraries
 from scipy import optimize as scipy_optimize
 from jaxopt import ProjectedGradient
 from jaxopt.projection import projection_non_negative
 
 class GaussianProcess:
-    def __init__(self, verbose=False, obs_noise=0.01, length_scale=1, rho=0.4, kappa=0.05, regularisation_weight=0.01):
+    def __init__(self, verbose=False, obs_noise=0.01, length_scale=1, rho=0.4, kappa=0.05, l1_regularisation_weight=0.01, invmax_regularisation_weight=0.01):
         self.obs_noise = obs_noise
         self.length_scale = length_scale
         self.rho = rho
         self.verbose = verbose
         self.kappa = kappa
-        self.regularisation_weight = regularisation_weight
+        self.l1_regularisation_weight = l1_regularisation_weight
+        self.invmax_regularisation_weight = invmax_regularisation_weight
 
         # TODO: check why the sum below?
         self.kernel = lambda x1, x2: jnp.exp(-jnp.sum((x1 - x2) ** 2 / (2*self.length_scale**2)))
@@ -90,7 +90,7 @@ class GaussianProcess:
         K = self._get_K(x_observed=x_observed)
         # print(f"K: {K}")
 
-        partial_likelihood = partial(self._loss, K=K, y_observed=y_observed, y_priors=y_priors)
+        partial_likelihood = partial(self.loss, K=K, y_observed=y_observed, y_priors=y_priors)
         # print(f"partial_likelihood: {partial_likelihood}")
 
         # # TODO: may not need partial above because optimize.minimize supports args tuple (see https://jax.readthedocs.io/en/latest/_autosummary/jax.scipy.optimize.minimize.html)
@@ -122,10 +122,22 @@ class GaussianProcess:
         return -llh
     
     @partial(jit, static_argnums=(0,))
-    def _loss(self, W, K, y_observed, y_priors):
-        loss = self._get_likelihood(W, K, y_observed, y_priors) + self.regularisation_weight * (jnp.sum(jnp.abs(W)))
+    def loss(self, W, K, y_observed, y_priors):
+        """Return the unaltered likelihood"""
+        loss = self._get_likelihood(W, K, y_observed, y_priors)
         return loss
-
+    
+    @partial(jit, static_argnums=(0,))
+    def loss_regularised_l1(self, W, K, y_observed, y_priors):
+        """Return the L1 regularised likelihood"""
+        loss = self._get_likelihood(W, K, y_observed, y_priors) + self.l1_regularisation_weight * (jnp.sum(jnp.abs(W)))
+        return loss
+    
+    @partial(jit, static_argnums=(0,))
+    def loss_regularised_invmax(self, W, K, y_observed, y_priors):
+        """Return the likelihood regularised with the inverse of the max of the weights"""
+        loss = self._get_likelihood(W, K, y_observed, y_priors) + self.invmax_regularisation_weight * (1/jnp.max(W))
+        return loss
 
     # TODO: this function can be removed if/when Cholesky method for likelihood is used
     def _get_K(self, x_observed):
