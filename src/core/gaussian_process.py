@@ -1,10 +1,6 @@
 # This GP class was inspired by Rasmussen's GPs for ML book (mainly algo on p. 19) and Antoine Cully's unpublished implementation of GPs
 
 from src.utils.all_imports import *
-from jax.scipy import optimize
-from scipy import optimize as scipy_optimize
-
-# 06/08/2023 Trying different optimisation libraries
 from jaxopt import ProjectedGradient
 from jaxopt.projection import projection_non_negative
 from jaxopt.projection import projection_box
@@ -22,102 +18,45 @@ class GaussianProcess:
         self.set_default_gradient_projection()
         self.set_projection_hyperparameters(hyperparams=())
 
-        # TODO: check why the sum below?
-        self.kernel = lambda x1, x2: jnp.exp(-jnp.sum((x1 - x2) ** 2 / (2*self.length_scale**2)))
-
-        # From ITE paper:
-        self.d = lambda x1, x2: jnp.linalg.norm(x2-x1)
-        self.kernel = lambda x1, x2: (1 + ((jnp.sqrt(5)*self.d(x1, x2)) / (self.rho)) 
-                                      + ((5*self.d(x1, x2)**2) / (3*self.rho**2))) * jnp.exp((-jnp.sqrt(5) * self.d(x1, x2))/(self.rho))
-        
-
-
-    # TODO: Would the following be interesting to me for this project? Not returning values of mu and var over the whole input space but by 
-    # returning functional expressions for both and then can query from those if need be (and can create repertoires at the very end if need be)
-    # TODO: Also, please note that here y_priors is the mean value of the prior function (nothing to do with ancestors, only with simu repertoire)
-    # TODO: Instead of setting y_observed = y_observed - y_prior@x_observed as I do in ite.py, simply set y_observed = y_observed -y_prior@x_observed in this method at the top (so imports make more sense)
-    # TODO: It could be confusing that both this method's y_priors and optimise_W's y_priors have the same name when they refer to different objects.
-    #  y_priors in train refers to the value of the simulated repertoire at x_observed
-    #  y_priors in optimise_W refers to the value of the ancestor mus at x_observed put in a matrix
-    # TODO: SET ONE OF THE TWO FOLLOWING ONES TO train FOT THAT TO BE THE ONE THAT IS USED
-    def train(self,
-              x_observed,
-              y_observed,
-              x_test,
-              y_priors,):
-        
-        # TODO: change the following line to the private method call _get_K
+    def train(self, x_observed, y_observed, x_test, y_priors,):
+        """GP training method using Cholesky decomposition presented on p.19 of Rasmussen book"""
         K = vmap(lambda x : vmap(lambda y: self.kernel(x, y))(x_observed))(x_observed) + self.obs_noise*jnp.eye(x_observed.shape[0])
         vec = vmap(lambda x: vmap(lambda y: self.kernel(x, y))(x_test))(x_observed)
         L = jnp.linalg.cholesky(K)
         alpha = jnp.linalg.solve(jnp.transpose(L), jnp.linalg.solve(L, y_observed))
 
-        # This line will have to be edited to sum in the adaptive prior
+        # The following line was edited to sum in the adaptive prior
         mu = y_priors + jnp.matmul(jnp.transpose(vec), alpha)
         v = jnp.linalg.solve(L, vec)
         var = 1 - jnp.sum(jnp.square(v), axis=0)
-
         return mu, var
     
-    # Naive method which does not use Cholesky decomposition to make sure that GP is implemented correctly
-    def _train(self,
-              x_observed,
-              y_observed,
-              x_test,
-              y_priors,):
-        
-        # Calculate K
+    def _train(self, x_observed, y_observed, x_test, y_priors,):
+        """Naive GP training method which does not use Cholesky decomposition to make sure that GP is implemented correctly"""
         K = self._get_K(x_observed)
-
-        # Calculate k vector
         k = vmap(lambda x: vmap(lambda y: self.kernel(x, y))(x_test))(x_observed)
-
-        # Calculate mu
         mu = y_priors + k.T @ jnp.linalg.inv(K) @ y_observed
-
-        # Calculate var
         var = vmap(lambda test_point: self.kernel(test_point, test_point).T - (vmap(lambda x_obs: self.kernel(test_point, x_obs))(x_observed)).T @ jnp.linalg.inv(K) @ vmap(lambda x_obs: self.kernel(test_point, x_obs))(x_observed))(x_test)
-
         return mu, var
-
-    # TODO: this could be made more efficient by inputting functions for mu and var as opposed to arrays and inputting a range over which the max is looked for
+    
+    def kernel(self, x1, x2):
+        d = lambda x1, x2: jnp.linalg.norm(x2-x1)
+        return (1 + ((jnp.sqrt(5)*d(x1, x2)) / (self.rho)) + ((5*d(x1, x2)**2) / (3*self.rho**2))) * jnp.exp((-jnp.sqrt(5) * d(x1, x2))/(self.rho))
+    
+    @partial(jit, static_argnums=(0,))
     def acquisition_function(self, mu, var):
-        # kappa is a measure of how much uncertainty is valued
-        # Should return the index of the policy to test given mu and var
-        # nan argmax ignores nan values (or else they would be considered the max values)
         return jnp.nanargmax(mu + self.kappa*var)
     
-    # TODO: uncomment to use jit
     @partial(jit, static_argnums=(0,))
     def optimise_W(self, x_observed, y_observed, y_priors,):
         W0 = jnp.full(shape=len(y_priors), fill_value=1/len(x_observed))
-        # print(f"W0: {W0}")
-
         K = self._get_K(x_observed=x_observed)
-        # print(f"K: {K}")
-
         partial_likelihood = partial(self.loss, K=K, y_observed=y_observed, y_priors=y_priors)
-        # print(f"partial_likelihood: {partial_likelihood}")
-
-        # # TODO: may not need partial above because optimize.minimize supports args tuple (see https://jax.readthedocs.io/en/latest/_autosummary/jax.scipy.optimize.minimize.html)
-        # TODO: the below is to use jax.scipy.optimize.minimize
-        # opt_res = optimize.minimize(fun=partial_likelihood, x0=W0, method="BFGS",)
-        # W = opt_res.x
-
-        # TODO: the below is to use optax
         pg = ProjectedGradient(fun=partial_likelihood, projection=self._gradient_projection_type)
         pg_sol = pg.run(W0, hyperparams_proj=self._projection_hyperparameters).params
         W = pg_sol
-
-        # # TODO: the below is to transform into one-hot encoding
-        # idx_max = jnp.nanargmax(W)
-        # W = jnp.zeros(W.shape)
-        # W = W.at[idx_max].set(1)
-
         return W
     
-    # TODO: This could made more efficient by using Cholesky decomposition method
-    # TODO: Should this method be in here or in the InhertingAgent?
     @partial(jit, static_argnums=(0,))
     def _get_likelihood(self, W, K, y_observed, y_priors):
         A = y_observed - y_priors.T @ W
@@ -145,7 +84,6 @@ class GaussianProcess:
         jax.debug.print("regularised loss: {}", loss)
         return loss
 
-    # TODO: this function can be removed if/when Cholesky method for likelihood is used
     def _get_K(self, x_observed):
         K = vmap(lambda x : vmap(lambda y: self.kernel(x, y))(x_observed))(x_observed) + self.obs_noise*jnp.eye(x_observed.shape[0])
         return K
@@ -164,6 +102,13 @@ class GaussianProcess:
 
 
 if __name__ == "__main__":
+    # Debugging likelihood not working for GPCF
+    gp = GaussianProcess()
+    x_observed = jnp.array([[0.5933333,0.23333333, 0.29333332, 0.46, 0.56, 0.20666666]])
+    y_observed = jnp.array([0.29857272])
+    ancestor_mus_at_curr_obs = jnp.array([[0.3464623], [0.28252518], [0.29259598], [0.30373174], [0.24637341], [0.40413338]])
+    print(gp.optimise_W(x_observed=x_observed, y_observed=y_observed, y_priors=ancestor_mus_at_curr_obs))
+
     # # Following toy problem to make sure that the GP works as expected
     # gp = GaussianProcess()
 
@@ -234,32 +179,61 @@ if __name__ == "__main__":
     # print(gp._get_likelihood(W, K, y_observed, y_priors))
 
 
-    # Debugging likelihood not working for GPCF
-    gp = GaussianProcess()
-    x_observed = jnp.array([[0.5933333,0.23333333, 0.29333332, 0.46, 0.56, 0.20666666]])
-    y_observed = jnp.array([0.29857272])
-    ancestor_mus_at_curr_obs = jnp.array([[0.3464623], [0.28252518], [0.29259598], [0.30373174], [0.24637341], [0.40413338]])
-    print(gp.optimise_W(x_observed=x_observed,
-                         y_observed=y_observed,
-                           y_priors=ancestor_mus_at_curr_obs))
+######### The below are all the TODO and remarks that were previously in the code above
 
-    # TODO: potential problem with the GP:
-    # Get negative values for the variance sometimes,
-    # Cannot input the same input twice.
+"""
 
-    # Best might be to re-write the GP train method in the more traditional way and see the difference in results on this toy problem
-    # Especially to see if it solves some of the problems above.
+# TODO: potential problem with the GP:
+# Get negative values for the variance sometimes,
+# Cannot input the same input twice.
 
-    # TODO: if the values of mu are super high, will variance ever really be taken into account?
-    # Will the GP not only ever go for the highest predicted mu which would then make the whole uncertainty component irrelevant
-    # And could lead to being stuck in an undesirable optimum.
-    # Therefore must either scale the mus or must scale the variance up to be on the same scale. THIS IS THE PROBLEM.
+# Best might be to re-write the GP train method in the more traditional way and see the difference in results on this toy problem
+# Especially to see if it solves some of the problems above.
 
-    
+# TODO: if the values of mu are super high, will variance ever really be taken into account?
+# Will the GP not only ever go for the highest predicted mu which would then make the whole uncertainty component irrelevant
+# And could lead to being stuck in an undesirable optimum.
+# Therefore must either scale the mus or must scale the variance up to be on the same scale. THIS IS THE PROBLEM.
 
-    
+# from jax.scipy import optimize
+# from scipy import optimize as scipy_optimize
 
+# 06/08/2023 Trying different optimisation libraries
 
+# TODO: check why the sum in the exponential kernel function for high-dimensions?
+
+# About the train method:
+# TODO: Would the following be interesting to me for this project? Not returning values of mu and var over the whole input space but by 
+# returning functional expressions for both and then can query from those if need be (and can create repertoires at the very end if need be)
+# TODO: Also, please note that here y_priors is the mean value of the prior function (nothing to do with ancestors, only with simu repertoire)
+# TODO: Instead of setting y_observed = y_observed - y_prior@x_observed as I do in ite.py, simply set y_observed = y_observed -y_prior@x_observed in this method at the top (so imports make more sense)
+# TODO: It could be confusing that both this method's y_priors and optimise_W's y_priors have the same name when they refer to different objects.
+#  y_priors in train refers to the value of the simulated repertoire at x_observed
+#  y_priors in optimise_W refers to the value of the ancestor mus at x_observed put in a matrix
+# TODO: SET ONE OF THE TWO FOLLOWING ONES TO train FOT THAT TO BE THE ONE THAT IS USED
+# TODO: change the K= line to the private method call _get_K
+
+# Concerning acquisition function
+# TODO: this could be made more efficient by inputting functions for mu and var as opposed to arrays and inputting a range over which the max is looked for
+
+# From the optimise_W method:
+ # # TODO: may not need partial above because optimize.minimize supports args tuple (see https://jax.readthedocs.io/en/latest/_autosummary/jax.scipy.optimize.minimize.html)
+# TODO: the below is to use jax.scipy.optimize.minimize
+# opt_res = optimize.minimize(fun=partial_likelihood, x0=W0, method="BFGS",)
+# W = opt_res.x
+# # TODO: the below is to transform into one-hot encoding
+# idx_max = jnp.nanargmax(W)
+# W = jnp.zeros(W.shape)
+# W = W.at[idx_max].set(1)
+
+# About _get_likelihood method:
+# TODO: This could made more efficient by using Cholesky decomposition method
+# TODO: Should this method be in here or in the InhertingAgent?
+
+# If you want to use the exponential kernel
+self.kernel = lambda x1, x2: jnp.exp(-jnp.sum((x1 - x2) ** 2 / (2*self.length_scale**2)))
+
+"""
 
 
 
