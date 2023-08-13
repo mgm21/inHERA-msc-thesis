@@ -6,7 +6,7 @@ from jaxopt.projection import projection_non_negative
 from jaxopt.projection import projection_box
 
 class GaussianProcess:
-    def __init__(self, verbose=False, obs_noise=0.01, length_scale=1, rho=0.4, kappa=0.05, l1_regularisation_weight=0.01, invmax_regularisation_weight=0.1):
+    def __init__(self, verbose=False, obs_noise=0.01, length_scale=1, rho=0.4, kappa=0.05, l1_regularisation_weight=0.15, invmax_regularisation_weight=0.15):
         self.obs_noise = obs_noise
         self.length_scale = length_scale
         self.rho = rho
@@ -14,9 +14,7 @@ class GaussianProcess:
         self.kappa = kappa
         self.l1_regularisation_weight = l1_regularisation_weight
         self.invmax_regularisation_weight = invmax_regularisation_weight
-
-        self.set_default_gradient_projection()
-        self.set_projection_hyperparameters(hyperparams=())
+        self.set_default_gradient_projection_settings()
 
     def train(self, x_observed, y_observed, x_test, y_priors,):
         """GP training method using Cholesky decomposition presented on p.19 of Rasmussen book"""
@@ -61,7 +59,6 @@ class GaussianProcess:
     def _get_likelihood(self, W, K, y_observed, y_priors):
         A = y_observed - y_priors.T @ W
         llh = -0.5 * A.T @ jnp.linalg.inv(K) @ A - 0.5 * jnp.log(jnp.linalg.det(K))
-        jax.debug.print("likelihood: {}", llh)
         return -llh
     
     @partial(jit, static_argnums=(0,))
@@ -80,16 +77,19 @@ class GaussianProcess:
     def loss_regularised_invmax(self, W, K, y_observed, y_priors):
         """Return the likelihood regularised with the inverse of the max of the weights"""
         loss = self._get_likelihood(W, K, y_observed, y_priors) + self.invmax_regularisation_weight * (1/jnp.max(W))
-        jax.debug.print("regularisation term: {}", self.invmax_regularisation_weight * (1/jnp.max(W)))
-        jax.debug.print("regularised loss: {}", loss)
+        return loss
+    
+    def loss_regularised_l1_invmax(self, W, K, y_observed, y_priors):
+        loss = self._get_likelihood(W, K, y_observed, y_priors) + self.l1_regularisation_weight * (jnp.sum(jnp.abs(W))) + self.invmax_regularisation_weight * (1/jnp.max(W))
         return loss
 
     def _get_K(self, x_observed):
         K = vmap(lambda x : vmap(lambda y: self.kernel(x, y))(x_observed))(x_observed) + self.obs_noise*jnp.eye(x_observed.shape[0])
         return K
 
-    def set_default_gradient_projection(self,):
-        self._gradient_projection_type = projection_non_negative
+    def set_default_gradient_projection_settings(self,):
+        self._gradient_projection_type = projection_box
+        self._projection_hyperparameters = (-jnp.inf, jnp.inf)
     
     def set_box_gradient_projection(self,):
         self._gradient_projection_type = projection_box
@@ -102,12 +102,23 @@ class GaussianProcess:
 
 
 if __name__ == "__main__":
-    # Debugging likelihood not working for GPCF
+    # # Debugging original un-regularised likelihood not working for GPCF
+    # gp = GaussianProcess()
+    # x_observed = jnp.array([[0.5933333,0.23333333, 0.29333332, 0.46, 0.56, 0.20666666]])
+    # y_observed = jnp.array([0.29857272])
+    # ancestor_mus_at_curr_obs = jnp.array([[0.3464623], [0.28252518], [0.29259598], [0.30373174], [0.24637341], [0.40413338]])
+    # print(gp.optimise_W(x_observed=x_observed, y_observed=y_observed, y_priors=ancestor_mus_at_curr_obs))
+
+    # Debugging 2: How does the following make any sense? It literally observed 40, shouldn't it predict that the ancestor is the one at 40?
     gp = GaussianProcess()
+    gp.set_box_gradient_projection()
+    gp.set_projection_hyperparameters(hyperparams=(0, 1))
+    gp.loss = gp.loss_regularised_l1_invmax
     x_observed = jnp.array([[0.5933333,0.23333333, 0.29333332, 0.46, 0.56, 0.20666666]])
-    y_observed = jnp.array([0.29857272])
-    ancestor_mus_at_curr_obs = jnp.array([[0.3464623], [0.28252518], [0.29259598], [0.30373174], [0.24637341], [0.40413338]])
+    y_observed = jnp.array([0.4004079])
+    ancestor_mus_at_curr_obs = jnp.array([[0.3464623], [0.28252518], [0.29259598], [0.30373174], [0.24637341], [0.40413338], [1.0308355]])
     print(gp.optimise_W(x_observed=x_observed, y_observed=y_observed, y_priors=ancestor_mus_at_curr_obs))
+
 
     # # Following toy problem to make sure that the GP works as expected
     # gp = GaussianProcess()

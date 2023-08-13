@@ -25,6 +25,7 @@ class ExperienceSharingAlgorithm(AdaptationAlgorithm):
         self.mean_func = self.family.ancestor_mus.T @ W
         self.mean_func_at_obs = self.ancestor_mus_at_obs[:, :counter+1].T @ W
 
+        if self.verbose: print(f"ancestor_mus_at_obs: {self.ancestor_mus_at_obs}")
         if self.verbose: print(f"mean_func_at_obs: {self.mean_func_at_obs}")
         if self.verbose: print(f"mean_func: {self.mean_func}")
         if self.verbose: print(f"x observations passed to gp: {self.agent.x_observed[:counter+1]}")
