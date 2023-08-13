@@ -2,11 +2,12 @@
 
 from src.utils.all_imports import *
 from jax.scipy import optimize
+from scipy import optimize as scipy_optimize
 
 # 06/08/2023 Trying different optimisation libraries
-from scipy import optimize as scipy_optimize
 from jaxopt import ProjectedGradient
 from jaxopt.projection import projection_non_negative
+from jaxopt.projection import projection_box
 
 class GaussianProcess:
     def __init__(self, verbose=False, obs_noise=0.01, length_scale=1, rho=0.4, kappa=0.05, l1_regularisation_weight=0.01, invmax_regularisation_weight=0.1):
@@ -18,6 +19,9 @@ class GaussianProcess:
         self.l1_regularisation_weight = l1_regularisation_weight
         self.invmax_regularisation_weight = invmax_regularisation_weight
 
+        self.set_default_gradient_projection()
+        self.set_projection_hyperparameters(hyperparams=())
+
         # TODO: check why the sum below?
         self.kernel = lambda x1, x2: jnp.exp(-jnp.sum((x1 - x2) ** 2 / (2*self.length_scale**2)))
 
@@ -25,6 +29,8 @@ class GaussianProcess:
         self.d = lambda x1, x2: jnp.linalg.norm(x2-x1)
         self.kernel = lambda x1, x2: (1 + ((jnp.sqrt(5)*self.d(x1, x2)) / (self.rho)) 
                                       + ((5*self.d(x1, x2)**2) / (3*self.rho**2))) * jnp.exp((-jnp.sqrt(5) * self.d(x1, x2))/(self.rho))
+        
+
 
     # TODO: Would the following be interesting to me for this project? Not returning values of mu and var over the whole input space but by 
     # returning functional expressions for both and then can query from those if need be (and can create repertoires at the very end if need be)
@@ -99,8 +105,8 @@ class GaussianProcess:
         # W = opt_res.x
 
         # TODO: the below is to use optax
-        pg = ProjectedGradient(fun=partial_likelihood, projection=projection_non_negative)
-        pg_sol = pg.run(W0).params
+        pg = ProjectedGradient(fun=partial_likelihood, projection=self._gradient_projection_type)
+        pg_sol = pg.run(W0, hyperparams_proj=self._projection_hyperparameters).params
         W = pg_sol
 
         # # TODO: the below is to transform into one-hot encoding
@@ -143,6 +149,19 @@ class GaussianProcess:
     def _get_K(self, x_observed):
         K = vmap(lambda x : vmap(lambda y: self.kernel(x, y))(x_observed))(x_observed) + self.obs_noise*jnp.eye(x_observed.shape[0])
         return K
+
+    def set_default_gradient_projection(self,):
+        self._gradient_projection_type = projection_non_negative
+    
+    def set_box_gradient_projection(self,):
+        self._gradient_projection_type = projection_box
+    
+    def set_non_negative_gradient_projection(self,):
+        self._gradient_projection_type = projection_non_negative
+    
+    def set_projection_hyperparameters(self, hyperparams):
+        self._projection_hyperparameters = hyperparams
+
 
 if __name__ == "__main__":
     # # Following toy problem to make sure that the GP works as expected
