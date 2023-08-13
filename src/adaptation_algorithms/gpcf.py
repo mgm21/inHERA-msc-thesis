@@ -1,7 +1,7 @@
 from src.utils.all_imports import *
-from src.adaptation_algorithms.experience_sharing_algorithm import ExperienceSharingAlgorithm
+from src.adaptation_algorithms.gpcf_variant import GPCFVariant
 
-class GPCF(ExperienceSharingAlgorithm):
+class GPCF(GPCFVariant):
     """GPCF algorithm as originally formulated in Cully et al."""
     def __init__(self, family, agent, gaussian_process, alpha=0.9, verbose=False,
                  path_to_results="families/ite_example/", save_res_arrs=True, norm_params=(0, 40), plot_repertoires=False):

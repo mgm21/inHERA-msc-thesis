@@ -1,7 +1,7 @@
 from src.utils.all_imports import *
-from src.adaptation_algorithms.experience_sharing_algorithm import ExperienceSharingAlgorithm
+from src.adaptation_algorithms.gpcf_variant import GPCFVariant
 
-class GPCF1Trust(ExperienceSharingAlgorithm):
+class GPCF1Trust(GPCFVariant):
     """GPCF algorithm which looks for the closest ancestor at each turn based solely on the last observation"""
     def __init__(self, family, agent, gaussian_process, alpha=0.9, verbose=False,
                  path_to_results="families/ite_example/", save_res_arrs=True, norm_params=(0, 40), plot_repertoires=False):
@@ -18,7 +18,6 @@ class GPCF1Trust(ExperienceSharingAlgorithm):
         W = W.at[closest_ancest_idx].set(1)
 
         if self.verbose: print(f"GPCF1Trust's weights: {W}")
-
         return W
 
 if __name__ == "__main__":
