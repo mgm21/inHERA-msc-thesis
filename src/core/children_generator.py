@@ -5,6 +5,8 @@ from src.core.gaussian_process import GaussianProcess
 from src.adaptation_algorithms.ite import ITE
 from src.adaptation_algorithms.gpcf import GPCF
 from src.adaptation_algorithms.gpcf_1trust import GPCF1Trust
+from src.adaptation_algorithms.gpcf_reg import GPCFReg
+from src.adaptation_algorithms.inhera import inHERA
 from src.loaders.repertoire_loader import RepertoireLoader
 from src.core.family import Family
 
@@ -134,6 +136,52 @@ class ChildrenGenerator:
             gpcf_1trust.run(num_iter=self.ite_num_iter)
 
             del gp, agent
+        
+        if "GPCF-reg" in self.algorithms_to_test:
+            agent = AdaptiveAgent(task=self.task,
+                        name=name,
+                        sim_repertoire_arrays=self.simu_arrs,
+                        damage_dictionary=damage_dict)
+            
+            gp = gp = GaussianProcess(kappa=self.gpcf_kappa)
+
+            # Create an ITE object with previous objects as inputs
+            gpcf_reg = GPCFReg(agent=agent,
+                    gaussian_process=gp,
+                    alpha=self.ite_alpha,
+                    save_res_arrs=True,
+                    path_to_results=f"{self.path_to_children}/{agent.name}/GPCF-reg/",
+                    verbose=self.verbose,
+                    norm_params=self.norm_params,
+                    family=self.family,
+                    )
+            
+            gpcf_reg.run(num_iter=self.ite_num_iter)
+
+            del gp, agent
+
+        if "inHERA" in self.algorithms_to_test:
+            agent = AdaptiveAgent(task=self.task,
+                        name=name,
+                        sim_repertoire_arrays=self.simu_arrs,
+                        damage_dictionary=damage_dict)
+            
+            gp = gp = GaussianProcess(kappa=self.gpcf_kappa)
+
+            # Create an ITE object with previous objects as inputs
+            inhera = GPCFReg(agent=agent,
+                    gaussian_process=gp,
+                    alpha=self.ite_alpha,
+                    save_res_arrs=True,
+                    path_to_results=f"{self.path_to_children}/{agent.name}/inHERA/",
+                    verbose=self.verbose,
+                    norm_params=self.norm_params,
+                    family=self.family,
+                    )
+            
+            inhera.run(num_iter=self.ite_num_iter)
+
+            del gp, agent       
 
         # Make sure to reset only after all collaborative algorithms have taken place
         if not self.children_in_ancestors:
