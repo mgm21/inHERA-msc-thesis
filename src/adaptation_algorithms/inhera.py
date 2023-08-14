@@ -1,15 +1,18 @@
 from src.utils.all_imports import *
 from src.adaptation_algorithms.experience_sharing_algorithm import ExperienceSharingAlgorithm
+from src.utils.hexapod_damage_dicts import intact
 
 class InHERA(ExperienceSharingAlgorithm):
     """The inHERA algorithm which allows for experience sharing/inheritance as well as taking into account the uncertainty of ancestors with regards to their final GP means"""
     def __init__(self, family, agent, gaussian_process, alpha=0.9, verbose=False,
-                 path_to_results="families/ite_example/", save_res_arrs=True, norm_params=(0, 40), plot_repertoires=False):
+                 path_to_results="families/ite_example/", save_res_arrs=True, norm_params=(0, 40), plot_repertoires=False,):
         
         super().__init__(family, agent, gaussian_process, alpha, verbose,
                  path_to_results, save_res_arrs, norm_params, plot_repertoires)
-        
-        # Details of regularisation
+
+        self.add_simulation_ancestor()
+
+        # Regularisation and constrained optimisation settings
         self.gaussian_process.set_box_gradient_projection()
         self.gaussian_process.set_projection_hyperparameters(hyperparams=(0, 1))
         self.gaussian_process.loss = self.gaussian_process.loss_regularised_l1_invmax
@@ -23,6 +26,19 @@ class InHERA(ExperienceSharingAlgorithm):
     
     def update_mean_function(self, counter):
         ...
+    
+    def add_simulation_ancestor(self, percentage_of_initial_uncertainty=0.5):
+        """Please note that the simulation anceestor is not the intact ancestor"""
+        simulated_mu = jnp.expand_dims(a=self.family.sim_fitnesses, axis=0)
+        initial_uncertainty = self.gaussian_process.kernel(1, 1) + self.gaussian_process.obs_noise
+        simulated_uncertainty = percentage_of_initial_uncertainty * initial_uncertainty
+        simulated_var = jnp.full(shape=(1, self.family.ancestor_mus.shape[1]), fill_value=simulated_uncertainty)
+        name = "simulated"
+
+        self.family.ancestor_mus = jnp.append(arr=self.family.ancestor_mus, values=simulated_mu, axis=0)
+        self.family.ancestors_vars = jnp.append(arr=self.family.ancestors_vars, values=simulated_var, axis=0)
+        self.family.ancestors_names += [name]
+        self.family.damage_dicts += [intact]
 
 if __name__ == "__main__":
     from src.core.family import Family
