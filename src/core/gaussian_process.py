@@ -36,7 +36,7 @@ class GaussianProcess:
         mu = y_priors + k.T @ jnp.linalg.inv(K) @ y_observed
         var = vmap(lambda test_point: self.kernel(test_point, test_point).T - (vmap(lambda x_obs: self.kernel(test_point, x_obs))(x_observed)).T @ jnp.linalg.inv(K) @ vmap(lambda x_obs: self.kernel(test_point, x_obs))(x_observed))(x_test)
         return mu, var
-    
+
     def kernel(self, x1, x2):
         d = lambda x1, x2: jnp.linalg.norm(x2-x1)
         return (1 + ((jnp.sqrt(5)*d(x1, x2)) / (self.rho)) + ((5*d(x1, x2)**2) / (3*self.rho**2))) * jnp.exp((-jnp.sqrt(5) * d(x1, x2))/(self.rho))
@@ -79,10 +79,12 @@ class GaussianProcess:
         loss = self._get_likelihood(W, K, y_observed, y_priors) + self.invmax_regularisation_weight * (1/jnp.max(W))
         return loss
     
+    @partial(jit, static_argnums=(0,))
     def loss_regularised_l1_invmax(self, W, K, y_observed, y_priors):
         loss = self._get_likelihood(W, K, y_observed, y_priors) + self.l1_regularisation_weight * (jnp.sum(jnp.abs(W))) + self.invmax_regularisation_weight * (1/jnp.max(W))
         return loss
-
+    
+    @partial(jit, static_argnums=(0,))
     def _get_K(self, x_observed):
         K = vmap(lambda x : vmap(lambda y: self.kernel(x, y))(x_observed))(x_observed) + self.obs_noise*jnp.eye(x_observed.shape[0])
         return K
