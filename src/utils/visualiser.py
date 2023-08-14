@@ -70,10 +70,10 @@ class Visualiser:
             ax2.fill_between(num_iter, mean-var, mean+var, alpha=0.4)
         
         ax.set_xlabel('Adaptation steps')
-        ax.set_ylabel('Mean fitness')
+        ax.set_ylabel('Maximum fitness observed')
 
         ax2.set_xlabel('Adaptation steps')
-        ax2.set_ylabel('Maximum fitness observed')
+        ax2.set_ylabel('Mean fitness')
 
         ax.legend()
         ax2.legend()

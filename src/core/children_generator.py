@@ -6,7 +6,7 @@ from src.adaptation_algorithms.ite import ITE
 from src.adaptation_algorithms.gpcf import GPCF
 from src.adaptation_algorithms.gpcf_1trust import GPCF1Trust
 from src.adaptation_algorithms.gpcf_reg import GPCFReg
-from src.adaptation_algorithms.inhera import inHERA
+from src.adaptation_algorithms.inhera import InHERA
 from src.loaders.repertoire_loader import RepertoireLoader
 from src.core.family import Family
 
@@ -169,7 +169,7 @@ class ChildrenGenerator:
             gp = gp = GaussianProcess(kappa=self.gpcf_kappa)
 
             # Create an ITE object with previous objects as inputs
-            inhera = GPCFReg(agent=agent,
+            inhera = InHERA(agent=agent,
                     gaussian_process=gp,
                     alpha=self.ite_alpha,
                     save_res_arrs=True,
