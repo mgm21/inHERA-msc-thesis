@@ -23,7 +23,7 @@ class GPCFVariant(AdaptationAlgorithm):
         self.ancestor_mus_at_obs = self.ancestor_mus_at_obs.at[:, counter].set(jnp.squeeze(self.ancestor_mus_at_curr_obs))
         W = self.get_ancestor_weights(counter,)
         self.mean_func = self.family.ancestor_mus.T @ W
-        self.mean_func_at_obs = self.ancestor_mus_at_obs[:, :counter+1].T @ W
+        self.mean_func_at_obs = self.mean_func[self.tested_indices[:counter+1]]
 
         if self.verbose: print(f"ancestor_mus_at_obs: {self.ancestor_mus_at_obs}")
         if self.verbose: print(f"mean_func_at_obs: {self.mean_func_at_obs}")
