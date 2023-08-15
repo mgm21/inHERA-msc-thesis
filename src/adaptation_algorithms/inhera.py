@@ -10,7 +10,7 @@ class InHERA(ExperienceSharingAlgorithm):
         super().__init__(family, agent, gaussian_process, alpha, verbose,
                  path_to_results, save_res_arrs, norm_params, plot_repertoires)
 
-        self.add_simulation_ancestor()
+        self.create_simulated_arrays()
 
         # Regularisation and constrained optimisation settings
         self.gaussian_process.set_box_gradient_projection()
@@ -25,20 +25,34 @@ class InHERA(ExperienceSharingAlgorithm):
         return W
     
     def update_mean_function(self, counter):
-        ...
-    
-    def add_simulation_ancestor(self, percentage_of_initial_uncertainty=0.5):
-        """Please note that the simulation anceestor is not the intact ancestor"""
-        simulated_mu = jnp.expand_dims(a=self.family.sim_fitnesses, axis=0)
-        initial_uncertainty = self.gaussian_process.kernel(1, 1) + self.gaussian_process.obs_noise
-        simulated_uncertainty = percentage_of_initial_uncertainty * initial_uncertainty
-        simulated_var = jnp.full(shape=(1, self.family.ancestor_mus.shape[1]), fill_value=simulated_uncertainty)
-        name = "simulated"
+        self.ancestor_mus_at_curr_obs = self.family.ancestor_mus[:, self.tested_indices[counter:counter+1]]
+        self.ancestor_mus_at_obs = self.ancestor_mus_at_obs.at[:, counter].set(jnp.squeeze(self.ancestor_mus_at_curr_obs))
+        self.ancestor_vars_at_curr_obs = self.family.ancestors_vars[:, self.tested_indices[counter:counter+1]]
+        self.ancestor_vars_at_obs = self.ancestor_vars_at_obs.at[:, counter].set(jnp.squeeze(self.ancestor_vars_at_curr_obs))
 
-        self.family.ancestor_mus = jnp.append(arr=self.family.ancestor_mus, values=simulated_mu, axis=0)
-        self.family.ancestors_vars = jnp.append(arr=self.family.ancestors_vars, values=simulated_var, axis=0)
-        self.family.ancestors_names += [name]
-        self.family.damage_dicts += [intact]
+        W = self.get_ancestor_weights(counter,)
+
+        self.mean_func = self.simulated_mu + (self.simulated_var - self.family.ancestors_vars.T) * (self.family.ancestor_mus.T - self.simulated_mu_repeated_num_ancest_times) @ W
+        self.mean_func_at_obs = self.mean_func[self.tested_indices[:counter+1]]
+    
+    def run_setup(self, num_iter):
+        super().run_setup(num_iter)
+        num_ancestors = len(self.family.ancestor_mus)
+        self.ancestor_vars_at_obs = jnp.full(shape=(num_ancestors, num_iter), fill_value=jnp.nan)
+        print(f"self.ancestor_vars_at_obs: {self.ancestor_vars_at_obs}")
+
+    
+    def create_simulated_arrays(self):
+        """Please note that the simulation anceestor is not the intact ancestor"""
+        simulated_mu = self.family.sim_fitnesses
+        initial_uncertainty = self.gaussian_process.kernel(1, 1) + self.gaussian_process.obs_noise
+        simulated_var = jnp.full(shape=self.family.ancestor_mus.T.shape, fill_value=initial_uncertainty)
+        num_of_ancestors = self.family.ancestor_mus.shape[0]
+
+        self.simulated_mu = simulated_mu
+        self.simulated_mu_repeated_num_ancest_times = jnp.repeat(a=jnp.expand_dims(a=self.simulated_mu, axis=1), repeats=num_of_ancestors, axis=1)
+        self.simulated_var = simulated_var
+
 
 if __name__ == "__main__":
     from src.core.family import Family
@@ -68,4 +82,4 @@ if __name__ == "__main__":
                 norm_params=norm_params,
                 save_res_arrs=True)
     
-    # algo.run(num_iter=5)
+    algo.run(num_iter=5)
