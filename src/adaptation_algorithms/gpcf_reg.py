@@ -11,7 +11,7 @@ class GPCFReg(GPCFVariant):
         
         # Details of regularisation
         self.gaussian_process.set_box_gradient_projection()
-        self.gaussian_process.set_projection_hyperparameters(hyperparams=(0, 1))
+        self.gaussian_process.set_projection_hyperparameters(hyperparams=(-jnp.inf, +jnp.inf))
         self.gaussian_process.loss = self.gaussian_process.loss_regularised_l1_invmax
     
     def get_ancestor_weights(self, counter):
