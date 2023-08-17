@@ -1,12 +1,15 @@
 # This GP class was inspired by Rasmussen's GPs for ML book (mainly algo on p. 19) and Antoine Cully's unpublished implementation of GPs
 
 from src.utils.all_imports import *
+import cvxpy as cp
+import jaxopt
 from jaxopt import ProjectedGradient
 from jaxopt.projection import projection_non_negative
 from jaxopt.projection import projection_box
+from jaxopt import ScipyBoundedMinimize
 
 class GaussianProcess:
-    def __init__(self, verbose=False, obs_noise=0.01, length_scale=1, rho=0.4, kappa=0.05, l1_regularisation_weight=0.15, invmax_regularisation_weight=0.15):
+    def __init__(self, verbose=False, obs_noise=0.01, length_scale=1, rho=0.4, kappa=0.05, l1_regularisation_weight=0.01, invmax_regularisation_weight=0.01):
         self.obs_noise = obs_noise
         self.length_scale = length_scale
         self.rho = rho
@@ -111,17 +114,29 @@ if __name__ == "__main__":
     # ancestor_mus_at_curr_obs = jnp.array([[0.3464623], [0.28252518], [0.29259598], [0.30373174], [0.24637341], [0.40413338]])
     # print(gp.optimise_W(x_observed=x_observed, y_observed=y_observed, y_priors=ancestor_mus_at_curr_obs))
 
+
     # Debugging 2: How does the following make any sense? It literally observed 40, shouldn't it predict that the ancestor is the one at 40?
     gp = GaussianProcess()
     gp.set_box_gradient_projection()
-    gp.set_projection_hyperparameters(hyperparams=(0, 1))
+    gp.set_projection_hyperparameters(hyperparams=(-jnp.inf, +jnp.inf))
     gp.loss = gp.loss_regularised_l1_invmax
+
     x_observed = jnp.array([[0.5933333,0.23333333, 0.29333332, 0.46, 0.56, 0.20666666]])
     y_observed = jnp.array([0.4004079])
     ancestor_mus_at_curr_obs = jnp.array([[0.3464623], [0.28252518], [0.29259598], [0.30373174], [0.24637341], [0.40413338], [1.0308355]])
-    print(gp.optimise_W(x_observed=x_observed, y_observed=y_observed, y_priors=ancestor_mus_at_curr_obs))
+    K = gp._get_K(x_observed)
 
+    weights_output_from_optim = gp.optimise_W(x_observed=x_observed, y_observed=y_observed, y_priors=ancestor_mus_at_curr_obs)
+    weights_expected = jnp.array([0, 0, 0, 0, 0, 1, 0])
 
+    print(f"weights_outputted: {weights_output_from_optim}") 
+    print(f"weights_expected: {weights_expected}")
+    print(f"loss from output of optim: {gp.loss(weights_output_from_optim, K, y_observed, ancestor_mus_at_curr_obs)}")
+    print(f"loss from expected weights: {gp.loss(weights_expected, K, y_observed, ancestor_mus_at_curr_obs)}")
+    print(f"likelihood from output of optim: {gp._get_likelihood(weights_output_from_optim, K, y_observed, ancestor_mus_at_curr_obs)}")
+    print(f"likelihood from expected weights: {gp._get_likelihood(weights_expected, K, y_observed, ancestor_mus_at_curr_obs)}")
+
+    # Debugging (rest)
     # # Following toy problem to make sure that the GP works as expected
     # gp = GaussianProcess()
 
