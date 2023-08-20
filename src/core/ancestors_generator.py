@@ -58,6 +58,9 @@ class AncestorsGenerator:
 
         # Run the ITE algorithm which saves the arrays TODO: could later decouple responsibilities here
         ite.run(num_iter=self.ite_num_iter)
+
+        del agent, gp, ite
+        gc.collect()
         
     
     def get_damage_dict_from_combination(self, combination):
