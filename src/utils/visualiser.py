@@ -25,7 +25,6 @@ class Visualiser:
 
         ax.plot(num_iter, rolling_max_fitness, label="ITE")
 
-
         ax.legend()
         fig.savefig(f'./maxfit_vs_iter.png', dpi=100)
 
@@ -85,6 +84,40 @@ class Visualiser:
 
         return ax, ax2
     
+    def get_medians_and_quants_plot(self, medians, quantiles1, quantiles2, names, path_to_res=".", save_fig=True, title="",):
+        plt.style.use(self.plt_style)
+        fig, (ax, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
+
+        for i in range(len(medians)):
+            median = medians[i]
+            q1 = quantiles1[i]
+            q2 = quantiles2[i]
+
+            rolling_max_median = jnp.array([jnp.nanmax(median[:i+1]) for i in range(median.shape[0])])
+            num_iter = jnp.array(list(range(1, median.shape[0]+1))) 
+
+            ax.plot(num_iter, rolling_max_median, label=names[i])
+            ax2.plot(num_iter, median, label=names[i])
+
+            ax.fill_between(num_iter, q1, q2, alpha=0.4)
+            ax2.fill_between(num_iter, q1, q2, alpha=0.4)
+        
+        ax.set_xlabel('Adaptation steps')
+        ax.set_ylabel('Maximum fitness observed')
+
+        ax2.set_xlabel('Adaptation steps')
+        ax2.set_ylabel('Median fitness')
+
+        ax.legend()
+        ax2.legend()
+
+        ax.set_title(f"{title}")
+        ax2.set_title(f"{title}")
+
+        if save_fig: fig.savefig(f'{path_to_res}/median_overall_perf_vs_num_iter.png', dpi=600)
+
+        return ax, ax2
+    
     def get_mean_and_var_plot_per_damage_level(self, means_dict, vars_dict, path_to_res=".", save_fig=True):
 
         num_damages_in_dict = 5
@@ -137,6 +170,64 @@ class Visualiser:
                 
         if save_fig: fig.savefig(f"{path_to_res}/per_damage_max_vs_num_iter.png", dpi=600)
         if save_fig: fig2.savefig(f"{path_to_res}/per_damage_mean_vs_num_iter.png", dpi=600)
+    
+    def get_medians_and_quants_plot_per_damage_level(self, medians_dict, quantiles1_dict, quantiles2_dict, path_to_res=".", save_fig=True):
+
+        num_damages_in_dict = 5
+
+        names = list(medians_dict.keys())
+
+        plt.style.use(self.plt_style)
+
+        fig, axs = plt.subplots(5, figsize=(10, 20))
+        fig2, axs2 = plt.subplots(5, figsize=(10, 20))
+
+        for damage_num in range(1, num_damages_in_dict+1):
+            medians = []
+            quantiles1 = []
+            quantiles2 = []
+
+
+            for algo in names:
+                medians += [medians_dict[algo][damage_num]]
+                quantiles1 += [quantiles1_dict[algo][damage_num]]
+                quantiles2 += [quantiles2_dict[algo][damage_num]]
+            
+            medians = jnp.array(medians)
+            quantiles1 = jnp.array(quantiles1)
+            quantiles2 = jnp.array(quantiles2)
+
+            for i in range(len(medians)):
+                median = medians[i]
+                quantile1 = quantiles1[i]
+                quantile2 = quantiles2[i]
+
+                rolling_max_median = jnp.array([jnp.nanmax(median[:i+1]) for i in range(median.shape[0])])
+                num_iter = jnp.array(list(range(1, median.shape[0]+1))) 
+
+                axs[damage_num-1].plot(num_iter, rolling_max_median, label=names[i])
+                axs2[damage_num-1].plot(num_iter, median, label=names[i])
+
+                axs[damage_num-1].fill_between(num_iter, quantile1, quantile2, alpha=0.4)
+                axs2[damage_num-1].fill_between(num_iter, quantile1, quantile2, alpha=0.4)
+
+            axs[damage_num-1].set_title(f"N={damage_num}")
+            axs2[damage_num-1].set_title(f"N={damage_num}")
+
+            if damage_num == num_damages_in_dict:
+                handles, labels = axs[damage_num-1].get_legend_handles_labels()
+            
+        fig.text(0.5, 0.05, 'Adaptation steps', ha='center')
+        fig.text(0.05, 0.5, 'Maximum fitness observed', va='center', rotation='vertical')
+
+        fig2.text(0.5, 0.05, 'Adaptation steps', ha='center')
+        fig2.text(0.05, 0.5, 'Mean fitness', va='center', rotation='vertical')
+
+        fig.legend(handles, labels, loc='upper right')
+        fig2.legend(handles, labels, loc='upper right')
+                
+        if save_fig: fig.savefig(f"{path_to_res}/per_damage_maxmedian_vs_num_iter.png", dpi=600)
+        if save_fig: fig2.savefig(f"{path_to_res}/per_damage_median_vs_num_iter.png", dpi=600)
 
         
         
