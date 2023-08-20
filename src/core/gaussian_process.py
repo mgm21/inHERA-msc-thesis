@@ -9,7 +9,7 @@ from jaxopt.projection import projection_box
 from jaxopt import ScipyBoundedMinimize
 
 class GaussianProcess:
-    def __init__(self, verbose=False, obs_noise=0.01, length_scale=1, rho=0.4, kappa=0.05, l1_regularisation_weight=0.01, invmax_regularisation_weight=0.01):
+    def __init__(self, verbose=False, obs_noise=0.01, length_scale=1, rho=0.4, kappa=0.05, l1_regularisation_weight=0.01, invmax_regularisation_weight=0.01, uncertainty_regularisation_weight=0.01):
         self.obs_noise = obs_noise
         self.length_scale = length_scale
         self.rho = rho
@@ -17,6 +17,7 @@ class GaussianProcess:
         self.kappa = kappa
         self.l1_regularisation_weight = l1_regularisation_weight
         self.invmax_regularisation_weight = invmax_regularisation_weight
+        self.uncertainty_regularisation_weight = uncertainty_regularisation_weight
         self.set_default_gradient_projection_settings()
 
     def train(self, x_observed, y_observed, x_test, y_priors,):
@@ -49,10 +50,10 @@ class GaussianProcess:
         return jnp.nanargmax(mu + self.kappa*var)
     
     @partial(jit, static_argnums=(0,))
-    def optimise_W(self, x_observed, y_observed, y_priors,):
+    def optimise_W(self, x_observed, y_observed, y_priors, y_priors_vars=None):
         W0 = jnp.full(shape=len(y_priors), fill_value=1/len(x_observed))
         K = self._get_K(x_observed=x_observed)
-        partial_likelihood = partial(self.loss, K=K, y_observed=y_observed, y_priors=y_priors)
+        partial_likelihood = partial(self.loss, K=K, y_observed=y_observed, y_priors=y_priors, y_priors_vars=y_priors_vars)
         pg = ProjectedGradient(fun=partial_likelihood, projection=self._gradient_projection_type)
         pg_sol = pg.run(W0, hyperparams_proj=self._projection_hyperparameters).params
         W = pg_sol
@@ -65,26 +66,32 @@ class GaussianProcess:
         return -llh
     
     @partial(jit, static_argnums=(0,))
-    def loss(self, W, K, y_observed, y_priors):
+    def loss(self, W, K, y_observed, y_priors, y_priors_vars=None):
         """Return the unaltered likelihood"""
         loss = self._get_likelihood(W, K, y_observed, y_priors)
         return loss
     
     @partial(jit, static_argnums=(0,))
-    def loss_regularised_l1(self, W, K, y_observed, y_priors):
+    def loss_regularised_l1(self, W, K, y_observed, y_priors, y_priors_vars=None):
         """Return the L1 regularised likelihood"""
         loss = self._get_likelihood(W, K, y_observed, y_priors) + self.l1_regularisation_weight * (jnp.sum(jnp.abs(W)))
         return loss
     
     @partial(jit, static_argnums=(0,))
-    def loss_regularised_invmax(self, W, K, y_observed, y_priors):
+    def loss_regularised_invmax(self, W, K, y_observed, y_priors, y_priors_vars=None):
         """Return the likelihood regularised with the inverse of the max of the weights"""
         loss = self._get_likelihood(W, K, y_observed, y_priors) + self.invmax_regularisation_weight * (1/jnp.max(W))
         return loss
     
     @partial(jit, static_argnums=(0,))
-    def loss_regularised_l1_invmax(self, W, K, y_observed, y_priors):
+    def loss_regularised_l1_invmax(self, W, K, y_observed, y_priors, y_priors_vars=None):
         loss = self._get_likelihood(W, K, y_observed, y_priors) + self.l1_regularisation_weight * (jnp.sum(jnp.abs(W))) + self.invmax_regularisation_weight * (1/jnp.max(W))
+        return loss
+    
+    @partial(jit, static_argnums=(0,))
+    def loss_regularised_l1_invmax_uncertainty(self, W, K, y_observed, y_priors, y_priors_vars):
+        uncertainty_loss = jnp.sum(W * jnp.sum(y_priors_vars, axis=1), axis=0) / len(y_observed)
+        loss = self._get_likelihood(W, K, y_observed, y_priors) + self.l1_regularisation_weight * (jnp.sum(jnp.abs(W))) + self.invmax_regularisation_weight * (1/jnp.max(W)) + self.uncertainty_regularisation_weight * uncertainty_loss
         return loss
     
     @partial(jit, static_argnums=(0,))
@@ -119,20 +126,21 @@ if __name__ == "__main__":
     gp = GaussianProcess()
     gp.set_box_gradient_projection()
     gp.set_projection_hyperparameters(hyperparams=(-jnp.inf, +jnp.inf))
-    gp.loss = gp.loss_regularised_l1_invmax
+    gp.loss = gp.loss_regularised_l1_invmax_uncertainty
 
     x_observed = jnp.array([[0.5933333,0.23333333, 0.29333332, 0.46, 0.56, 0.20666666]])
     y_observed = jnp.array([0.4004079])
     ancestor_mus_at_curr_obs = jnp.array([[0.3464623], [0.28252518], [0.29259598], [0.30373174], [0.24637341], [0.40413338], [1.0308355]])
+    ancestor_vars_at_curr_obs = jnp.array([[0.0], [0.0], [0.0], [0.0], [1.], [0.], [0.0]])
     K = gp._get_K(x_observed)
 
-    weights_output_from_optim = gp.optimise_W(x_observed=x_observed, y_observed=y_observed, y_priors=ancestor_mus_at_curr_obs)
+    weights_output_from_optim = gp.optimise_W(x_observed=x_observed, y_observed=y_observed, y_priors=ancestor_mus_at_curr_obs, y_priors_vars=ancestor_vars_at_curr_obs)
     weights_expected = jnp.array([0, 0, 0, 0, 0, 1, 0])
 
     print(f"weights_outputted: {weights_output_from_optim}") 
     print(f"weights_expected: {weights_expected}")
-    print(f"loss from output of optim: {gp.loss(weights_output_from_optim, K, y_observed, ancestor_mus_at_curr_obs)}")
-    print(f"loss from expected weights: {gp.loss(weights_expected, K, y_observed, ancestor_mus_at_curr_obs)}")
+    print(f"loss from output of optim: {gp.loss(weights_output_from_optim, K, y_observed, ancestor_mus_at_curr_obs, ancestor_vars_at_curr_obs)}")
+    print(f"loss from expected weights: {gp.loss(weights_expected, K, y_observed, ancestor_mus_at_curr_obs, ancestor_vars_at_curr_obs)}")
     print(f"likelihood from output of optim: {gp._get_likelihood(weights_output_from_optim, K, y_observed, ancestor_mus_at_curr_obs)}")
     print(f"likelihood from expected weights: {gp._get_likelihood(weights_expected, K, y_observed, ancestor_mus_at_curr_obs)}")
 
