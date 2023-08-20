@@ -87,7 +87,9 @@ class ChildrenGenerator:
             ite.run(num_iter=self.ite_num_iter)
         
             # Memory concern 
-            del gp, agent
+            del agent, gp
+            del ite
+            gc.collect()
         
         if "GPCF" in self.algorithms_to_test:
             agent = AdaptiveAgent(task=self.task,
@@ -113,6 +115,8 @@ class ChildrenGenerator:
         
             # Memory concern
             del gp, agent
+            del gpcf
+            gc.collect()
         
         if "GPCF-1trust" in self.algorithms_to_test:
             agent = AdaptiveAgent(task=self.task,
@@ -136,6 +140,8 @@ class ChildrenGenerator:
             gpcf_1trust.run(num_iter=self.ite_num_iter)
 
             del gp, agent
+            del gpcf_1trust
+            gc.collect()
         
         if "GPCF-reg" in self.algorithms_to_test:
             agent = AdaptiveAgent(task=self.task,
@@ -159,6 +165,8 @@ class ChildrenGenerator:
             gpcf_reg.run(num_iter=self.ite_num_iter)
 
             del gp, agent
+            del gpcf_reg
+            gc.collect()
 
         if "inHERA" in self.algorithms_to_test:
             agent = AdaptiveAgent(task=self.task,
@@ -181,7 +189,9 @@ class ChildrenGenerator:
             
             inhera.run(num_iter=self.ite_num_iter)
 
-            del gp, agent       
+            del gp, agent
+            del inhera
+            gc.collect()    
 
         # Make sure to reset only after all collaborative algorithms have taken place
         if not self.children_in_ancestors:
