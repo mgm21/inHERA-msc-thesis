@@ -1,6 +1,8 @@
 from src.utils.all_imports import *
 
 class ChildrenLoader:
+    all_algo_names = ["ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA"]
+
     def load_children(self, path_to_family="families/family_4", algos=["ITE", "GPCF"]):
         path_to_children = f"{path_to_family}/children"
 
@@ -10,7 +12,7 @@ class ChildrenLoader:
 
         for _, dirs, _ in os.walk(path_to_children):
             for dirname in dirs:
-                if dirname not in algos:
+                if dirname not in self.all_algo_names:
                     for algo in algos:
                         algo_path = f"{path_to_children}/{dirname}/{algo}"
                         y_observed = jnp.load(f"{algo_path}/y_observed.npy")
@@ -30,7 +32,7 @@ class ChildrenLoader:
         
         for _, dirs, _ in os.walk(path_to_children):
             for dirname in dirs:
-                if dirname not in algos:
+                if dirname not in self.all_algo_names:
                     for algo in algos:
                         # Figure out what type of damaged has occured
                         num_legs_damaged = len(dirname.split("_")) - 1
