@@ -57,3 +57,4 @@ from datetime import datetime
 from dataclasses import dataclass
 import itertools
 import matplotlib.pyplot as plt
+import gc

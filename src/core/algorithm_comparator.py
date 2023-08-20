@@ -5,6 +5,7 @@ from src.loaders.children_loader import ChildrenLoader
 from src.utils.hexapod_damage_dicts import shortform_damage_list, intact
 from src.utils.visualiser import Visualiser
 
+
 class AlgorithmComparator:
     def __init__(self,algorithms_to_test,
             path_to_family,
@@ -55,7 +56,6 @@ class AlgorithmComparator:
     
 
     def generate_children(self,):
-        
         children_gen = ChildrenGenerator(algorithms_to_test=self.algorithms_to_test,
                                          path_to_family=self.path_to_family,
                                          task=self.task,
@@ -76,17 +76,22 @@ class AlgorithmComparator:
     def get_algo_means_and_var(self):
         children_loader = ChildrenLoader()
         res_dict = children_loader.load_children(path_to_family=self.path_to_family,
-                                      algos=self.algorithms_to_plot)
-        
+                                      algos=self.algorithms_to_plot)        
         
         means = []
         vars = []
+        medians = []
+        quantiles1 = []
+        quantiles2 = []
 
         for algo in algorithms_to_plot:
             means += [jnp.nanmean(res_dict[algo], axis=0)]
-            vars += [jnp.nanvar(res_dict[algo], axis=0)]
+            vars += [jnp.nanstd(res_dict[algo], axis=0)]
+            medians += [jnp.nanmedian(res_dict[algo], axis=0)]
+            quantiles1 += [jnp.nanquantile(res_dict[algo], q=0.25, axis=0)]
+            quantiles2 += [jnp.nanquantile(res_dict[algo], q=0.75, axis=0)]
         
-        return means, vars
+        return means, vars, medians, quantiles1, quantiles2
     
     def get_damage_specific_algo_means_and_vars(self,):
         children_loader = ChildrenLoader()
@@ -94,16 +99,25 @@ class AlgorithmComparator:
 
         means = {}
         vars = {}
+        medians = {}
+        quantiles1 = {}
+        quantiles2 = {}
 
         for algo in algorithms_to_plot:
             means[algo] = {}
             vars[algo] = {}
+            medians[algo] = {}
+            quantiles1[algo] = {}
+            quantiles2[algo] = {}
 
             for num_damage in res_dict[algo]:
-                means[algo][num_damage] = jnp.mean(res_dict[algo][num_damage], axis=0)
-                vars[algo][num_damage] = jnp.var(res_dict[algo][num_damage], axis=0)
+                means[algo][num_damage] = jnp.nanmean(res_dict[algo][num_damage], axis=0)
+                vars[algo][num_damage] = jnp.nanvar(res_dict[algo][num_damage], axis=0)
+                medians[algo][num_damage] = jnp.nanmedian(res_dict[algo][num_damage], axis=0)
+                quantiles1[algo][num_damage] = jnp.nanquantile(res_dict[algo][num_damage], q=0.25, axis=0)
+                quantiles2[algo][num_damage] = jnp.nanquantile(res_dict[algo][num_damage], q=0.75, axis=0)
         
-        return means, vars
+        return means, vars, medians, quantiles1, quantiles2
 
     
     def savefig_algos_comparison_results(self, means, vars):
@@ -112,29 +126,47 @@ class AlgorithmComparator:
                                    vars=vars,
                                    names=self.algorithms_to_plot,
                                    path_to_res=self.path_to_family)
+        
+    def savefig_algos_comparison_results2(self, medians, quantiles1 ,quantiles2):
+        visu = Visualiser()
+        visu.get_medians_and_quants_plot(medians=medians,
+                                   quantiles1=quantiles1,
+                                   quantiles2=quantiles2,
+                                   names=self.algorithms_to_plot,
+                                   path_to_res=self.path_to_family)
     
     def savefig_per_damage_algos_comparison_results(self, means_dict, vars_dict,):
         visu = Visualiser()
         visu.get_mean_and_var_plot_per_damage_level(means_dict=means_dict,
                                                     vars_dict=vars_dict,
                                                     path_to_res=self.path_to_family,)
+        
+    def savefig_per_damage_algos_comparison_results2(self, medians_dict, quantiles1_dict, quantiles2_dict,):
+        visu = Visualiser()
+        visu.get_medians_and_quants_plot_per_damage_level(medians_dict=medians_dict,
+                                                    quantiles1_dict=quantiles1_dict,
+                                                    quantiles2_dict=quantiles2_dict,
+                                                    path_to_res=self.path_to_family,)
 
 
 if __name__ == "__main__":
-    # Choose hyper parameters for comparison experiment
-    from families.family_4 import family_task
-    path_to_family = "families/family_4"
+    # Choose the family. Change both!
+    from families.family_10 import family_task
+    path_to_family = "families/family_10"
+
     task = family_task.task
     norm_params = jnp.load(f"{path_to_family}/norm_params.npy")
-    algo_num_iter = 20
-    ancest_num_legs_damaged = (1,)
-    children_num_legs_damaged = (1,)
-    algorithms_to_test = ["GPCF"] # ITE, GPCF, GPCF-1trust, 
-    algorithms_to_plot = ["ITE", "GPCF", "GPCF-1trust"] # ITE, GPCF, GPCF-1trust,
+    algo_num_iter = family_task.algo_num_iter
+    children_in_ancestors = family_task.children_in_ancestors
+
+    ancest_num_legs_damaged = (1,) # Must be a tuple e.g. (2,)
+    children_num_legs_damaged = (1, 2, 3, 4, 5) # Must be a tuple e.g. (1, 2, 3, 4,)
+    algorithms_to_test = ["ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA"] # "ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA"
+    algorithms_to_plot = ["inHERA"] # "ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA"
     verbose = True
+
     ite_alpha = 0.9
     gpcf_kappa = 0.05
-    children_in_ancestors = True
 
     # DEFINE AN ALGORITHM COMPARATOR
     algo_comp = AlgorithmComparator(algorithms_to_test=algorithms_to_test,
@@ -149,6 +181,8 @@ if __name__ == "__main__":
                   gpcf_kappa=gpcf_kappa,
                   algorithms_to_plot=algorithms_to_plot,
                   children_in_ancestors=children_in_ancestors)
+    
+    start_time = time.time()
 
     # # # TO RUN THE FULL FLOW
     # algo_comp.run()
@@ -156,15 +190,23 @@ if __name__ == "__main__":
     # # TO ONLY GENERATE THE ANCESTORS
     # algo_comp.generate_ancestors()
 
-    # # # # TO ONLY MAKE THE CHILDREN ADAPT
-    # algo_comp.generate_children()
+    # # # TO ONLY MAKE THE CHILDREN ADAPT
+    algo_comp.generate_children()
 
-    # TO ONLY PRODUCE AND SAVE THE OVERALL PLOTS
-    means, vars = algo_comp.get_algo_means_and_var()
-    algo_comp.savefig_algos_comparison_results(means, vars,)
+    # # TO ONLY PRODUCE AND SAVE THE OVERALL PLOTS
+    # means, vars, medians, quant1, quant2 = algo_comp.get_algo_means_and_var()
+    # algo_comp.savefig_algos_comparison_results2(medians, quant1, quant2,)
+
+    # means, vars, _, _, _ = algo_comp.get_algo_means_and_var()
+    # algo_comp.savefig_algos_comparison_results(means, vars)
 
     # # TO PRODUCE THE PLOTS PER DAMAGE LEVEL
-    # means_dict, vars_dict = algo_comp.get_damage_specific_algo_means_and_vars()
+    # means_dict, vars_dict, _, _, _ = algo_comp.get_damage_specific_algo_means_and_vars()
     # algo_comp.savefig_per_damage_algos_comparison_results(means_dict, vars_dict,)
 
+    # # TO PRODUCE THE PLOTS PER DAMAGE LEVEL
+    # _, _, medians_dict, quantiles1_dict, quantiles2_dict = algo_comp.get_damage_specific_algo_means_and_vars()
+    # algo_comp.savefig_per_damage_algos_comparison_results2(medians_dict, quantiles1_dict, quantiles2_dict)
     
+    end_time = time.time()
+    print(f"Execution time (s): {end_time - start_time}")
