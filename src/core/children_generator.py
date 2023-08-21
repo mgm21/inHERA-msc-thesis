@@ -54,6 +54,47 @@ class ChildrenGenerator:
     def generate_custom_children(self, damage_dicts=[{}]):
         for count, damage_dict in enumerate(damage_dicts):
             self.generate_child(damage_dict, name=f"custom{count}")
+    
+    def generate_hyperparam_sweep_children(self, num_broken_limbs=1, num_total_limbs=6,):
+        # Get all the combinations of num_broken_limbs possible for robot with num_total_limbs limbs
+        all_combinations = list(itertools.combinations(range(0, num_total_limbs), num_broken_limbs))
+        if self.verbose: print(f"all_combinations: {all_combinations}")
+
+        regularisation_weights = jnp.array([1.000, 0.100, 0.010, 0.001])
+
+        for combination in all_combinations:
+            for l1_regularisation_weight in regularisation_weights:
+                for invmax_regularisation_weight in regularisation_weights:
+                    if self.verbose: print(f"l1_regularisation_weight: {l1_regularisation_weight}")
+                    if self.verbose: print(f"invmax_regularisation_weight: {invmax_regularisation_weight}")
+
+                    damage_dict = self.get_damage_dict_from_combination(combination)
+                    name = self.get_name_from_combination(combination)
+
+                    agent = AdaptiveAgent(task=self.task,
+                                name=name,
+                                sim_repertoire_arrays=self.simu_arrs,
+                                damage_dictionary=damage_dict)
+                    
+                    gp = gp = GaussianProcess(kappa=self.gpcf_kappa, l1_regularisation_weight=l1_regularisation_weight, invmax_regularisation_weight=invmax_regularisation_weight,)
+
+                    gpcf_reg = GPCFReg(agent=agent,
+                            gaussian_process=gp,
+                            alpha=self.ite_alpha,
+                            save_res_arrs=True,
+                            path_to_results=f"{self.path_to_children}/{agent.name}-l1-{round(l1_regularisation_weight, 3)}-invmax{round(invmax_regularisation_weight, 3)}/GPCF-reg/",
+                            verbose=self.verbose,
+                            norm_params=self.norm_params,
+                            family=self.family,
+                            )
+                    
+                    gpcf_reg.run(num_iter=self.ite_num_iter)
+
+                    del gp, agent
+                    del gpcf_reg
+                    gc.collect()
+            
+
 
     def generate_child(self, damage_dict, name):
         # Make sure to remove agent from family before collaboration algorithms (does not affect single agent algos)

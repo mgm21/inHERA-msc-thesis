@@ -1,7 +1,6 @@
 # This GP class was inspired by Rasmussen's GPs for ML book (mainly algo on p. 19) and Antoine Cully's unpublished implementation of GPs
 
 from src.utils.all_imports import *
-import cvxpy as cp
 import jaxopt
 from jaxopt import ProjectedGradient
 from jaxopt.projection import projection_non_negative
