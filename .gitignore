@@ -176,3 +176,5 @@ families/*
 class_example_repertoire
 class-last_repertoire
 mapelites-logs.csv
+*.csv
+repertoires/*

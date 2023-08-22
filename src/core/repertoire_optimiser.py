@@ -226,16 +226,33 @@ if __name__ == "__main__":
     from src.core.task import Task
     import src.utils.hexapod_damage_dicts as hexapod_damage_dicts
 
-    task = Task(num_iterations=10, episode_length=10)
+    SEED = 10
 
-    damage_dict = hexapod_damage_dicts.get_damage_dict(jnp.array([0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                                 200, 200, 200, 200, 200, 200, 200, 200, 200]))
+    if not os.path.exists(path=f"repertoires/seed_{SEED}"):
+                os.makedirs(name=f"repertoires/seed_{SEED}")
 
-    broken_agent = AdaptiveAgent(task=task,
-                                 damage_dictionary=damage_dict)
+    path_to_result = f"repertoires/seed_{SEED}"
+
+    task = Task(batch_size=128,
+                env_name="hexapod_uni",
+                episode_length=150, 
+                num_iterations=10e4,
+                seed=SEED,
+                policy_hidden_layer_sizes=(64, 64),
+                iso_sigma=0.005,
+                line_sigma=0.05,
+                min_bd=0.,
+                max_bd=1.,
+                grid_shape=tuple([3]) * 6,)
     
+    repertoire_opt = RepertoireOptimiser(task=task,)
 
-    repertoire_opt = RepertoireOptimiser(task=task, env=broken_agent.env)
+    start_time = time.time()
     
-    repertoire_opt.optimise_repertoire(plot_path="families/by_setting_half_the_actuators_to_0-20",
-                                       html_path="families/by_setting_half_the_actuators_to_0-20.html")
+    repertoire_opt.optimise_repertoire(plot_path=f"{path_to_result}/result_plots",
+                                       html_path=f"{path_to_result}/best_policy.html",
+                                       repertoire_path=f"{path_to_result}/repertoire/",
+                                       csv_results_path=f"{path_to_result}/mapelites_log.csv")
+    
+    end_time = time.time()
+    print(f"Execution time (s): {end_time - start_time}")
