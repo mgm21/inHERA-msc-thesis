@@ -229,6 +229,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--save_dir", type=str, required=True)
+
     args = parser.parse_args()
     save_dir = args.save_dir
 
@@ -246,7 +247,7 @@ if __name__ == "__main__":
                 line_sigma=0.05,
                 min_bd=0.,
                 max_bd=1.,
-                grid_shape=tuple([4]) * 6,)
+                grid_shape=tuple([4])*6,)
     
     repertoire_opt = RepertoireOptimiser(task=task,)
 
