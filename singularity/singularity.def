@@ -15,10 +15,11 @@ From: airl_lab/default/airl_env:qdax_f57720d0
    pip install --upgrade absl-py
    pip install git+https://github.com/adaptive-intelligent-robotics/QDax.git@develop
 
-   # Change this line if you get JAX or NVIDIA compatibility issue      
-   pip install -U jax[cuda11_cudnn82] -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html  
-
    pip install -U "brax==0.1.2"
+
+   # Change this line if you get JAX or NVIDIA compatibility issue 
+   pip install --upgrade jax==0.4.9 jaxlib==0.4.7+cuda11.cudnn82 -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html     
+   # pip install -U jax[cuda11_cudnn82] -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html  
 
    # Create working directory
    mkdir -p /git/exp/inhera-msc-thesis/
@@ -39,6 +40,9 @@ From: airl_lab/default/airl_env:qdax_f57720d0
 
 
 %runscript
+
+   echo $CUDA_VISIBLE_DEVICES
+   
    CURPATH=$(pwd)
    echo pwd is $(pwd)
 
