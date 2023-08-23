@@ -45,8 +45,9 @@ class GaussianProcess:
         return (1 + ((jnp.sqrt(5)*d(x1, x2)) / (self.rho)) + ((5*d(x1, x2)**2) / (3*self.rho**2))) * jnp.exp((-jnp.sqrt(5) * d(x1, x2))/(self.rho))
     
     @partial(jit, static_argnums=(0,))
+    # TODO: check with Antoine that the following is correct
     def acquisition_function(self, mu, var):
-        return jnp.nanargmax(mu + self.kappa*var)
+        return jnp.nanargmax(mu - self.kappa*jnp.sqrt(var))
     
     @partial(jit, static_argnums=(0,))
     def optimise_W(self, x_observed, y_observed, y_priors, y_priors_vars=None):
