@@ -21,32 +21,39 @@ From: airl_lab/default/airl_env:qdax_f57720d0
    pip install -U "brax==0.1.2"
 
    # Create working directory
-   mkdir -p /git/exp/inhera-msc-thesis
+   mkdir -p /git/exp/inhera-msc-thesis/
 
    #==================================================================================
    exit 0 #NOTFORFINAL - the lines below this "exit" will be executed only when building the final image
    #==================================================================================
 
    # Enter working directory
+   echo $PWD
+   ls -l
    cd /git/exp
-
    #CLONEHERE
+   echo $PWD
+   ls -l
+   mkdir /git/exp/inhera-msc-thesis/results/
+   mkdir /git/exp/results/
 
-   mkdir -p /git/exp/inhera-msc-thesis/results/
 
 %runscript
-   # The following line is to understand why this runscript does not work
-   echo $PWD
-   
-   # Enter project
-   # Check that this is not actually ../../git/exp/inhera-msc-thesis because HPC job failed 
-   cd ../../../git/exp/inhera-msc-thesis/
+   CURPATH=$(pwd)
+   echo pwd is $(pwd)
 
-   # The following line is to understand why this runscript does not work
-   echo $PWD
+   if [ ! -d ./results ]; then
+      mkdir results
+   fi
+
+   PATHNAME=$(date +%Y-%m-%d_%H_%M_%S)_$$
+   mkdir $CURPATH/results/$PATHNAME
+
+   # Enter project
+   cd /git/exp/inhera-msc-thesis
 
    # Run main
-   python mapelites-example-main.py
+   python -m src.core.repertoire_optimiser --save_dir $CURPATH/results/$PATHNAME
 
 %help
    MAP-Elites example using QDax.

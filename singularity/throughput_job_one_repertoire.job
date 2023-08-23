@@ -25,7 +25,7 @@
 #          Set the name of the job (up to 15 characters, 
 #          no blank spaces, start with alphanumeric character)
 
-#PBS -N hpc_example
+#PBS -N repertoire_generation
 
 #          By default, the standard output and error streams are sent
 #          to files in the current working directory with names:
@@ -53,10 +53,10 @@
 #          the job is terminated.
 
 
-#PBS -l walltime=1:00:00
+#PBS -l walltime=5:00:00
 
 # number of nodes
-#PBS -l select=1:ncpus=5:mem=32gb
+#PBS -l select=1:ncpus=8:mem=64gb
 
 
 ######################################################################
@@ -102,7 +102,7 @@ stagein()
 {
  echo ' '
  echo Transferring files from server to compute node
- cp $HOME/final_inhera-msc-thesis_2023-07-12_13_17_02.sif ./
+ cp $HOME/final_inhera-msc-thesis_2023-08-23_08_46_23.sif ./
  echo Files in node work directory are as follows:
  ls -l
 }
@@ -116,7 +116,7 @@ stagein()
 runprogram()
 {
     module load singularity
-    ./final_inhera-msc-thesis_2023-07-12_13_17_02.sif
+    ./final_inhera-msc-thesis_2023-08-23_08_46_23.sif
 }
 
 ###########################################################
