@@ -176,6 +176,9 @@ class RepertoireOptimiser:
         fig, axes = plot_map_elites_results(env_steps=env_steps, metrics=all_metrics, repertoire=repertoire, min_bd=min_bd, max_bd=max_bd, grid_shape=grid_shape)
         fig.savefig(plot_path)
 
+        print(f"this is the plot_path: {plot_path}")
+        print(f"this is the repertoire path: {repertoire_path}")
+
         os.makedirs(repertoire_path, exist_ok=True)
         repertoire.save(path=repertoire_path)
 
@@ -228,35 +231,37 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--save_dir", type=str, required=True)
+    parser.add_argument("--save_dir", type=str, required=False, default="repertoires")
 
     args = parser.parse_args()
     save_dir = args.save_dir
 
-    SEED = 10
-
     path_to_result = save_dir
+    print(f"the path to result from .py source file perspective is {path_to_result}")
 
-    task = Task(batch_size=128,
-                env_name="hexapod_uni",
-                episode_length=150, 
-                num_iterations=10e4,
-                seed=SEED,
-                policy_hidden_layer_sizes=(64, 64),
-                iso_sigma=0.005,
-                line_sigma=0.05,
-                min_bd=0.,
-                max_bd=1.,
-                grid_shape=tuple([4])*6,)
-    
-    repertoire_opt = RepertoireOptimiser(task=task,)
+    for SEED in range(0, 1):
+        task = Task(batch_size=256,
+                    env_name="hexapod_uni",
+                    episode_length=10, 
+                    num_iterations=10,
+                    seed=SEED,
+                    policy_hidden_layer_sizes=(64, 64),
+                    iso_sigma=0.005,
+                    line_sigma=0.05,
+                    min_bd=0.,
+                    max_bd=1.,
+                    grid_shape=tuple([3])*6,)
+        
+        repertoire_opt = RepertoireOptimiser(task=task,)
 
-    start_time = time.time()
-    
-    repertoire_opt.optimise_repertoire(plot_path=f"{path_to_result}/seed_{SEED}_result_plots",
-                                       html_path=f"{path_to_result}/seed_{SEED}_best_policy.html",
-                                       repertoire_path=f"{path_to_result}/seed_{SEED}_repertoire/",
-                                       csv_results_path=f"{path_to_result}/seed_{SEED}_mapelites_log.csv")
-    
-    end_time = time.time()
-    print(f"Execution time (s): {end_time - start_time}")
+        start_time = time.time()
+
+        print(f"these are all the paths that will be used: {path_to_result}/seed_{SEED}_result_plots \n {path_to_result}/seed_{SEED}_best_policy.html \n {path_to_result}/seed_{SEED}_repertoire/ \n {path_to_result}/seed_{SEED}_mapelites_log.csv")
+        
+        repertoire_opt.optimise_repertoire(plot_path=f"{path_to_result}/seed_{SEED}_result_plots",
+                                        html_path=f"{path_to_result}/seed_{SEED}_best_policy.html",
+                                        repertoire_path=f"{path_to_result}/seed_{SEED}_repertoire/",
+                                        csv_results_path=f"{path_to_result}/seed_{SEED}_mapelites_log.csv")
+        
+        end_time = time.time()
+        print(f"Execution time (s): {end_time - start_time}")

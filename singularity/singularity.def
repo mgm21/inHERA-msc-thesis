@@ -46,9 +46,12 @@ From: airl_lab/default/airl_env:qdax_f57720d0
    CURPATH=$(pwd)
    echo pwd is $(pwd)
 
-   if [ ! -d ./results ]; then
-      mkdir results
-   fi
+   # if [ ! -d ./results ]; then
+   #    mkdir results
+   # fi
+   
+   mkdir -p $CURPATH/results
+   echo path to results from singularity.def perspective is $CURPATH/results
 
    # PATHNAME=$(date +%Y-%m-%d_%H_%M_%S)_$$
    # mkdir $CURPATH/results/$PATHNAME
