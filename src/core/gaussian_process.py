@@ -47,7 +47,7 @@ class GaussianProcess:
     @partial(jit, static_argnums=(0,))
     # TODO: check with Antoine that the following is correct
     def acquisition_function(self, mu, var):
-        return jnp.nanargmax(mu - self.kappa*jnp.sqrt(var))
+        return jnp.nanargmax(mu + self.kappa*jnp.sqrt(var))
     
     @partial(jit, static_argnums=(0,))
     def optimise_W(self, x_observed, y_observed, y_priors, y_priors_vars=None):
