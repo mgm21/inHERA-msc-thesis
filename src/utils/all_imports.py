@@ -1,5 +1,7 @@
 import os
 
+os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
+
 from IPython.display import clear_output
 import functools
 import time

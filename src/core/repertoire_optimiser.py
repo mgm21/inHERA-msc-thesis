@@ -242,8 +242,8 @@ if __name__ == "__main__":
     for SEED in range(0, 1):
         task = Task(batch_size=256,
                     env_name="hexapod_uni",
-                    episode_length=10, 
-                    num_iterations=10,
+                    episode_length=200, 
+                    num_iterations=4e3,
                     seed=SEED,
                     policy_hidden_layer_sizes=(64, 64),
                     iso_sigma=0.005,
