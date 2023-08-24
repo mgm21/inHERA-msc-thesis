@@ -60,7 +60,7 @@ From: airl_lab/default/airl_env:qdax_f57720d0
    cd /git/exp/inhera-msc-thesis
 
    # Run main
-   python -m src.core.repertoire_optimiser --save_dir $CURPATH/results
+   python -m exact-colab-me --save_dir $CURPATH/results
 
 %help
    MAP-Elites example using QDax.
