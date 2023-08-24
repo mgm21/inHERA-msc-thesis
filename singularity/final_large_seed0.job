@@ -56,7 +56,7 @@
 #PBS -l walltime=5:00:00
 
 # number of nodes
-#PBS -l select=1:ncpus=4:mem=24gb
+#PBS -l select=1:ncpus=4:mem=24gb:ngpus=1:gpu_type=RTX6000
 
 
 ######################################################################
@@ -102,7 +102,7 @@ stagein()
 {
  echo ' '
  echo Transferring files from server to compute node
- cp $HOME/final_small_run.sif ./
+ cp $HOME/final_large_seed0.sif ./
  echo Files in node work directory are as follows:
  ls -l
 }
@@ -121,7 +121,7 @@ runprogram()
     # ./run final_10_4.sif
     # export SINGULARITYENV_CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
     echo $CUDA_VISIBLE_DEVICES
-    time singularity -d run --cleanenv --containall --home /tmp/ --no-home --nv final_small_run.sif
+    time singularity -d run --nv final_large_seed0.sif
 }
 
 ###########################################################
