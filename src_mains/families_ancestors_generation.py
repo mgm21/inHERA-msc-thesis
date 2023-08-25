@@ -11,9 +11,14 @@ from final_families import family_task
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--save_dir", type=str, required=False, default="dummy_ancestors")
+parser.add_argument("--job_index", type=int, required=False, default=0)
+parser.add_argument("--num_legs_damaged", type=int, required=False, default=2)
 
 args = parser.parse_args()
+
 save_dir = args.save_dir
+job_index = args.job_index
+num_legs_damaged = args.num_legs_damaged
 
 path_to_result = save_dir
 
@@ -21,7 +26,7 @@ path_to_result = save_dir
 task = family_task.task
 algo_num_iter = family_task.algo_num_iter
 children_in_ancestors = family_task.children_in_ancestors
-ancest_num_legs_damaged = (1,) # TODO: to test the time it takes to generate all the 1-leg damages
+ancest_num_legs_damaged = (num_legs_damaged,)
 verbose = True
 ite_alpha = 0.9
 gpcf_kappa = 0.05
@@ -32,21 +37,24 @@ for file_name in os.listdir(families_path):
 
     # For every repertoire in the repertoires folder
     if os.path.isdir(d) and file_name not in ["__pycache__",]:
-        # Define the family specific hyperparameters (path and norm_params)
-        path_to_family = f"{families_path}/{file_name}"
-        norm_params = jnp.load(f"{path_to_family}/norm_params.npy")
+        # Only run for the family index specified
+        if f"{job_index}" in file_name:
+            print(file_name)
+            # Define the family specific hyperparameters (path and norm_params)
+            path_to_family = f"{families_path}/{file_name}"
+            norm_params = jnp.load(f"{path_to_family}/norm_params.npy")
 
-        # Define an AncestorsGenerator
-        ancest_gen = AncestorsGenerator(path_to_family=path_to_family,
-                                        task=task,
-                                        norm_params=norm_params,
-                                        verbose=verbose)
-        
-        ancest_gen.path_to_ancestors = f"{save_dir}/{file_name}/ancestors"
-        
-        # Generate the ancestors for this family
-        for i in range(len(ancest_num_legs_damaged)):
-            ancest_gen.generate_auto_ancestors(num_broken_limbs=ancest_num_legs_damaged[i])
+            # Define an AncestorsGenerator
+            ancest_gen = AncestorsGenerator(path_to_family=path_to_family,
+                                            task=task,
+                                            norm_params=norm_params,
+                                            verbose=verbose)
+            
+            ancest_gen.path_to_ancestors = f"{save_dir}/{file_name}/ancestors"
+            
+            # Generate the ancestors for this family
+            for i in range(len(ancest_num_legs_damaged)):
+                ancest_gen.generate_auto_ancestors(num_broken_limbs=ancest_num_legs_damaged[i])
 
-        del ancest_gen
-        gc.collect()
+            del ancest_gen
+            gc.collect()

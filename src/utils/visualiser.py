@@ -241,37 +241,40 @@ class Visualiser:
 
 if __name__ == "__main__":
     visu = Visualiser()
+    # for seed in range(0, 21):
+    #     visu.old_get_maxfit_vs_iter_fig(path_to_arrs=f"results/family-seed_{seed}_last_repertoire/ancestors/damaged_1", path_to_res=".")
 
-    # LOAD THE ITE RESULTS
-    ite_fits = jnp.array([jnp.load("families/family_3/ancestors/damaged_0_1_2_3_4/y_observed.npy"),
-                jnp.load("families/family_3/ancestors/damaged_0_1_2_3_5/y_observed.npy"),
-                jnp.load("families/family_3/ancestors/damaged_0_1_2_4_5/y_observed.npy"),
-                jnp.load("families/family_3/ancestors/damaged_0_1_3_4_5/y_observed.npy"),
-                jnp.load("families/family_3/ancestors/damaged_1_2_3_4_5/y_observed.npy")])
 
-    gpcf_fits = jnp.array([jnp.load("families/family_3/new_agents/damaged_0_1_2_3_4/GPCF/y_observed.npy"),
-                jnp.load("families/family_3/new_agents/damaged_0_1_2_3_5/GPCF/y_observed.npy"),
-                jnp.load("families/family_3/new_agents/damaged_0_1_2_4_5/GPCF/y_observed.npy"),
-                jnp.load("families/family_3/new_agents/damaged_0_1_3_4_5/GPCF/y_observed.npy"),
-                jnp.load("families/family_3/new_agents/damaged_1_2_3_4_5/GPCF/y_observed.npy")])
+    # # LOAD THE ITE RESULTS
+    # ite_fits = jnp.array([jnp.load("families/family_3/ancestors/damaged_0_1_2_3_4/y_observed.npy"),
+    #             jnp.load("families/family_3/ancestors/damaged_0_1_2_3_5/y_observed.npy"),
+    #             jnp.load("families/family_3/ancestors/damaged_0_1_2_4_5/y_observed.npy"),
+    #             jnp.load("families/family_3/ancestors/damaged_0_1_3_4_5/y_observed.npy"),
+    #             jnp.load("families/family_3/ancestors/damaged_1_2_3_4_5/y_observed.npy")])
+
+    # gpcf_fits = jnp.array([jnp.load("families/family_3/new_agents/damaged_0_1_2_3_4/GPCF/y_observed.npy"),
+    #             jnp.load("families/family_3/new_agents/damaged_0_1_2_3_5/GPCF/y_observed.npy"),
+    #             jnp.load("families/family_3/new_agents/damaged_0_1_2_4_5/GPCF/y_observed.npy"),
+    #             jnp.load("families/family_3/new_agents/damaged_0_1_3_4_5/GPCF/y_observed.npy"),
+    #             jnp.load("families/family_3/new_agents/damaged_1_2_3_4_5/GPCF/y_observed.npy")])
     
-    # print(f"ite_fits: {ite_fits}")
-    # print(f"gpcf_fits: {gpcf_fits}")
+    # # print(f"ite_fits: {ite_fits}")
+    # # print(f"gpcf_fits: {gpcf_fits}")
     
-    ite_mean = jnp.nanmean(ite_fits, axis=0)
+    # ite_mean = jnp.nanmean(ite_fits, axis=0)
 
-    gpcf_mean = jnp.nanmean(gpcf_fits, axis=0)
+    # gpcf_mean = jnp.nanmean(gpcf_fits, axis=0)
 
-    # print(gpcf_mean)
+    # # print(gpcf_mean)
     
-    ite_var = jnp.nanvar(ite_fits, axis=0)
-    gpcf_var = jnp.nanvar(gpcf_fits, axis=0)
+    # ite_var = jnp.nanvar(ite_fits, axis=0)
+    # gpcf_var = jnp.nanvar(gpcf_fits, axis=0)
 
-    # LOAD THE GPCF RESULTS
-    means = [ite_mean, gpcf_mean]
-    vars = [ite_var, gpcf_var]
+    # # LOAD THE GPCF RESULTS
+    # means = [ite_mean, gpcf_mean]
+    # vars = [ite_var, gpcf_var]
 
-    plot_names = ["ITE", "GPCF"]
+    # plot_names = ["ITE", "GPCF"]
 
-    visu.get_mean_and_var_plot(means=means, vars=vars, names=plot_names)
+    # visu.get_mean_and_var_plot(means=means, vars=vars, names=plot_names)
 
