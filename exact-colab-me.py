@@ -10,7 +10,7 @@ save_dir = args.save_dir
 path_to_result = save_dir
 
 
-for SEED in range(2, 10):
+for SEED in range(10, 21):
     batch_size = 256
     env_name = 'hexapod_uni'
     episode_length = 150
