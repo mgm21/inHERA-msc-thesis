@@ -1,7 +1,7 @@
 from src.utils.all_imports import *
 
-repertoires_path = "./dummy_repertoires"
-families_path = "./dummy_families"
+repertoires_path = "./final_repertoires"
+families_path = "./final_families"
 
 for file_name in os.listdir(repertoires_path):
     d = os.path.join(repertoires_path, file_name)

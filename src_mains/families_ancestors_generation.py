@@ -6,17 +6,22 @@ from src.loaders.children_loader import ChildrenLoader
 from src.utils.hexapod_damage_dicts import shortform_damage_list, intact
 from src.utils.visualiser import Visualiser
 
-families_path = "./dummy_families"
-from dummy_families import family_task
+families_path = "./final_families"
+from final_families import family_task
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--save_dir", type=str, required=False, default="dummy_ancestors")
+
+args = parser.parse_args()
+save_dir = args.save_dir
+
+path_to_result = save_dir
 
 # Define the hyperparameters/objects common to the whole family (e.g. task-related parameters)
 task = family_task.task
 algo_num_iter = family_task.algo_num_iter
 children_in_ancestors = family_task.children_in_ancestors
-ancest_num_legs_damaged = (1, 2, 3, 4, 5) # Must be a tuple e.g. (2,)
-children_num_legs_damaged = (1, 2, 3, 4, 5) # Must be a tuple e.g. (1, 2, 3, 4,)
-algorithms_to_test = ["ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA"] # "ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA"
-algorithms_to_plot = ["ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA"] # "ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA"
+ancest_num_legs_damaged = (1,) # TODO: to test the time it takes to generate all the 1-leg damages
 verbose = True
 ite_alpha = 0.9
 gpcf_kappa = 0.05
@@ -27,26 +32,21 @@ for file_name in os.listdir(families_path):
 
     # For every repertoire in the repertoires folder
     if os.path.isdir(d) and file_name not in ["__pycache__",]:
-        # Define the family specific hyperparameters (e.g. path)
+        # Define the family specific hyperparameters (path and norm_params)
         path_to_family = f"{families_path}/{file_name}"
         norm_params = jnp.load(f"{path_to_family}/norm_params.npy")
 
-        # Define an algorithm comparator with families and family specific hyperparameters
-        algo_comp = AlgorithmComparator(algorithms_to_test=algorithms_to_test,
-                path_to_family=path_to_family,
-                task=task,
-                norm_params=norm_params,
-                algo_num_iter=algo_num_iter,
-                ancest_num_legs_damaged=ancest_num_legs_damaged,
-                children_num_legs_damaged=children_num_legs_damaged,
-                verbose=verbose,
-                ite_alpha=ite_alpha,
-                gpcf_kappa=gpcf_kappa,
-                algorithms_to_plot=algorithms_to_plot,
-                children_in_ancestors=children_in_ancestors)
+        # Define an AncestorsGenerator
+        ancest_gen = AncestorsGenerator(path_to_family=path_to_family,
+                                        task=task,
+                                        norm_params=norm_params,
+                                        verbose=verbose)
+        
+        ancest_gen.path_to_ancestors = f"{save_dir}/{file_name}/ancestors"
         
         # Generate the ancestors for this family
-        algo_comp.generate_ancestors()
+        for i in range(len(ancest_num_legs_damaged)):
+            ancest_gen.generate_auto_ancestors(num_broken_limbs=ancest_num_legs_damaged[i])
 
-        del algo_comp
+        del ancest_gen
         gc.collect()
