@@ -1,10 +1,5 @@
 from src.utils.all_imports import *
-from src.core.algorithm_comparator import AlgorithmComparator
 from src.core.ancestors_generator import AncestorsGenerator
-from src.core.children_generator import ChildrenGenerator
-from src.loaders.children_loader import ChildrenLoader
-from src.utils.hexapod_damage_dicts import shortform_damage_list, intact
-from src.utils.visualiser import Visualiser
 
 families_path = "./numiter20k_final_families"
 from numiter20k_final_families import family_task
