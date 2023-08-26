@@ -12,7 +12,6 @@ from numiter20k_final_families import family_task
 parser = argparse.ArgumentParser()
 parser.add_argument("--save_dir", type=str, required=False, default="dummy_ancestors")
 parser.add_argument("--job_index", type=int, required=False, default=0)
-parser.add_argument("--num_legs_damaged", type=int, required=False, default=2)
 
 args = parser.parse_args()
 
@@ -26,7 +25,7 @@ path_to_result = save_dir
 task = family_task.task
 algo_num_iter = family_task.algo_num_iter
 children_in_ancestors = family_task.children_in_ancestors
-ancest_num_legs_damaged = (num_legs_damaged,)
+ancest_num_legs_damaged = (1,)
 verbose = True
 ite_alpha = 0.9
 gpcf_kappa = 0.05
