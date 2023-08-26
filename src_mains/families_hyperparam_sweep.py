@@ -1,6 +1,8 @@
 from src.utils.all_imports import *
 from src.utils.hexapod_damage_dicts import shortform_damage_list
 
+# TODO: could implement this script quite quickly by wrapping the families_children_generation script inside these nested for loops and making sure to store everything within a dedicated
+#  hyperparameter directory whose name includes the values of the hyper parameters (whose ranges are not length 1, only include the ones that change)
 
 # Load/define all the hyperparameters for this run (different hyperparameter settings?, children/damage_dict to test?, algorithms to test children on?, seed identification? fam_id, ancestors_id?, path_to_results?)
 parser = argparse.ArgumentParser()

@@ -12,7 +12,6 @@ args = parser.parse_args()
 
 save_dir = args.save_dir
 job_index = args.job_index
-num_legs_damaged = args.num_legs_damaged
 
 path_to_result = save_dir
 
@@ -20,7 +19,7 @@ path_to_result = save_dir
 task = family_task.task
 algo_num_iter = family_task.algo_num_iter
 children_in_ancestors = family_task.children_in_ancestors
-ancest_num_legs_damaged = (1,)
+ancest_num_legs_damaged = (1, 2, 3)
 verbose = True
 ite_alpha = 0.9
 gpcf_kappa = 0.05
