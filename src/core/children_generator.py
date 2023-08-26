@@ -51,9 +51,11 @@ class ChildrenGenerator:
             name = self.get_name_from_combination(combination)
             self.generate_child(damage_dict, name)
 
-    def generate_custom_children(self, damage_dicts=[{}]):
-        for count, damage_dict in enumerate(damage_dicts):
-            self.generate_child(damage_dict, name=f"custom{count}")
+    def generate_custom_children(self, combinations):
+        for combination in combinations:
+                    damage_dict = self.get_damage_dict_from_combination(combination)
+                    name = self.get_name_from_combination(combination)
+                    self.generate_child(damage_dict, name)
     
     def generate_hyperparam_sweep_children(self, num_broken_limbs=1, num_total_limbs=6,):
         # Get all the combinations of num_broken_limbs possible for robot with num_total_limbs limbs
@@ -94,8 +96,6 @@ class ChildrenGenerator:
                     del gpcf_reg
                     gc.collect()
             
-
-
     def generate_child(self, damage_dict, name):
         # Make sure to remove agent from family before collaboration algorithms (does not affect single agent algos)
         if not self.children_in_ancestors: 

@@ -7,6 +7,11 @@ import functools
 import time
 
 import jax
+
+# Uncomment these lines to use the cpu instead of the default gpu
+jax.config.update('jax_platform_name', 'cpu')
+print(jax.numpy.ones(3).device()) # TFRT_CPU_0
+
 import jax.numpy as jnp
 
 import brax
