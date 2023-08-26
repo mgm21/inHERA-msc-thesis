@@ -178,3 +178,5 @@ class-last_repertoire
 mapelites-logs.csv
 dummy*/*
 results*/*
+4kiter*/*
+20knumiter_final_repertoires/*

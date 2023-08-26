@@ -1,7 +1,9 @@
 from src.utils.all_imports import *
 
-repertoires_path = "./final_repertoires"
-families_path = "./final_families"
+# TODO: Manually add a task file after this routine... Could think about how to save the task object and file.
+
+repertoires_path = "./20knumiter_final_repertoires"
+families_path = "./20knumiter_final_families"
 
 for file_name in os.listdir(repertoires_path):
     d = os.path.join(repertoires_path, file_name)
@@ -23,5 +25,5 @@ for file_name in os.listdir(repertoires_path):
         jnp.save(f"{family_path}/norm_params.npy", norm_params)
         jnp.save(f"{family_path}/repertoire/fitnesses.npy", f)
 
-# Manually add a task file after this routine... Could think about how to save the task object and file.
+# TODO: Manually add a task file after this routine... Could think about how to save the task object and file.
 

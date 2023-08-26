@@ -6,8 +6,8 @@ from src.loaders.children_loader import ChildrenLoader
 from src.utils.hexapod_damage_dicts import shortform_damage_list, intact
 from src.utils.visualiser import Visualiser
 
-families_path = "./final_families"
-from final_families import family_task
+families_path = "./numiter20k_final_families"
+from numiter20k_final_families import family_task
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--save_dir", type=str, required=False, default="dummy_ancestors")
