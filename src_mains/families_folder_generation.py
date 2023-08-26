@@ -2,8 +2,8 @@ from src.utils.all_imports import *
 
 # TODO: Manually add a task file after this routine... Could think about how to save the task object and file.
 
-repertoires_path = "./numiter20k_final_repertoires"
-families_path = "./numiter20k_final_families"
+repertoires_path = "./numiter40k_final_repertoires"
+families_path = "./numiter40k_final_families"
 
 for file_name in os.listdir(repertoires_path):
     d = os.path.join(repertoires_path, file_name)

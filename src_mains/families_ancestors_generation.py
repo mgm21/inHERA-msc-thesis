@@ -1,8 +1,8 @@
 from src.utils.all_imports import *
 from src.core.ancestors_generator import AncestorsGenerator
 
-families_path = "./numiter20k_final_families"
-from numiter20k_final_families import family_task
+families_path = "./numiter40k_final_families"
+from numiter40k_final_families import family_task
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--save_dir", type=str, required=False, default="dummy_ancestors")
