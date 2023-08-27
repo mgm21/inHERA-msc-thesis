@@ -30,7 +30,11 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
                 max_observation_array = jnp.array([jnp.nanmax(observation_array[:i+1]) for i in range(observation_array.shape[0])])
                 observation_arrays += [observation_array]
                 max_observation_arrays += [max_observation_array]
-            
+        
+        if len(observation_arrays) == 0:
+            print(f"Sorry, this path_to_include {path_to_include} is not found in the {path_to_folder} folder.")
+            break
+
         # Turn observation lists to JAX to perform jnp operations on them
         observation_arrays = jnp.array(observation_arrays)
         max_observation_arrays = jnp.array(max_observation_arrays)
@@ -69,20 +73,20 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
     ax1.set_ylabel('Maximum fitness')
     ax2.set_xlabel('Adaptation steps')
     ax2.set_ylabel('Median fitness')
-    ax1.set_ylim(-.2, 1.2)
-    ax2.set_ylim(-.2, 1.2)
+    ax1.set_ylim(0, 0.5)
+    ax2.set_ylim(0, 0.5)
 
     fig.savefig(path_to_result, dpi=600) 
 
-# Make sure to incude a "/" at the end of a tag to not confuse damaged_0/ with damaged_0_1/, for example
-paths_to_include = []
-# paths_to_include += [[f"damaged_3/", f"seed_{i}_"] for i in range(6, 8)] # For specific seeds
-paths_to_include += [[f"damaged_5/",]]
 
 now = datetime.now()
 now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
+# Make sure to incude a "/" at the end of a tag to not confuse damaged_0/ with damaged_0_1/, for example
+paths_to_include = []
+paths_to_include += [[f"damaged_{i}_{j}/",] for i in range(0, 5) for j in range(i+1, 4)]
+
 plot_fitness_vs_numiter(path_to_folder="numiter40k_ancestors",
                         paths_to_include=paths_to_include,
-                        path_to_result=f"result_plot-{now_str}",
-                        show_spread=True,)
+                        path_to_result=f"plot_results/result_plot-40k_ancestors-{now_str}",
+                        show_spread=False,)
