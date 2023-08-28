@@ -1,5 +1,7 @@
 from src.utils.all_imports import *
 from src.core.ancestors_generator import AncestorsGenerator
+from src.utils.hexapod_damage_dicts import intact
+
 
 families_path = "./numiter40k_final_families"
 from numiter40k_final_families import family_task
@@ -45,9 +47,12 @@ for file_name in os.listdir(families_path):
             
             ancest_gen.path_to_ancestors = f"{save_dir}/{file_name}/ancestors"
             
-            # Generate the ancestors for this family
-            for i in range(len(ancest_num_legs_damaged)):
-                ancest_gen.generate_auto_ancestors(num_broken_limbs=ancest_num_legs_damaged[i])
+            # # Generate the ancestors for this family # TODO: UNCOMMENT THE FOLLOWING TO GET ANCESTORS FOR DAMAGED ROBOTS
+            # for i in range(len(ancest_num_legs_damaged)):
+            #     ancest_gen.generate_auto_ancestors(num_broken_limbs=ancest_num_legs_damaged[i])
+            
+            # Include the intact agent as one of the ancestors
+            ancest_gen.generate_ancestor(damage_dict=intact, name="intact")
 
             del ancest_gen
             gc.collect()

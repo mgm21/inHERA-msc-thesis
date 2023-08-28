@@ -73,20 +73,25 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
     ax1.set_ylabel('Maximum fitness')
     ax2.set_xlabel('Adaptation steps')
     ax2.set_ylabel('Median fitness')
-    ax1.set_ylim(0, 0.5)
-    ax2.set_ylim(0, 0.5)
+    ax1.set_ylim(0, 0.15)
+    ax2.set_ylim(0, 0.15)
 
-    fig.savefig(path_to_result, dpi=600) 
-
+    fig.savefig(path_to_result, dpi=600)
+        
 
 now = datetime.now()
 now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
 # Make sure to incude a "/" at the end of a tag to not confuse damaged_0/ with damaged_0_1/, for example
-paths_to_include = []
-paths_to_include += [[f"damaged_{i}_{j}/",] for i in range(0, 5) for j in range(i+1, 4)]
 
-plot_fitness_vs_numiter(path_to_folder="numiter40k_ancestors",
+paths_to_include = []
+paths_to_include += [["ITE/", "damaged_1_2_3/"]]
+paths_to_include += [["GPCF/", "damaged_1_2_3/"]]
+paths_to_include += [["GPCF-reg/", "damaged_1_2_3/"]]
+paths_to_include += [["GPCF-1trust/", "damaged_1_2_3/"]]
+paths_to_include += [["inHERA/", "damaged_1_2_3/"]]
+
+plot_fitness_vs_numiter(path_to_folder="results",
                         paths_to_include=paths_to_include,
-                        path_to_result=f"plot_results/result_plot-40k_ancestors-{now_str}",
+                        path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
                         show_spread=False,)

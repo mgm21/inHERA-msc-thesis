@@ -60,7 +60,7 @@ From: airl_lab/default/airl_env:qdax_f57720d0
    cd /git/exp/inhera-msc-thesis
 
    # Run main
-   python -m src_mains.families_children_generation --save_dir $CURPATH/results --job_index "$@"
+   python -m src_mains.families_ancestors_generation --save_dir $CURPATH/results --job_index "$@"
 
 %help
    MAP-Elites example using QDax.
