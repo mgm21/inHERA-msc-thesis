@@ -246,9 +246,13 @@ class ChildrenGenerator:
         
         damage_dict = get_damage_dict(merged_dict)
 
+        print(damage_dict)
+
         return damage_dict
     
     def get_name_from_combination(self, combination):
+        if len(combination) == 0:
+            return "intact"
         # The name will be, for example, damaged_0_2, if legs 0 and 2 were damaged
         name = 'damaged' + (len(combination)*'_{}').format(*combination)
         return name
@@ -262,12 +266,12 @@ if __name__ == "__main__":
     # Will automate this later. Perhaps json/pickle the task object and put it in the family so that everyone can refer to a unique task.
     
     # CHANGE THIS
-    from families.family_3 import family_task
-    norm_params = jnp.load("families/family_3/norm_params.npy")
+    from dummy_families import family_task
+    norm_params = jnp.load("dummy_families/family-seed_0_last_repertoire/norm_params.npy")
 
     # CHANGE PATH!
-    ancest_gen = ChildrenGenerator(algorithms_to_test = ["ITE", "GPCF"],
-                                   path_to_family='families/family_3',
+    children_gen = ChildrenGenerator(algorithms_to_test = ["ITE", "GPCF"],
+                                   path_to_family='dummy_families/family-seed_0_last_repertoire',
                                     task = family_task.task,
                                     shortform_damage_list=shortform_damage_list,
                                     ite_alpha=0.99,
@@ -275,5 +279,10 @@ if __name__ == "__main__":
                                     verbose=False,
                                     norm_params=norm_params)
     
-    # For automatically generated children
-    ancest_gen.generate_auto_children(num_broken_limbs=5)
+    print(children_gen.get_name_from_combination((1, 2)))
+    print(children_gen.get_damage_dict_from_combination(()))
+    
+    # # For automatically generated children
+    # children_gen.generate_auto_children(num_broken_limbs=5)
+
+
