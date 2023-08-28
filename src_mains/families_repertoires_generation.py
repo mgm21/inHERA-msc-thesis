@@ -2,7 +2,7 @@ from src.utils.all_imports import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--save_dir", type=str, required=False, default="final_repertoires")
-parser.add_argument("--seed", type=int, required=False, default=0)
+parser.add_argument("--seed", type=int, required=False, default=1)
 
 args = parser.parse_args()
 save_dir = args.save_dir

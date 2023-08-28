@@ -25,7 +25,6 @@ class ChildrenGenerator:
 
         self.gpcf_kappa = gpcf_kappa
 
-        
         self.path_to_repertoire = f"{path_to_family}/repertoire"
         self.path_to_children = f"{path_to_family}/children"
         self.task = task
@@ -41,7 +40,7 @@ class ChildrenGenerator:
         self.simu_arrs = rep_loader.load_repertoire(repertoire_path=f"{self.path_to_repertoire}/",)
         # print(self.simu_arrs[2])
 
-    def generate_auto_children(self, num_broken_limbs=2, num_total_limbs=6,):
+    def generate_auto_children(self, num_broken_limbs=2, num_total_limbs=6, **kwargs):
         # Get all the combinations of num_broken_limbs possible for robot with num_total_limbs limbs
         all_combinations = list(itertools.combinations(range(0, num_total_limbs), num_broken_limbs))
         if self.verbose: print(f"all_combinations: {all_combinations}")
@@ -49,13 +48,13 @@ class ChildrenGenerator:
         for combination in all_combinations:
             damage_dict = self.get_damage_dict_from_combination(combination)
             name = self.get_name_from_combination(combination)
-            self.generate_child(damage_dict, name)
+            self.generate_child(damage_dict, name, **kwargs)
 
-    def generate_custom_children(self, combinations):
+    def generate_custom_children(self, combinations, **kwargs):
         for combination in combinations:
                     damage_dict = self.get_damage_dict_from_combination(combination)
                     name = self.get_name_from_combination(combination)
-                    self.generate_child(damage_dict, name)
+                    self.generate_child(damage_dict, name, **kwargs)
     
     def generate_hyperparam_sweep_children(self, num_broken_limbs=1, num_total_limbs=6,):
         # Get all the combinations of num_broken_limbs possible for robot with num_total_limbs limbs
@@ -96,7 +95,7 @@ class ChildrenGenerator:
                     del gpcf_reg
                     gc.collect()
             
-    def generate_child(self, damage_dict, name):
+    def generate_child(self, damage_dict, name, **kwargs):
         # Make sure to remove agent from family before collaboration algorithms (does not affect single agent algos)
         if not self.children_in_ancestors: 
             # This means that the child being generated should not use itself as an ancestor (i.e. an agent with the exact same damage)
@@ -111,7 +110,7 @@ class ChildrenGenerator:
                       damage_dictionary=damage_dict)
         
             # Define a GP
-            gp = GaussianProcess()
+            gp = GaussianProcess(**kwargs)
 
             # Create an ITE object with previous objects as inputs
             ite = ITE(agent=agent,
@@ -139,7 +138,7 @@ class ChildrenGenerator:
                         damage_dictionary=damage_dict)
 
 
-            gp = GaussianProcess(kappa=self.gpcf_kappa)
+            gp = GaussianProcess(kappa=self.gpcf_kappa, **kwargs)
 
             # Create an ITE object with previous objects as inputs
             gpcf = GPCF(agent=agent,
@@ -165,7 +164,7 @@ class ChildrenGenerator:
                         sim_repertoire_arrays=self.simu_arrs,
                         damage_dictionary=damage_dict)
             
-            gp = gp = GaussianProcess(kappa=self.gpcf_kappa)
+            gp = GaussianProcess(kappa=self.gpcf_kappa, **kwargs)
 
             # Create an ITE object with previous objects as inputs
             gpcf_1trust = GPCF1Trust(agent=agent,
@@ -190,7 +189,7 @@ class ChildrenGenerator:
                         sim_repertoire_arrays=self.simu_arrs,
                         damage_dictionary=damage_dict)
             
-            gp = gp = GaussianProcess(kappa=self.gpcf_kappa)
+            gp = GaussianProcess(kappa=self.gpcf_kappa, **kwargs)
 
             # Create an ITE object with previous objects as inputs
             gpcf_reg = GPCFReg(agent=agent,
@@ -215,7 +214,7 @@ class ChildrenGenerator:
                         sim_repertoire_arrays=self.simu_arrs,
                         damage_dictionary=damage_dict)
             
-            gp = gp = GaussianProcess(kappa=self.gpcf_kappa)
+            gp = GaussianProcess(kappa=self.gpcf_kappa, **kwargs)
 
             # Create an ITE object with previous objects as inputs
             inhera = InHERA(agent=agent,
@@ -237,7 +236,6 @@ class ChildrenGenerator:
         # Make sure to reset only after all collaborative algorithms have taken place
         if not self.children_in_ancestors:
             self.family.reset_the_ancestor_arrs()
-
 
     def get_damage_dict_from_combination(self, combination):
         merged_dict = {}

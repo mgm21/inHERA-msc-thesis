@@ -6,7 +6,7 @@ from src.core.children_generator import ChildrenGenerator
 # Load/define all the hyperparameters for this run (children/damage_dict to test?, algorithms to test children on?, seed identification? fam_id, ancestors_id?, path_to_results?)
 parser = argparse.ArgumentParser()
 parser.add_argument("--save_dir", type=str, required=False, default="./trial_folder")
-parser.add_argument("--job_index", type=int, required=False, default=0)
+parser.add_argument("--job_index", type=int, required=False, default=1)
 
 args = parser.parse_args()
 save_dir = args.save_dir

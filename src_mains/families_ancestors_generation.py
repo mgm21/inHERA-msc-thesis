@@ -8,7 +8,7 @@ from numiter40k_final_families import family_task
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--save_dir", type=str, required=False, default="dummy_ancestors")
-parser.add_argument("--job_index", type=int, required=False, default=0)
+parser.add_argument("--job_index", type=int, required=False, default=1)
 
 args = parser.parse_args()
 
