@@ -1,9 +1,14 @@
 from src.utils.all_imports import *
 
-def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, show_spread=True, group_names=None,):    
+def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, show_spread=True, group_names=None, include_median_plot=True, include_max_plot=True):    
     plt.style.use("seaborn")
     alpha = 0.2
-    fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
+    if include_median_plot and include_max_plot:
+        fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
+    elif include_median_plot and not include_max_plot:
+        fig, ax2 = plt.subplots()
+    elif not include_median_plot and include_max_plot:
+        fig, ax1 = plt.subplots()
 
     if len(paths_to_include) == 0: print("Please include at least 1 list with tags in paths_to_include")
 
@@ -50,8 +55,8 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
                 max_quantile1_array = jnp.nanquantile(max_observation_arrays, q=0.25, axis=0)
                 max_quantile3_array = jnp.nanquantile(max_observation_arrays, q=0.75, axis=0)
                 
-                ax2.fill_between(num_iter, quantile1_array, quantile3_array, alpha=alpha)
-                ax1.fill_between(num_iter, max_quantile1_array, max_quantile3_array, alpha=alpha)
+                if include_median_plot: ax2.fill_between(num_iter, quantile1_array, quantile3_array, alpha=alpha)
+                if include_max_plot: ax1.fill_between(num_iter, max_quantile1_array, max_quantile3_array, alpha=alpha)
         
         else:
             num_iter = num_iter = jnp.array(list(range(1, observation_arrays.shape[1]+1)))  
@@ -59,22 +64,28 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
             max_median_array = max_observation_arrays[0]
 
             # Dummy fills to ensure consistency with colour fill 
-            ax2.fill_between(num_iter, jnp.zeros(shape=len(num_iter)), jnp.zeros(shape=len(num_iter)), alpha=alpha)
-            ax1.fill_between(num_iter, jnp.zeros(shape=len(num_iter)), jnp.zeros(shape=len(num_iter)), alpha=alpha)
+            if include_median_plot: ax2.fill_between(num_iter, jnp.zeros(shape=len(num_iter)), jnp.zeros(shape=len(num_iter)), alpha=alpha)
+            if include_max_plot: ax1.fill_between(num_iter, jnp.zeros(shape=len(num_iter)), jnp.zeros(shape=len(num_iter)), alpha=alpha)
 
         # Plot this median & quantiles on the general fig
-        ax2.plot(num_iter, median_array, label=group_name)
-        ax1.plot(num_iter, max_median_array, label=group_name)
+        if include_median_plot: ax2.plot(num_iter, median_array, label=group_name)
+        if include_max_plot: ax1.plot(num_iter, max_median_array, label=group_name)
 
     # Configure and save the figure
-    ax2.legend()
-    ax1.legend()
-    ax1.set_xlabel('Adaptation steps')
-    ax1.set_ylabel('Maximum fitness')
-    ax2.set_xlabel('Adaptation steps')
-    ax2.set_ylabel('Median fitness')
-    ax1.set_ylim(0, 0.15)
-    ax2.set_ylim(0, 0.15)
+
+    min_y, max_y = 0, 0.1
+
+    if include_max_plot:
+        ax1.set_xlabel('Adaptation steps')
+        ax1.set_ylabel('Maximum fitness')
+        ax1.legend()
+        ax1.set_ylim(min_y, max_y)
+
+    if include_median_plot:
+        ax2.set_xlabel('Adaptation steps')
+        ax2.set_ylabel('Median fitness')
+        ax2.legend()
+        ax2.set_ylim(min_y, max_y)
 
     fig.savefig(path_to_result, dpi=600)
         
@@ -84,18 +95,19 @@ now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
 # Make sure to incude a "/" at the end of a tag to not confuse damaged_0/ with damaged_0_1/, for example
 
-# paths_to_include = []
-# paths_to_include += [["ITE/", "damaged_1_2_3/"]]
-# paths_to_include += [["GPCF/", "damaged_1_2_3/"]]
-# paths_to_include += [["GPCF-reg/", "damaged_1_2_3/"]]
-# paths_to_include += [["GPCF-1trust/", "damaged_1_2_3/"]]
-# paths_to_include += [["inHERA/", "damaged_1_2_3/"]]
-
-
 paths_to_include = []
-paths_to_include += [["seed_0_", ""]]
+paths_to_include += [["ITE/", "damaged_1_2_3/"]]
+paths_to_include += [["GPCF/", "damaged_1_2_3/"]]
+paths_to_include += [["GPCF-reg/", "damaged_1_2_3/"]]
+paths_to_include += [["GPCF-1trust/", "damaged_1_2_3/"]]
+paths_to_include += [["inHERA/", "damaged_1_2_3/"]]
 
-plot_fitness_vs_numiter(path_to_folder="results",
+
+# paths_to_include = []
+# paths_to_include += [["seed_20_", "damaged_1_2_3/"]]
+
+plot_fitness_vs_numiter(path_to_folder="numiter40k_final_children_without_intact_ancestor",
                         paths_to_include=paths_to_include,
                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
-                        show_spread=False,)
+                        show_spread=False,
+                        include_median_plot=False)
