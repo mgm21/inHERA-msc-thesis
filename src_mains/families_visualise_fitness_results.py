@@ -84,12 +84,16 @@ now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
 # Make sure to incude a "/" at the end of a tag to not confuse damaged_0/ with damaged_0_1/, for example
 
+# paths_to_include = []
+# paths_to_include += [["ITE/", "damaged_1_2_3/"]]
+# paths_to_include += [["GPCF/", "damaged_1_2_3/"]]
+# paths_to_include += [["GPCF-reg/", "damaged_1_2_3/"]]
+# paths_to_include += [["GPCF-1trust/", "damaged_1_2_3/"]]
+# paths_to_include += [["inHERA/", "damaged_1_2_3/"]]
+
+
 paths_to_include = []
-paths_to_include += [["ITE/", "damaged_1_2_3/"]]
-paths_to_include += [["GPCF/", "damaged_1_2_3/"]]
-paths_to_include += [["GPCF-reg/", "damaged_1_2_3/"]]
-paths_to_include += [["GPCF-1trust/", "damaged_1_2_3/"]]
-paths_to_include += [["inHERA/", "damaged_1_2_3/"]]
+paths_to_include += [["seed_0_", ""]]
 
 plot_fitness_vs_numiter(path_to_folder="results",
                         paths_to_include=paths_to_include,

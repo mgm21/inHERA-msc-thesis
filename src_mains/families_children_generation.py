@@ -41,4 +41,5 @@ children_generator = ChildrenGenerator(algorithms_to_test=algorithms_to_test,
                                        children_in_ancestors=children_in_ancestors)
 
 children_generator.path_to_children = path_to_results
-children_generator.generate_custom_children(combinations=children_damage_combinations) # TODO: uncomment to produce the custom children from above!
+children_generator.generate_custom_children(combinations=children_damage_combinations) # Generate the chosen children
+children_generator.generate_custom_children(combinations=[()]) # Generate the intact child
