@@ -2,24 +2,24 @@ from src.utils.all_imports import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--save_dir", type=str, required=False, default="final_repertoires")
-parser.add_argument("--seed", type=int, required=False, default=1)
+parser.add_argument("--job_index", type=int, required=False, default=1)
 
 args = parser.parse_args()
 save_dir = args.save_dir
 path_to_result = save_dir
-SEED = args.seed
+SEED = args.job_index
 
 batch_size = 256
 env_name = 'hexapod_uni'
-episode_length = 150
-num_iterations = 40000
+episode_length = 100
+num_iterations = 20000
 seed = SEED
 policy_hidden_layer_sizes = (64, 64)
 iso_sigma = 0.005
 line_sigma = 0.05
 min_bd = 0.
 max_bd = 1.0
-grid_shape = tuple([3])*6
+grid_shape = tuple([5])*6
 
 # Init environment
 env = environments.create(env_name, episode_length=episode_length)

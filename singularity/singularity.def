@@ -53,14 +53,14 @@ From: airl_lab/default/airl_env:qdax_f57720d0
    mkdir -p $CURPATH/results
    echo path to results from singularity.def perspective is $CURPATH/results
 
-   PATHNAME=$(date +%Y-%m-%d_%H_%M_%S)_$$
-   mkdir $CURPATH/results/$PATHNAME
+   # PATHNAME=$(date +%Y-%m-%d_%H_%M_%S)_$$
+   # mkdir $CURPATH/results/$PATHNAME
 
    # Enter project
    cd /git/exp/inhera-msc-thesis
 
    # Run main
-   python -m src_mains.families_hyperparam_sweep --save_dir $CURPATH/results/$PATHNAME --job_index "$@"
+   python -m src_mains.families_repertoires_generation --save_dir $CURPATH/results --job_index "$@"
 
 %help
    MAP-Elites example using QDax.

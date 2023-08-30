@@ -20,7 +20,7 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
         # Generate the default group name from the tags in the path to include
         if group_names == None:
             name_tags = [tag for tag in path_to_include]
-            group_name = ", ".join(name_tags).replace("/", "").replace("_", " ")
+            group_name = ", ".join(name_tags).replace("/", "").replace("_", " ").replace("-", ",")
 
         # For all directories in the overall folder
         for root, _, _ in os.walk(path_to_folder):
@@ -73,41 +73,107 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
 
     # Configure and save the figure
 
-    min_y, max_y = 0, 0.1
+    # min_y, max_y = 0, 0.2
 
     if include_max_plot:
         ax1.set_xlabel('Adaptation steps')
         ax1.set_ylabel('Maximum fitness')
         ax1.legend()
-        ax1.set_ylim(min_y, max_y)
+        ax1.set_ylim()
 
     if include_median_plot:
         ax2.set_xlabel('Adaptation steps')
         ax2.set_ylabel('Median fitness')
         ax2.legend()
-        ax2.set_ylim(min_y, max_y)
+        ax2.set_ylim()
 
     fig.savefig(path_to_result, dpi=600)
         
-
 now = datetime.now()
 now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
 # Make sure to incude a "/" at the end of a tag to not confuse damaged_0/ with damaged_0_1/, for example
 
-paths_to_include = []
-paths_to_include += [["ITE/", "damaged_1_2_3/"]]
-paths_to_include += [["GPCF/", "damaged_1_2_3/"]]
-paths_to_include += [["GPCF-reg/", "damaged_1_2_3/"]]
-paths_to_include += [["GPCF-1trust/", "damaged_1_2_3/"]]
-paths_to_include += [["inHERA/", "damaged_1_2_3/"]]
+
+paths_to_include = [[f"damaged_0/", f"seed_{i}_"] for i in range(1, 4)]
+
+now = datetime.now()
+now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
+
+plot_fitness_vs_numiter(path_to_folder="numiter40k_final_families",
+                        paths_to_include=paths_to_include,
+                        path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
+                        show_spread=False,
+                        include_median_plot=True)
+
+# paths_to_include = []
+# paths_to_include += [["ITE/", "damaged_1_2_3/"]]
+# paths_to_include += [["GPCF/", "damaged_1_2_3/"]]
+# paths_to_include += [["GPCF-reg/", "damaged_1_2_3/"]]
+# paths_to_include += [["GPCF-1trust/", "damaged_1_2_3/"]]
+# paths_to_include += [["inHERA/", "damaged_1_2_3/"]]
 
 
 # paths_to_include = []
 # paths_to_include += [["seed_20_", "damaged_1_2_3/"]]
 
-plot_fitness_vs_numiter(path_to_folder="numiter40k_final_children_without_intact_ancestor",
-                        paths_to_include=paths_to_include,
-                        path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
-                        show_spread=False,
-                        include_median_plot=False)
+# for i in [1, 0.1, 0.01]:
+#     for j in [1, 0.1, 0.01]:
+#         now = datetime.now()
+#         now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")    
+#         paths_to_include = []
+#         paths_to_include += [["damaged_1/", f"l1_{i}-v_{j}", "GPCF-reg"]]
+
+#         plot_fitness_vs_numiter(path_to_folder="numiter40k_first_hyperparameter_sweep_bad_formatting",
+#                                 paths_to_include=paths_to_include,
+#                                 path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
+#                                 show_spread=True,
+#                                 include_median_plot=True)
+
+
+# now = datetime.now()
+# now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")    
+# paths_to_include = []
+# paths_to_include += [["damaged_1_2_3/", f"l1_{i}-v_{j}", "GPCF-reg"] for i in [0.01] for j in [1, 0.1, 0.01]]
+
+# plot_fitness_vs_numiter(path_to_folder="numiter40k_first_hyperparameter_sweep_bad_formatting",
+#                         paths_to_include=paths_to_include,
+#                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
+#                         show_spread=False,
+#                         include_median_plot=True)
+
+
+# paths_to_include = []
+# paths_to_include += [["ITE/", "damaged_3_4/"]]
+# paths_to_include += [["GPCF/", "damaged_3_4/"]]
+# paths_to_include += [["GPCF-reg/", "damaged_3_4/"]]
+# paths_to_include += [["GPCF-1trust/", "damaged_3_4/"]]
+# paths_to_include += [["inHERA/", "damaged_3_4/"]]
+
+# now = datetime.now()
+# now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
+# plot_fitness_vs_numiter(path_to_folder="results/numiter40k_final_children_without_intact_ancestor",
+#                         paths_to_include=paths_to_include,
+#                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}-without-intact",
+#                         show_spread=False,
+#                         include_median_plot=True)
+# now = datetime.now()
+# now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
+# plot_fitness_vs_numiter(path_to_folder="results/numiter40k_final_children_with_intact_ancestor_and_intact_child",
+#                         paths_to_include=paths_to_include,
+#                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}-with-intact",
+#                         show_spread=False,
+#                         include_median_plot=True)
+
+# paths_to_include = []
+# paths_to_include += [["damaged_0/"]]
+
+# now = datetime.now()
+# now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
+# plot_fitness_vs_numiter(path_to_folder="numiter40k_final_families",
+#                         paths_to_include=paths_to_include,
+#                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}-without-intact",
+#                         show_spread=True,
+#                         include_median_plot=True)
+
+# TODO: only thing to look at is that here you have to specify the folder parent to y_observed or else it cannot find it. Is that okay?
