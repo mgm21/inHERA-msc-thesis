@@ -14,7 +14,7 @@ seed = args.job_index
 
 # Change these
 children_damage_combinations = [(1,), (3, 4), (1, 2, 3)] # Careful, tuples
-algorithms_to_test = ["inHERA-b0"] # "ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA", "inHERA-B0"
+algorithms_to_test = ["inHERA-b0"] # "ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA", "inHERA-b0"
 path_to_families = "numiter40k_final_families" # Careful, must be same as below
 from numiter40k_final_families import family_task # Careful, must be same as above
 verbose = True

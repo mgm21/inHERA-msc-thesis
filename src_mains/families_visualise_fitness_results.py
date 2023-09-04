@@ -92,7 +92,9 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
     if include_max_plot:
         ax1.set_xlabel('Adaptation steps')
         ax1.set_ylabel('Maximum fitness')
-        ax1.legend()
+        ax1.legend(loc="lower right")
+        # To put legend outside of figure
+        # ax1.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
         ax1.set_ylim()
 
     if include_median_plot:
@@ -101,7 +103,7 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
         ax2.legend()
         ax2.set_ylim()
 
-    fig.savefig(path_to_result, dpi=600)
+    fig.savefig(path_to_result, dpi=600, bbox_inches="tight")
 
     return maxscores
         
@@ -140,29 +142,69 @@ now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 # paths_to_include = []
 # paths_to_include += [["seed_20_", "damaged_1_2_3/"]]
 
-maxscores_matrix = []
 
+# # MAXSCORING ROUTINE - l1, v
+# maxscores_matrix = []
+# for damage in ["damaged_1/", "damaged_3_4/", "damaged_1_2_3/"]:
+#     paths_to_include = []
+#     group_names = []
+#     for i in [0.01, 0.001, 0.0001]:
+#         for j in [1, 0.1, 0.01, 0.001, 0.0001]:
+#             now = datetime.now()
+#             now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")    
+#             paths_to_include += [[damage, f"l1_{i}-v_{j}", "GPCF-reg"]]
+#             group_names += [f"l1_{i}-v{j}"]
+
+#     maxscores_matrix += [plot_fitness_vs_numiter(path_to_folder="results/l1_v_gpcf_sweep",
+#                                     paths_to_include=paths_to_include,
+#                                     path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
+#                                     show_spread=False,
+#                                     include_median_plot=False,
+#                                     group_names=group_names)]
+# maxscores_matrix = jnp.array(maxscores_matrix)
+# print(maxscores_matrix)
+# print(jnp.argmax(jnp.mean(maxscores_matrix, axis=0)))
+# print(group_names[jnp.argmax(jnp.mean(maxscores_matrix, axis=0))])
+
+# MAXSCORING ROUTINE - u
+maxscores_matrix = []
 for damage in ["damaged_1/", "damaged_3_4/", "damaged_1_2_3/"]:
     paths_to_include = []
     group_names = []
-    for i in [0.01, 0.001, 0.0001]:
-        for j in [1, 0.1, 0.01, 0.001, 0.0001]:
+    for u in [1, 0.1, 0.01, 0.001, 0.0001, 0.00001]:
             now = datetime.now()
             now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")    
-            paths_to_include += [[damage, f"l1_{i}-v_{j}", "GPCF-reg"]]
-            group_names += [f"l1_{i}-v{j}"]
+            paths_to_include += [[damage, f"u_{u}", "inHERA-b0"]]
+            group_names += [f"u_{u}"]
 
-    maxscores_matrix += [plot_fitness_vs_numiter(path_to_folder="results/l1_v_gpcf_sweep",
+    maxscores_matrix += [plot_fitness_vs_numiter(path_to_folder="results/u_sweep",
                                     paths_to_include=paths_to_include,
                                     path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
                                     show_spread=False,
-                                    include_median_plot=True,
+                                    include_median_plot=False,
                                     group_names=group_names)]
-
+    
 maxscores_matrix = jnp.array(maxscores_matrix)
 print(maxscores_matrix)
 print(jnp.argmax(jnp.mean(maxscores_matrix, axis=0)))
 print(group_names[jnp.argmax(jnp.mean(maxscores_matrix, axis=0))])
+
+# # TO PLOT JUST THE BEST HYPERPARAMETER
+# paths_to_include = []
+
+# paths_to_include += [["damaged_1_2_3/", "GPCF-reg", "l1_0.001-v_0.0001"]]
+# group_names = ["l1_0.001-v_0.0001"]
+# plot_fitness_vs_numiter(path_to_folder="results/l1_v_gpcf_sweep",
+#                                     paths_to_include=paths_to_include,
+#                                     path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
+#                                     show_spread=True,
+#                                     include_median_plot=False,
+#                                     group_names=group_names)
+
+# maxscores_matrix = jnp.array(maxscores_matrix)
+# print(maxscores_matrix)
+# print(jnp.argmax(jnp.mean(maxscores_matrix, axis=0)))
+# print(group_names[jnp.argmax(jnp.mean(maxscores_matrix, axis=0))])
 
 
 

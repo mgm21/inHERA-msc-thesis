@@ -8,7 +8,7 @@ from jaxopt.projection import projection_box
 from jaxopt import ScipyBoundedMinimize
 
 class GaussianProcess:
-    def __init__(self, verbose=False, obs_noise=0.01, length_scale=1, rho=0.4, kappa=0.05, l1_regularisation_weight=0.01, invmax_regularisation_weight=0.01, uncertainty_regularisation_weight=0.01):
+    def __init__(self, verbose=False, obs_noise=0.01, length_scale=1, rho=0.4, kappa=0.05, l1_regularisation_weight=0.001, invmax_regularisation_weight=0.0001, uncertainty_regularisation_weight=0.001):
         self.obs_noise = obs_noise
         self.length_scale = length_scale
         self.rho = rho

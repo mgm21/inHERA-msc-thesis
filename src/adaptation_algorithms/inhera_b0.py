@@ -12,6 +12,9 @@ class InHERAB0(ExperienceSharingAlgorithm):
 
         self.create_simulated_arrays()
 
+        # Set best hyperparameter
+        gaussian_process.uncertainty_regularisation_weight = 0.00001
+
         # Regularisation and constrained optimisation settings
         self.gaussian_process.set_box_gradient_projection()
         self.gaussian_process.set_projection_hyperparameters(hyperparams=(-jnp.inf, jnp.inf))
