@@ -9,18 +9,18 @@ from src.core.children_generator import ChildrenGenerator
 # Load/define all the hyperparameters for this run (different hyperparameter settings?, children/damage_dict to test?, algorithms to test children on?, seed identification? fam_id, ancestors_id?, path_to_results?)
 parser = argparse.ArgumentParser()
 parser.add_argument("--save_dir", type=str, required=False, default="trial_folder")
-parser.add_argument("--job_index", type=int, required=False, default=1)
+parser.add_argument("--job_index", type=int, required=False, default=5)
 
 args = parser.parse_args()
 save_dir = args.save_dir
 seed = args.job_index
 
 # Define the hyperparameter range(s)
-kappa_regularisation_weight_list = [2, 1, 0.5, 0.1, 0.05, 0.01, 0.005, 0.001]
+u_regularisation_weight_list = [1, 0.1, 0.01, 0.001, 0.0001, 0.00001]
 
 # Change these
 children_damage_combinations = [(1,), (3, 4), (1, 2, 3)] # Careful, tuples
-algorithms_to_test = ["inHERA-b0",]
+algorithms_to_test = ["inHERA-b0", "inHERA"]
 path_to_families = "numiter40k_final_families" # Careful, must be same as below
 from numiter40k_final_families import family_task # Careful, must be same as above
 verbose = True
@@ -46,11 +46,11 @@ children_generator = ChildrenGenerator(algorithms_to_test=algorithms_to_test,
 # For all the hyperparameter settings that you would like to test the children in (add nests of for loops to test new hyper parameters)
 # Add a for loop for all the parameters that you would like to test
 l1 = 0.001
-v = 0.001
-u = 0.001
-for kappa in kappa_regularisation_weight_list:
-    print(f"Starting pass for kappa={kappa}")
-    path_to_hyperparam_folder = f"{save_dir}/hyperparameter_sweep/kappa_{kappa}"
+v = 0.0001
+kappa = 0.05
+for u in u_regularisation_weight_list:
+    print(f"Starting pass for u={u}")
+    path_to_hyperparam_folder = f"{save_dir}/hyperparameter_sweep/u_{u}"
     path_to_results = f"{path_to_hyperparam_folder}/family-seed_{seed}_last_repertoire"
     os.makedirs(name=path_to_hyperparam_folder, exist_ok=True)
     os.makedirs(name=path_to_results, exist_ok=True)

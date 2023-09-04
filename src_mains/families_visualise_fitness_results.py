@@ -3,7 +3,7 @@ from src.utils.all_imports import *
 def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, show_spread=True, group_names=None, include_median_plot=True, include_max_plot=True):    
     # plt.style.use("seaborn")
     sns.set()
-    sns.color_palette(n_colors=10)
+    sns.color_palette(n_colors=15)
     maxscores = []
     medscores = []
 
@@ -68,8 +68,8 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
             if include_max_plot: ax1.fill_between(num_iter, jnp.zeros(shape=len(num_iter)), jnp.zeros(shape=len(num_iter)), alpha=alpha)
 
         # Calculate this curve's score
-        maxscores += [round(jnp.sum(max_median_array)/20, ndigits=2)]
-        medscores += [round(jnp.sum(median_array)/20, ndigits=2)]
+        maxscores += [round(jnp.sum(max_median_array)/20, ndigits=8)]
+        medscores += [round(jnp.sum(median_array)/20, ndigits=8)]
 
         # Generate the default group name from the tags in the path to include
         if group_names == None:
@@ -102,6 +102,8 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
         ax2.set_ylim()
 
     fig.savefig(path_to_result, dpi=600)
+
+    return maxscores
         
 now = datetime.now()
 now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
@@ -138,37 +140,49 @@ now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 # paths_to_include = []
 # paths_to_include += [["seed_20_", "damaged_1_2_3/"]]
 
-# for i in [1, 0.1, 0.01]:
-#     for j in [1, 0.1, 0.01]:
-#         now = datetime.now()
-#         now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")    
-#         paths_to_include = []
-#         paths_to_include += [["damaged_1/", f"l1_{i}-v_{j}", "GPCF-reg"]]
+maxscores_matrix = []
 
-#         plot_fitness_vs_numiter(path_to_folder="numiter40k_first_hyperparameter_sweep_bad_formatting",
-#                                 paths_to_include=paths_to_include,
-#                                 path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
-#                                 show_spread=True,
-#                                 include_median_plot=True)
+for damage in ["damaged_1/", "damaged_3_4/", "damaged_1_2_3/"]:
+    paths_to_include = []
+    group_names = []
+    for i in [0.01, 0.001, 0.0001]:
+        for j in [1, 0.1, 0.01, 0.001, 0.0001]:
+            now = datetime.now()
+            now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")    
+            paths_to_include += [[damage, f"l1_{i}-v_{j}", "GPCF-reg"]]
+            group_names += [f"l1_{i}-v{j}"]
+
+    maxscores_matrix += [plot_fitness_vs_numiter(path_to_folder="results/l1_v_gpcf_sweep",
+                                    paths_to_include=paths_to_include,
+                                    path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
+                                    show_spread=False,
+                                    include_median_plot=True,
+                                    group_names=group_names)]
+
+maxscores_matrix = jnp.array(maxscores_matrix)
+print(maxscores_matrix)
+print(jnp.argmax(jnp.mean(maxscores_matrix, axis=0)))
+print(group_names[jnp.argmax(jnp.mean(maxscores_matrix, axis=0))])
 
 
-now = datetime.now()
-now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
-kappa_list = [2, 1, 0.5, 0.1, 0.05, 0.01, 0.005, 0.001,]
-group_names = []
+# now = datetime.now()
+# now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
-paths_to_include = []
-for kappa in kappa_list:
-    group_names += [f"k = {kappa}"]  
-    paths_to_include += [["damaged_1/", f"kappa_{kappa}", "inHERA-b0"]]
+# kappa_list = [2, 1, 0.5, 0.1, 0.05, 0.01, 0.005, 0.001,]
+# group_names = []
 
-plot_fitness_vs_numiter(path_to_folder="results/inhera-b0_kappa_sweep",
-                        paths_to_include=paths_to_include,
-                        path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
-                        show_spread=True,
-                        include_median_plot=True,
-                        group_names=group_names)
+# paths_to_include = []
+# for kappa in kappa_list:
+#     group_names += [f"k = {kappa}"]  
+#     paths_to_include += [["damaged_1/", f"kappa_{kappa}", "inHERA-b0"]]
+
+# plot_fitness_vs_numiter(path_to_folder="results/inhera-b0_kappa_sweep",
+#                         paths_to_include=paths_to_include,
+#                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
+#                         show_spread=True,
+#                         include_median_plot=True,
+#                         group_names=group_names)
 
 
 # now = datetime.now()
@@ -215,5 +229,20 @@ plot_fitness_vs_numiter(path_to_folder="results/inhera-b0_kappa_sweep",
 #                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}-without-intact",
 #                         show_spread=True,
 #                         include_median_plot=True)
+
+# paths_to_include = []
+# paths_to_include += [["damaged_1/", "ITE"]]
+# now = datetime.now()
+# now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
+# plot_fitness_vs_numiter(path_to_folder="results/numiter40k_final_children_with_intact_ancestor_and_intact_child",
+#                         paths_to_include=paths_to_include,
+#                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}-without-intact",
+#                         show_spread=True,
+#                         include_median_plot=False,
+#                         group_names=["damaged 1"])
+
+
+
+
 
 # TODO: only thing to look at is that here you have to specify the folder parent to y_observed or else it cannot find it. Is that okay?
