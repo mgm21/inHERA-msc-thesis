@@ -5,7 +5,7 @@ from src.core.children_generator import ChildrenGenerator
 
 # Load/define all the hyperparameters for this run (children/damage_dict to test?, algorithms to test children on?, seed identification? fam_id, ancestors_id?, path_to_results?)
 parser = argparse.ArgumentParser()
-parser.add_argument("--save_dir", type=str, required=False, default="./trial_folder")
+parser.add_argument("--save_dir", type=str, required=False, default="./trial_setting")
 parser.add_argument("--job_index", type=int, required=False, default=1)
 
 args = parser.parse_args()
@@ -14,7 +14,7 @@ seed = args.job_index
 
 # Change these
 children_damage_combinations = [(1,), (3, 4), (1, 2, 3)] # Careful, tuples
-algorithms_to_test = ["ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA"]
+algorithms_to_test = ["inHERA-b0"] # "ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA", "inHERA-B0"
 path_to_families = "numiter40k_final_families" # Careful, must be same as below
 from numiter40k_final_families import family_task # Careful, must be same as above
 verbose = True
