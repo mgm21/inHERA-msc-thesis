@@ -33,7 +33,7 @@ class InHERAB0(ExperienceSharingAlgorithm):
 
         W = self.get_ancestor_weights(counter,)
 
-        self.mean_func = (self.simulated_var - self.family.ancestors_vars.T) * (self.family.ancestor_mus.T) @ W
+        self.mean_func = self.simulated_mu + (self.simulated_var - self.family.ancestors_vars.T) * (self.family.ancestor_mus.T - self.simulated_mu_repeated_num_ancest_times) @ W
         self.mean_func_at_obs = self.mean_func[self.tested_indices[:counter+1]]
     
     def run_setup(self, num_iter):
@@ -50,8 +50,13 @@ class InHERAB0(ExperienceSharingAlgorithm):
         simulated_var = jnp.full(shape=self.family.ancestor_mus.T.shape, fill_value=initial_uncertainty)
         num_of_ancestors = self.family.ancestor_mus.shape[0]
 
+        # These are the base arrays that will be used in the inHERA equation. If they must be changed, it should be done here
         self.simulated_mu = simulated_mu
         self.simulated_mu_repeated_num_ancest_times = jnp.repeat(a=jnp.expand_dims(a=self.simulated_mu, axis=1), repeats=num_of_ancestors, axis=1)
+
+        self.simulated_mu *= 1e-10
+        self.simulated_mu_repeated_num_ancest_times *= 1e-10
+
         self.simulated_var = simulated_var
 
 

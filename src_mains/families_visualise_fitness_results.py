@@ -37,7 +37,7 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
                 max_observation_arrays += [max_observation_array]
         
         if len(observation_arrays) == 0:
-            print(f"Sorry, this path_to_include {path_to_include} is not found in the {path_to_folder} folder.")
+            print(f"Sorry, this path_to_include {path_to_include} is not found in the {path_to_folder} folder. Or the {path_to_folder} is not recognised.")
             break
 
         # Turn observation lists to JAX to perform jnp operations on them
@@ -94,13 +94,20 @@ now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
 # Make sure to incude a "/" at the end of a tag to not confuse damaged_0/ with damaged_0_1/, for example
 
+damage = "damaged_1_2_3/"
+paths_to_include = []
+paths_to_include += [["ITE/", damage]]
+paths_to_include += [["GPCF/", damage]]
+paths_to_include += [["GPCF-reg/", damage]]
+paths_to_include += [["GPCF-1trust/", damage]]
+paths_to_include += [["inHERA/", damage]]
+paths_to_include += [["inHERA-b0/", damage]]
 
-paths_to_include = [[f"damaged_0/", f"seed_{i}_"] for i in range(1, 4)]
 
 now = datetime.now()
 now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
-plot_fitness_vs_numiter(path_to_folder="numiter40k_final_families",
+plot_fitness_vs_numiter(path_to_folder="results/numiter40k_final_children_with_intact_ancestor_and_intact_child",
                         paths_to_include=paths_to_include,
                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
                         show_spread=False,

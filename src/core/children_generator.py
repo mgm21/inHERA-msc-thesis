@@ -139,7 +139,7 @@ class ChildrenGenerator:
                         damage_dictionary=damage_dict)
 
 
-            gp = GaussianProcess(kappa=self.gpcf_kappa, **kwargs)
+            gp = GaussianProcess(**kwargs)
 
             # Create an ITE object with previous objects as inputs
             gpcf = GPCF(agent=agent,
@@ -165,7 +165,7 @@ class ChildrenGenerator:
                         sim_repertoire_arrays=self.simu_arrs,
                         damage_dictionary=damage_dict)
             
-            gp = GaussianProcess(kappa=self.gpcf_kappa, **kwargs)
+            gp = GaussianProcess(**kwargs)
 
             # Create an ITE object with previous objects as inputs
             gpcf_1trust = GPCF1Trust(agent=agent,
@@ -190,7 +190,7 @@ class ChildrenGenerator:
                         sim_repertoire_arrays=self.simu_arrs,
                         damage_dictionary=damage_dict)
             
-            gp = GaussianProcess(kappa=self.gpcf_kappa, **kwargs)
+            gp = GaussianProcess(**kwargs)
 
             # Create an ITE object with previous objects as inputs
             gpcf_reg = GPCFReg(agent=agent,
@@ -215,7 +215,7 @@ class ChildrenGenerator:
                         sim_repertoire_arrays=self.simu_arrs,
                         damage_dictionary=damage_dict)
             
-            gp = GaussianProcess(kappa=self.gpcf_kappa, **kwargs)
+            gp = GaussianProcess(**kwargs)
 
             # Create an ITE object with previous objects as inputs
             inhera = InHERA(agent=agent,
@@ -240,7 +240,7 @@ class ChildrenGenerator:
                         sim_repertoire_arrays=self.simu_arrs,
                         damage_dictionary=damage_dict)
             
-            gp = GaussianProcess(kappa=self.gpcf_kappa, **kwargs)
+            gp = GaussianProcess(**kwargs)
 
             # Create an ITE object with previous objects as inputs
             inhera_b0 = InHERAB0(agent=agent,
