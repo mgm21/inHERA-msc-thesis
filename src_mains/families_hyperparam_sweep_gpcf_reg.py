@@ -15,12 +15,9 @@ args = parser.parse_args()
 save_dir = args.save_dir
 seed = args.job_index
 
-# Tuples!
-children_damage_combinations = [(1,), (3, 4), (1, 2, 3)] # Careful, tuples
-
 # Define the hyperparameter range(s)
-l1_regularisation_weight_list = [1, 0.1, 0.01,]
-invmax_regularisation_weight_list = [1, 0.1, 0.01,]
+l1_regularisation_weight_list = [0.01, 0.001, 0.0001]
+invmax_regularisation_weight_list = [1, 0.1, 0.01, 0.001, 0.0001]
 
 # Change these
 children_damage_combinations = [(1,), (3, 4), (1, 2, 3)] # Careful, tuples

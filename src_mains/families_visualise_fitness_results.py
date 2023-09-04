@@ -1,7 +1,12 @@
 from src.utils.all_imports import *
 
 def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, show_spread=True, group_names=None, include_median_plot=True, include_max_plot=True):    
-    plt.style.use("seaborn")
+    # plt.style.use("seaborn")
+    sns.set()
+    sns.color_palette(n_colors=10)
+    maxscores = []
+    medscores = []
+
     alpha = 0.2
     if include_median_plot and include_max_plot:
         fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
@@ -12,15 +17,10 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
 
     if len(paths_to_include) == 0: print("Please include at least 1 list with tags in paths_to_include")
 
-    for path_to_include in paths_to_include:
+    for idx, path_to_include in enumerate(paths_to_include):
         # Initialise objects to store all the y_observed arrays to be averaged to plot one group (i.e. one curve)
         observation_arrays = []
         max_observation_arrays = []
-
-        # Generate the default group name from the tags in the path to include
-        if group_names == None:
-            name_tags = [tag for tag in path_to_include]
-            group_name = ", ".join(name_tags).replace("/", "").replace("_", " ").replace("-", ",")
 
         # For all directories in the overall folder
         for root, _, _ in os.walk(path_to_folder):
@@ -67,9 +67,23 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
             if include_median_plot: ax2.fill_between(num_iter, jnp.zeros(shape=len(num_iter)), jnp.zeros(shape=len(num_iter)), alpha=alpha)
             if include_max_plot: ax1.fill_between(num_iter, jnp.zeros(shape=len(num_iter)), jnp.zeros(shape=len(num_iter)), alpha=alpha)
 
+        # Calculate this curve's score
+        maxscores += [round(jnp.sum(max_median_array)/20, ndigits=2)]
+        medscores += [round(jnp.sum(median_array)/20, ndigits=2)]
+
+        # Generate the default group name from the tags in the path to include
+        if group_names == None:
+            name_tags = [tag for tag in path_to_include]
+            maxgroup_name = ", ".join(name_tags).replace("/", "").replace("_", " ").replace("-", ",") + f" , m = %.2f" % maxscores[idx]
+            medgroup_name = ", ".join(name_tags).replace("/", "").replace("_", " ").replace("-", ",") + f" , m = %.2f" % medscores[idx]
+        
+        else:
+            maxgroup_name = group_names[idx] + f" , m = %.2f" % maxscores[idx]
+            medgroup_name = group_names[idx] + f" , m = %.2f" % medscores[idx]
+        
         # Plot this median & quantiles on the general fig
-        if include_median_plot: ax2.plot(num_iter, median_array, label=group_name)
-        if include_max_plot: ax1.plot(num_iter, max_median_array, label=group_name)
+        if include_median_plot: ax2.plot(num_iter, median_array, label=medgroup_name)
+        if include_max_plot: ax1.plot(num_iter, max_median_array, label=maxgroup_name)
 
     # Configure and save the figure
 
@@ -94,24 +108,24 @@ now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
 # Make sure to incude a "/" at the end of a tag to not confuse damaged_0/ with damaged_0_1/, for example
 
-damage = "damaged_1_2_3/"
-paths_to_include = []
-paths_to_include += [["ITE/", damage]]
-paths_to_include += [["GPCF/", damage]]
-paths_to_include += [["GPCF-reg/", damage]]
-paths_to_include += [["GPCF-1trust/", damage]]
-paths_to_include += [["inHERA/", damage]]
-paths_to_include += [["inHERA-b0/", damage]]
+# damage = "damaged_1_2_3/"
+# paths_to_include = []
+# paths_to_include += [["ITE/", damage]]
+# paths_to_include += [["GPCF/", damage]]
+# paths_to_include += [["GPCF-reg/", damage]]
+# paths_to_include += [["GPCF-1trust/", damage]]
+# paths_to_include += [["inHERA/", damage]]
+# paths_to_include += [["inHERA-b0/", damage]]
 
 
-now = datetime.now()
-now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
+# now = datetime.now()
+# now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
-plot_fitness_vs_numiter(path_to_folder="results/numiter40k_final_children_with_intact_ancestor_and_intact_child",
-                        paths_to_include=paths_to_include,
-                        path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
-                        show_spread=False,
-                        include_median_plot=True)
+# plot_fitness_vs_numiter(path_to_folder="results/numiter40k_final_children_with_intact_ancestor_and_intact_child",
+#                         paths_to_include=paths_to_include,
+#                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
+#                         show_spread=False,
+#                         include_median_plot=True)
 
 # paths_to_include = []
 # paths_to_include += [["ITE/", "damaged_1_2_3/"]]
@@ -136,6 +150,25 @@ plot_fitness_vs_numiter(path_to_folder="results/numiter40k_final_children_with_i
 #                                 path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
 #                                 show_spread=True,
 #                                 include_median_plot=True)
+
+
+now = datetime.now()
+now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
+
+kappa_list = [2, 1, 0.5, 0.1, 0.05, 0.01, 0.005, 0.001,]
+group_names = []
+
+paths_to_include = []
+for kappa in kappa_list:
+    group_names += [f"k = {kappa}"]  
+    paths_to_include += [["damaged_1/", f"kappa_{kappa}", "inHERA-b0"]]
+
+plot_fitness_vs_numiter(path_to_folder="results/inhera-b0_kappa_sweep",
+                        paths_to_include=paths_to_include,
+                        path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
+                        show_spread=True,
+                        include_median_plot=True,
+                        group_names=group_names)
 
 
 # now = datetime.now()
