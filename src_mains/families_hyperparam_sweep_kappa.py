@@ -5,22 +5,25 @@ from src.core.children_generator import ChildrenGenerator
 
 # TODO: could implement this script quite quickly by wrapping the families_children_generation script inside these nested for loops and making sure to store everything within a dedicated
 #  hyperparameter directory whose name includes the values of the hyper parameters (whose ranges are not length 1, only include the ones that change)
+now = time.time()
 
 # Load/define all the hyperparameters for this run (different hyperparameter settings?, children/damage_dict to test?, algorithms to test children on?, seed identification? fam_id, ancestors_id?, path_to_results?)
 parser = argparse.ArgumentParser()
-parser.add_argument("--save_dir", type=str, required=False, default="trial_folder")
-parser.add_argument("--job_index", type=int, required=False, default=5)
+parser.add_argument("--save_dir", type=str, required=False, default="lab_machine_kappa_sweep")
+parser.add_argument("--job_index", type=int, required=False, default=1)
+parser.add_argument("--algorithm", type=str, required=False, default="inHERA")
 
 args = parser.parse_args()
 save_dir = args.save_dir
 seed = args.job_index
+algorithm = args.algorithm
 
 # Define the hyperparameter range(s)
-kappa_regularisation_weight_list = [2, 1, 0.1, 0.01, 0.001, 0.0001, 0.00001]
+kappa_regularisation_weight_list = [1, 0.1, 0.01, 0.001, 0.0001,]
 
 # Change these
 children_damage_combinations = [(1,), (3, 4), (1, 2, 3)] # Careful, tuples
-algorithms_to_test = ["inHERA-b0", "inHERA", "GPCF-1trust", "GPCF-reg", "GPCF"]
+algorithms_to_test = [algorithm]
 path_to_families = "numiter40k_final_families" # Careful, must be same as below
 from numiter40k_final_families import family_task # Careful, must be same as above
 verbose = True
@@ -58,3 +61,8 @@ for kappa in kappa_regularisation_weight_list:
     children_generator.path_to_children = path_to_results
     children_generator.generate_custom_children(combinations=children_damage_combinations, kappa=kappa, l1_regularisation_weight=l1, invmax_regularisation_weight=v, uncertainty_regularisation_weight=u) # Generate the chosen children
     children_generator.generate_custom_children(combinations=[()], kappa=kappa, l1_regularisation_weight=l1, invmax_regularisation_weight=v, uncertainty_regularisation_weight=u) # Generate the intact child
+
+
+end = time.time()
+
+print(f"Run took: {end} - {now} seconds")
