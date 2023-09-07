@@ -174,7 +174,7 @@ now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 #     for u in [1, 0.1, 0.01, 0.001, 0.0001, 0.00001]:
 #             now = datetime.now()
 #             now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")    
-#             paths_to_include += [[damage, f"u_{u}", "inHERA-b0"]]
+#             paths_to_include += [[damage, f"u_{u}", "inHERA/"]]
 #             group_names += [f"u_{u}"]
 
 #     maxscores_matrix += [plot_fitness_vs_numiter(path_to_folder="results/u_sweep",
@@ -189,43 +189,60 @@ now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 # print(jnp.argmax(jnp.mean(maxscores_matrix, axis=0)))
 # print(group_names[jnp.argmax(jnp.mean(maxscores_matrix, axis=0))])
 
-# # TO PLOT JUST THE BEST HYPERPARAMETER
+# MAXSCORING ROUTINE - kappa
+maxscores_matrix = []
+for damage in ["damaged_1/", "damaged_3_4/", "damaged_1_2_3/"]:
+    paths_to_include = []
+    group_names = []
+    for kappa in [1, 0.1, 0.01, 0.001, 0.0001]:
+            now = datetime.now()
+            now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")    
+            paths_to_include += [[damage, f"kappa_{kappa}", "GPCF/"]]
+            group_names += [f"k{kappa}"]
+
+    maxscores_matrix += [plot_fitness_vs_numiter(path_to_folder="results/kappa_sweep",
+                                    paths_to_include=paths_to_include,
+                                    path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
+                                    show_spread=False,
+                                    include_median_plot=False,
+                                    group_names=group_names)]
+    
+maxscores_matrix = jnp.array(maxscores_matrix)
+print(maxscores_matrix)
+print(jnp.argmax(jnp.mean(maxscores_matrix, axis=0)))
+print(group_names[jnp.argmax(jnp.mean(maxscores_matrix, axis=0))])
+
+# # # TO PLOT JUST THE BEST HYPERPARAMETER plots for u 
 # paths_to_include = []
 
-# paths_to_include += [["damaged_1_2_3/", "GPCF-reg", "l1_0.001-v_0.0001"]]
-# group_names = ["l1_0.001-v_0.0001"]
-# plot_fitness_vs_numiter(path_to_folder="results/l1_v_gpcf_sweep",
+# paths_to_include += [["damaged_1_2_3/", "inHERA/", "u_0.0001"]]
+# group_names = ["u_0.0001"]
+# plot_fitness_vs_numiter(path_to_folder="results/u_sweep",
 #                                     paths_to_include=paths_to_include,
 #                                     path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
 #                                     show_spread=True,
 #                                     include_median_plot=False,
 #                                     group_names=group_names)
 
-# maxscores_matrix = jnp.array(maxscores_matrix)
-# print(maxscores_matrix)
-# print(jnp.argmax(jnp.mean(maxscores_matrix, axis=0)))
-# print(group_names[jnp.argmax(jnp.mean(maxscores_matrix, axis=0))])
 
+# # inHERA SPECIFIC KAPPA SWEEP
+# now = datetime.now()
+# now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
+# kappa_list = [2, 1, 0.5, 0.1, 0.05, 0.01, 0.005, 0.001,]
+# group_names = []
 
-# inHERA SPECIFIC KAPPA SWEEP
-now = datetime.now()
-now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
+# paths_to_include = []
+# for kappa in kappa_list:
+#     group_names += [f"k = {kappa}"]  
+#     paths_to_include += [["damaged_1/", f"kappa_{kappa}", "inHERA-b0"]]
 
-kappa_list = [2, 1, 0.5, 0.1, 0.05, 0.01, 0.005, 0.001,]
-group_names = []
-
-paths_to_include = []
-for kappa in kappa_list:
-    group_names += [f"k = {kappa}"]  
-    paths_to_include += [["damaged_1/", f"kappa_{kappa}", "inHERA-b0"]]
-
-plot_fitness_vs_numiter(path_to_folder="results/inhera-b0_kappa_sweep",
-                        paths_to_include=paths_to_include,
-                        path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
-                        show_spread=False,
-                        include_median_plot=True,
-                        group_names=group_names)
+# plot_fitness_vs_numiter(path_to_folder="results/inhera-b0_kappa_sweep",
+#                         paths_to_include=paths_to_include,
+#                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
+#                         show_spread=False,
+#                         include_median_plot=True,
+#                         group_names=group_names)
 
 
 # now = datetime.now()

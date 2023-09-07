@@ -12,14 +12,20 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--save_dir", type=str, required=False, default="lab_machine_kappa_sweep")
 parser.add_argument("--job_index", type=int, required=False, default=1)
 parser.add_argument("--algorithm", type=str, required=False, default="inHERA")
+parser.add_argument("--hyperparameter", type=float, required=False, default=1)
+
 
 args = parser.parse_args()
 save_dir = args.save_dir
 seed = args.job_index
 algorithm = args.algorithm
+hyperparameter = args.hyperparameter
+
+if type(hyperparameter) != list:
+    hyperparameter = [hyperparameter]
 
 # Define the hyperparameter range(s)
-kappa_regularisation_weight_list = [1, 0.1, 0.01, 0.001, 0.0001,]
+kappa_regularisation_weight_list = hyperparameter
 
 # Change these
 children_damage_combinations = [(1,), (3, 4), (1, 2, 3)] # Careful, tuples
