@@ -50,7 +50,7 @@ children_generator = ChildrenGenerator(algorithms_to_test=algorithms_to_test,
 # Add a for loop for all the parameters that you would like to test
 l1 = 0.001
 v = 0.0001
-u = 0.001
+u = 0.0001
 for kappa in kappa_regularisation_weight_list:
     print(f"Starting pass for kappa={kappa}")
     path_to_hyperparam_folder = f"{save_dir}/hyperparameter_sweep/kappa_{kappa}"
