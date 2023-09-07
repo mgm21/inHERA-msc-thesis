@@ -8,6 +8,8 @@ from src.adaptation_algorithms.gpcf_1trust import GPCF1Trust
 from src.adaptation_algorithms.gpcf_reg import GPCFReg
 from src.adaptation_algorithms.inhera import InHERA
 from src.adaptation_algorithms.inhera_b0 import InHERAB0
+from src.adaptation_algorithms.inhera_expert import InHERAExpert
+from src.adaptation_algorithms.inhera_b0_expert import InHERAB0Expert
 from src.loaders.repertoire_loader import RepertoireLoader
 from src.core.family import Family
 
@@ -257,7 +259,59 @@ class ChildrenGenerator:
 
             del gp, agent
             del inhera_b0
-            gc.collect()  
+            gc.collect()
+        
+        if "inHERA-expert" in self.algorithms_to_test:
+            agent = AdaptiveAgent(task=self.task,
+                        name=name,
+                        sim_repertoire_arrays=self.simu_arrs,
+                        damage_dictionary=damage_dict)
+            
+            gp = GaussianProcess(**kwargs)
+
+            # Create an ITE object with previous objects as inputs
+            inhera_expert = InHERAExpert(agent=agent,
+                    gaussian_process=gp,
+                    alpha=self.ite_alpha,
+                    save_res_arrs=True,
+                    path_to_results=f"{self.path_to_children}/{agent.name}/inHERA-b0/",
+                    verbose=self.verbose,
+                    norm_params=self.norm_params,
+                    family=self.family,
+                    )
+            
+            inhera_expert.run(num_iter=self.ite_num_iter)
+
+            del gp, agent
+            del inhera_expert
+            gc.collect()
+
+        if "inHERA-b0-expert" in self.algorithms_to_test:
+            agent = AdaptiveAgent(task=self.task,
+                        name=name,
+                        sim_repertoire_arrays=self.simu_arrs,
+                        damage_dictionary=damage_dict)
+            
+            gp = GaussianProcess(**kwargs)
+
+            # Create an ITE object with previous objects as inputs
+            inhera_b0_expert = InHERAB0Expert(agent=agent,
+                    gaussian_process=gp,
+                    alpha=self.ite_alpha,
+                    save_res_arrs=True,
+                    path_to_results=f"{self.path_to_children}/{agent.name}/inHERA-b0/",
+                    verbose=self.verbose,
+                    norm_params=self.norm_params,
+                    family=self.family,
+                    )
+            
+            inhera_b0_expert.run(num_iter=self.ite_num_iter)
+
+            del gp, agent
+            del inhera_b0_expert
+            gc.collect()                        
+
+
 
         # Make sure to reset only after all collaborative algorithms have taken place
         if not self.children_in_ancestors:
