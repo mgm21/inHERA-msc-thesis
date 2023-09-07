@@ -2,20 +2,20 @@ from src.utils.all_imports import *
 from src.adaptation_algorithms.experience_sharing_algorithm import ExperienceSharingAlgorithm
 from src.utils.hexapod_damage_dicts import intact
 
-class InHERAB0(ExperienceSharingAlgorithm):
+class InHERAB0Expert(ExperienceSharingAlgorithm):
     """The inHERA algorithm which allows for experience sharing/inheritance as well as taking into account the uncertainty of ancestors with regards to their final GP means"""
     def __init__(self, family, agent, gaussian_process, alpha=0.9, verbose=False,
                  path_to_results="families/ite_example/", save_res_arrs=True, norm_params=(0, 40), plot_repertoires=False,):
         
         super().__init__(family, agent, gaussian_process, alpha, verbose,
                  path_to_results, save_res_arrs, norm_params, plot_repertoires)
+        
+        
 
         self.create_simulated_arrays()
 
         # Set best hyperparameters of algorithm 
         gaussian_process.kappa = 1
-
-        # Set best hyperparameter
         gaussian_process.uncertainty_regularisation_weight = 0.00001
 
         # Regularisation and constrained optimisation settings
@@ -24,10 +24,20 @@ class InHERAB0(ExperienceSharingAlgorithm):
         self.gaussian_process.loss = self.gaussian_process.loss_regularised_l1_invmax_uncertainty
     
     def get_ancestor_weights(self, counter):
-        W = self.gaussian_process.optimise_W(x_observed=self.agent.x_observed[:counter+1],
-                                                    y_observed=self.agent.y_observed[:counter+1],
-                                                    y_priors=self.ancestor_mus_at_obs[:, :counter+1],
-                                                    y_priors_vars=self.ancestor_vars_at_obs[:, :counter+1])
+        if counter <= 5:
+            # Look for the single closest ancestor
+            ancestor_mus_at_curr_obs = self.ancestor_mus_at_obs
+            diffs = jnp.abs(ancestor_mus_at_curr_obs[:, counter] - jnp.repeat(a=self.agent.y_observed[counter], repeats=ancestor_mus_at_curr_obs.shape[0]))
+            closest_ancest_idx = jnp.nanargmin(diffs)
+            W = jnp.zeros(shape=ancestor_mus_at_curr_obs.shape[0])
+            W = W.at[closest_ancest_idx].set(1)
+        
+        else:
+            W = self.gaussian_process.optimise_W(x_observed=self.agent.x_observed[:counter+1],
+                                                        y_observed=self.agent.y_observed[:counter+1],
+                                                        y_priors=self.ancestor_mus_at_obs[:, :counter+1],
+                                                        y_priors_vars=self.ancestor_vars_at_obs[:, :counter+1])
+        
         if self.verbose: print(f"GPCF's weights: {W}")
         return W
     

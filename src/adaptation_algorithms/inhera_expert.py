@@ -2,7 +2,7 @@ from src.utils.all_imports import *
 from src.adaptation_algorithms.experience_sharing_algorithm import ExperienceSharingAlgorithm
 from src.utils.hexapod_damage_dicts import intact
 
-class InHERAB0(ExperienceSharingAlgorithm):
+class InHERAExpert(ExperienceSharingAlgorithm):
     """The inHERA algorithm which allows for experience sharing/inheritance as well as taking into account the uncertainty of ancestors with regards to their final GP means"""
     def __init__(self, family, agent, gaussian_process, alpha=0.9, verbose=False,
                  path_to_results="families/ite_example/", save_res_arrs=True, norm_params=(0, 40), plot_repertoires=False,):
@@ -13,10 +13,7 @@ class InHERAB0(ExperienceSharingAlgorithm):
         self.create_simulated_arrays()
 
         # Set best hyperparameters of algorithm 
-        gaussian_process.kappa = 1
-
-        # Set best hyperparameter
-        gaussian_process.uncertainty_regularisation_weight = 0.00001
+        gaussian_process.kappa = 0.01
 
         # Regularisation and constrained optimisation settings
         self.gaussian_process.set_box_gradient_projection()
@@ -24,10 +21,20 @@ class InHERAB0(ExperienceSharingAlgorithm):
         self.gaussian_process.loss = self.gaussian_process.loss_regularised_l1_invmax_uncertainty
     
     def get_ancestor_weights(self, counter):
-        W = self.gaussian_process.optimise_W(x_observed=self.agent.x_observed[:counter+1],
-                                                    y_observed=self.agent.y_observed[:counter+1],
-                                                    y_priors=self.ancestor_mus_at_obs[:, :counter+1],
-                                                    y_priors_vars=self.ancestor_vars_at_obs[:, :counter+1])
+        if counter <= 5:
+            # Look for the single closest ancestor
+            ancestor_mus_at_curr_obs = self.ancestor_mus_at_obs
+            diffs = jnp.abs(ancestor_mus_at_curr_obs[:, counter] - jnp.repeat(a=self.agent.y_observed[counter], repeats=ancestor_mus_at_curr_obs.shape[0]))
+            closest_ancest_idx = jnp.nanargmin(diffs)
+            W = jnp.zeros(shape=ancestor_mus_at_curr_obs.shape[0])
+            W = W.at[closest_ancest_idx].set(1)
+        
+        else:
+            W = self.gaussian_process.optimise_W(x_observed=self.agent.x_observed[:counter+1],
+                                                        y_observed=self.agent.y_observed[:counter+1],
+                                                        y_priors=self.ancestor_mus_at_obs[:, :counter+1],
+                                                        y_priors_vars=self.ancestor_vars_at_obs[:, :counter+1])
+            
         if self.verbose: print(f"GPCF's weights: {W}")
         return W
     
@@ -56,13 +63,8 @@ class InHERAB0(ExperienceSharingAlgorithm):
         simulated_var = jnp.full(shape=self.family.ancestor_mus.T.shape, fill_value=initial_uncertainty)
         num_of_ancestors = self.family.ancestor_mus.shape[0]
 
-        # These are the base arrays that will be used in the inHERA equation. If they must be changed, it should be done here
         self.simulated_mu = simulated_mu
         self.simulated_mu_repeated_num_ancest_times = jnp.repeat(a=jnp.expand_dims(a=self.simulated_mu, axis=1), repeats=num_of_ancestors, axis=1)
-
-        self.simulated_mu *= 1e-10
-        self.simulated_mu_repeated_num_ancest_times *= 1e-10
-
         self.simulated_var = simulated_var
 
 
@@ -74,8 +76,8 @@ if __name__ == "__main__":
     from src.core.gaussian_process import GaussianProcess
     from src.loaders.repertoire_loader import RepertoireLoader
 
-    path_to_family = "families/numiter40k_final_families"
-    from numiter40k_final_families import family_task
+    path_to_family = "families/family_4"
+    from families.family_4 import family_task
     fam = Family(path_to_family=path_to_family)
     task = family_task.task
     norm_params = jnp.load(f"{path_to_family}/norm_params.npy")
@@ -92,6 +94,6 @@ if __name__ == "__main__":
                 gaussian_process=gp,
                 verbose=True,
                 norm_params=norm_params,
-                save_res_arrs=False)
+                save_res_arrs=True)
     
     algo.run(num_iter=5)

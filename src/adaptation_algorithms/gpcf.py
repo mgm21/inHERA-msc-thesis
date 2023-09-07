@@ -8,6 +8,9 @@ class GPCF(GPCFVariant):
         
         super().__init__(family, agent, gaussian_process, alpha, verbose,
                  path_to_results, save_res_arrs, norm_params, plot_repertoires)
+        
+        # Set best hyperparameters of algorithm 
+        gaussian_process.kappa = 1
     
     def get_ancestor_weights(self, counter):
         W = self.gaussian_process.optimise_W(x_observed=self.agent.x_observed[:counter+1],

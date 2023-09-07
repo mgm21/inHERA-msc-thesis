@@ -9,6 +9,8 @@ class InHERA(ExperienceSharingAlgorithm):
         
         super().__init__(family, agent, gaussian_process, alpha, verbose,
                  path_to_results, save_res_arrs, norm_params, plot_repertoires)
+        
+        gaussian_process.kappa = 0.01
 
         self.create_simulated_arrays()
 
