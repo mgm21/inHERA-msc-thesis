@@ -10,8 +10,6 @@ class InHERAB0Expert(ExperienceSharingAlgorithm):
         super().__init__(family, agent, gaussian_process, alpha, verbose,
                  path_to_results, save_res_arrs, norm_params, plot_repertoires)
         
-        
-
         self.create_simulated_arrays()
 
         # Set best hyperparameters of algorithm 

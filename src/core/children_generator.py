@@ -274,7 +274,7 @@ class ChildrenGenerator:
                     gaussian_process=gp,
                     alpha=self.ite_alpha,
                     save_res_arrs=True,
-                    path_to_results=f"{self.path_to_children}/{agent.name}/inHERA-b0/",
+                    path_to_results=f"{self.path_to_children}/{agent.name}/inHERA-expert/",
                     verbose=self.verbose,
                     norm_params=self.norm_params,
                     family=self.family,
@@ -299,7 +299,7 @@ class ChildrenGenerator:
                     gaussian_process=gp,
                     alpha=self.ite_alpha,
                     save_res_arrs=True,
-                    path_to_results=f"{self.path_to_children}/{agent.name}/inHERA-b0/",
+                    path_to_results=f"{self.path_to_children}/{agent.name}/inHERA-b0-expert/",
                     verbose=self.verbose,
                     norm_params=self.norm_params,
                     family=self.family,
@@ -310,8 +310,6 @@ class ChildrenGenerator:
             del gp, agent
             del inhera_b0_expert
             gc.collect()                        
-
-
 
         # Make sure to reset only after all collaborative algorithms have taken place
         if not self.children_in_ancestors:

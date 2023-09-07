@@ -107,22 +107,22 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
 
     return maxscores
         
-now = datetime.now()
-now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
+# now = datetime.now()
+# now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
-damage = "damaged_1_2_3/"
-paths_to_include = []
-for algorithm in ["GPCF/", "GPCF-1trust/"]: #  "GPCF-reg/", "GPCF-1trust/", "inHERA/", "inHERA-b0/"
-    paths_to_include += [[algorithm, damage, "kappa_0.001"]]
+# damage = "damaged_1_2_3/"
+# paths_to_include = []
+# for algorithm in ["GPCF/", "GPCF-1trust/"]: #  "GPCF-reg/", "GPCF-1trust/", "inHERA/", "inHERA-b0/"
+#     paths_to_include += [[algorithm, damage, "kappa_0.001"]]
 
-now = datetime.now()
-now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
+# now = datetime.now()
+# now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
-plot_fitness_vs_numiter(path_to_folder="results/kappa_sweep",
-                        paths_to_include=paths_to_include,
-                        path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
-                        show_spread=True,
-                        include_median_plot=True)
+# plot_fitness_vs_numiter(path_to_folder="results/kappa_sweep",
+#                         paths_to_include=paths_to_include,
+#                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
+#                         show_spread=True,
+#                         include_median_plot=True)
 
 # Make sure to incude a "/" at the end of a tag to not confuse damaged_0/ with damaged_0_1/, for example
 
@@ -204,27 +204,27 @@ plot_fitness_vs_numiter(path_to_folder="results/kappa_sweep",
 # print(group_names[jnp.argmax(jnp.mean(maxscores_matrix, axis=0))])
 
 # MAXSCORING ROUTINE - kappa
-# maxscores_matrix = []
-# for damage in ["damaged_1/", "damaged_3_4/", "damaged_1_2_3/"]:
-#     paths_to_include = []
-#     group_names = []
-#     for kappa in [1, 0.1, 0.01, 0.001, 0.0001]:
-#             now = datetime.now()
-#             now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")    
-#             paths_to_include += [[damage, f"kappa_{kappa}", "GPCF/"]]
-#             group_names += [f"k{kappa}"]
+maxscores_matrix = []
+for damage in ["damaged_1/", "damaged_3_4/", "damaged_1_2_3/"]:
+    paths_to_include = []
+    group_names = []
+    for kappa in [4, 3, 2, 1, 0.1, 0.01, 0.001, 0.0001]:
+            now = datetime.now()
+            now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")    
+            paths_to_include += [[damage, f"kappa_{kappa}", "inHERA-b0/"]]
+            group_names += [f"k{kappa}"]
 
-#     maxscores_matrix += [plot_fitness_vs_numiter(path_to_folder="results/kappa_sweep",
-#                                     paths_to_include=paths_to_include,
-#                                     path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
-#                                     show_spread=False,
-#                                     include_median_plot=False,
-#                                     group_names=group_names)]
+    maxscores_matrix += [plot_fitness_vs_numiter(path_to_folder="results/kappa_sweep",
+                                    paths_to_include=paths_to_include,
+                                    path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
+                                    show_spread=False,
+                                    include_median_plot=False,
+                                    group_names=group_names)]
     
-# maxscores_matrix = jnp.array(maxscores_matrix)
-# print(maxscores_matrix)
-# print(jnp.argmax(jnp.mean(maxscores_matrix, axis=0)))
-# print(group_names[jnp.argmax(jnp.mean(maxscores_matrix, axis=0))])
+maxscores_matrix = jnp.array(maxscores_matrix)
+print(maxscores_matrix)
+print(jnp.argmax(jnp.mean(maxscores_matrix, axis=0)))
+print(group_names[jnp.argmax(jnp.mean(maxscores_matrix, axis=0))])
 
 # # # TO PLOT JUST THE BEST HYPERPARAMETER plots for u 
 # paths_to_include = []
