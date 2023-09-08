@@ -7,7 +7,7 @@ from src.core.children_generator import ChildrenGenerator
 parser = argparse.ArgumentParser()
 parser.add_argument("--save_dir", type=str, required=False, default="./trial_setting")
 parser.add_argument("--job_index", type=int, required=False, default=1)
-parser.add_argument("--algorithm", type=str, required=False, default="inHERA-b0-expert")
+parser.add_argument("--algorithm", type=str, required=False, default="GPCF")
 
 
 args = parser.parse_args()
@@ -15,9 +15,22 @@ save_dir = args.save_dir
 seed = args.job_index
 algorithm = args.algorithm
 
+if algorithm == "GPCF":
+    algorithms_to_test = ["GPCF", "GPCF-reg", "GPCF-1trust"]
+elif algorithm == "inHERA":
+    algorithms_to_test = ["inHERA", "inHERA-b0"]
+elif algorithm == "ITE":
+    algorithms_to_test = ["ITE", "inHERA-expert", "inHERA-b0-expert"]
+elif algorithm == "experts":
+    algorithms_to_test = ["inHERA-expert", "inHERA-b0-expert"]
+else:
+    algorithms_to_test = [algorithm]
+
+print(algorithms_to_test)
+
 # Change these
 children_damage_combinations = [(1,), (3, 4), (1, 2, 3)] # Careful, tuples
-algorithms_to_test = [algorithm] # "ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA", "inHERA-b0", "inHERA-expert", "inHERA-b0-expert"
+ # "ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA", "inHERA-b0", "inHERA-expert", "inHERA-b0-expert"
 path_to_families = "numiter40k_final_families" # Careful, must be same as below
 from numiter40k_final_families import family_task # Careful, must be same as above
 verbose = True
