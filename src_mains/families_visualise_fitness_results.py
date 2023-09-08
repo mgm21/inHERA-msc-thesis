@@ -1,9 +1,21 @@
 from src.utils.all_imports import *
+import matplotlib.font_manager as fm
 
 def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, show_spread=True, group_names=None, include_median_plot=True, include_max_plot=True):    
     # plt.style.use("seaborn")
     sns.set()
-    sns.color_palette(n_colors=15)
+    color_list = sns.color_palette(n_colors=15)
+
+    color_dict = {"ITE/": color_list[0],
+                  "GPCF-reg/": color_list[2],
+                  "GPCF-1trust/": color_list[3],
+                  "inHERA-expert/": color_list[7],
+                  "inHERA-b0-expert/": color_list[8],
+                  "inHERA-b0/": color_list[6],
+                  "inHERA/": color_list[5],
+                  "GPCF/": color_list[1],}
+
+
     maxscores = []
     medscores = []
 
@@ -13,11 +25,17 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
     elif include_median_plot and not include_max_plot:
         fig, ax2 = plt.subplots()
     elif not include_median_plot and include_max_plot:
-        fig, ax1 = plt.subplots()
+        fig, ax1 = plt.subplots(figsize=(9, 6))
 
     if len(paths_to_include) == 0: print("Please include at least 1 list with tags in paths_to_include")
 
     for idx, path_to_include in enumerate(paths_to_include):
+
+        # Set algo specific color
+        for algo_name in list(color_dict.keys()):
+            if algo_name in path_to_include:
+                color = color_dict[algo_name]
+
         # Initialise objects to store all the y_observed arrays to be averaged to plot one group (i.e. one curve)
         observation_arrays = []
         max_observation_arrays = []
@@ -55,8 +73,8 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
                 max_quantile1_array = jnp.nanquantile(max_observation_arrays, q=0.25, axis=0)
                 max_quantile3_array = jnp.nanquantile(max_observation_arrays, q=0.75, axis=0)
                 
-                if include_median_plot: ax2.fill_between(num_iter, quantile1_array, quantile3_array, alpha=alpha)
-                if include_max_plot: ax1.fill_between(num_iter, max_quantile1_array, max_quantile3_array, alpha=alpha)
+                if include_median_plot: ax2.fill_between(num_iter, quantile1_array, quantile3_array, alpha=alpha, color=color)
+                if include_max_plot: ax1.fill_between(num_iter, max_quantile1_array, max_quantile3_array, alpha=alpha, color=color)
         
         else:
             num_iter = num_iter = jnp.array(list(range(1, observation_arrays.shape[1]+1)))  
@@ -64,8 +82,8 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
             max_median_array = max_observation_arrays[0]
 
             # Dummy fills to ensure consistency with colour fill 
-            if include_median_plot: ax2.fill_between(num_iter, jnp.zeros(shape=len(num_iter)), jnp.zeros(shape=len(num_iter)), alpha=alpha)
-            if include_max_plot: ax1.fill_between(num_iter, jnp.zeros(shape=len(num_iter)), jnp.zeros(shape=len(num_iter)), alpha=alpha)
+            if include_median_plot: ax2.fill_between(num_iter, jnp.zeros(shape=len(num_iter)), jnp.zeros(shape=len(num_iter)), alpha=alpha, color=color)
+            if include_max_plot: ax1.fill_between(num_iter, jnp.zeros(shape=len(num_iter)), jnp.zeros(shape=len(num_iter)), alpha=alpha, color=color)
 
         # Calculate this curve's score
         maxscores += [round(jnp.sum(max_median_array)/20, ndigits=8)]
@@ -78,21 +96,30 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
             medgroup_name = ", ".join(name_tags).replace("/", "").replace("_", " ").replace("-", ",") + f" , m = %.2f" % medscores[idx]
         
         else:
-            maxgroup_name = group_names[idx] + f" , m = %.2f" % maxscores[idx]
-            medgroup_name = group_names[idx] + f" , m = %.2f" % medscores[idx]
+            maxgroup_name = group_names[idx] + f" , m = %.3f" % maxscores[idx]
+            medgroup_name = group_names[idx] + f" , m = %.3f" % medscores[idx]
         
         # Plot this median & quantiles on the general fig
-        if include_median_plot: ax2.plot(num_iter, median_array, label=medgroup_name)
-        if include_max_plot: ax1.plot(num_iter, max_median_array, label=maxgroup_name)
+        if include_median_plot: ax2.plot(num_iter, median_array, label=medgroup_name, color=color)
+        if include_max_plot: ax1.plot(num_iter, max_median_array, label=maxgroup_name, color=color)
 
     # Configure and save the figure
 
     # min_y, max_y = 0, 0.2
 
+    font_used = "Serif"
+    font_size = 20
+    font = {'fontname': font_used}
+    legend_font = fm.FontProperties(family=font_used)
+    legend_font._size = font_size - 3
+
+
     if include_max_plot:
-        ax1.set_xlabel('Adaptation steps')
-        ax1.set_ylabel('Maximum fitness')
-        ax1.legend(loc="lower right")
+        ax1.set_xlabel('Adaptation steps', fontsize=font_size, **font)
+        ax1.set_ylabel('Maximum fitness', fontsize=font_size, **font)
+        ax1.legend(loc="lower right", prop=legend_font,)
+        ax1.tick_params(axis='x', labelsize=15)
+        ax1.tick_params(axis='y', labelsize=15)
         # To put legend outside of figure
         # ax1.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
         ax1.set_ylim()
@@ -107,26 +134,27 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
 
     return maxscores
         
-now = datetime.now()
-now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
-damage = "damaged_1/"
-paths_to_include = []
-for algorithm in ["GPCF-reg/",]: #  "GPCF-reg/", "GPCF-1trust/", "inHERA/", "inHERA-b0/"
-    paths_to_include += [[algorithm, damage,]]
+# FINAL PLOTS PLOTTING ROUTNINE
+for algo in ["GPCF", "GPCF-reg", "GPCF-1trust", "inHERA", "inHERA-b0", "inHERA-expert", "inHERA-b0-expert"]:
+    group_names = ["ITE", algo]
+    for damage in ["damaged_1/", "damaged_3_4/", "damaged_1_2_3/"]:
+        paths_to_include = []
+        for algorithm in ["ITE/", f"{algo}/"]: # "ITE", "GPCF/", "GPCF-reg/", "GPCF-1trust/", "inHERA/", "inHERA-b0/", "inHERA-expert/", "inHERA-b0-expert/",
+            paths_to_include += [[algorithm, damage,]]
 
-now = datetime.now()
-now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
+        now = datetime.now()
+        now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
-plot_fitness_vs_numiter(path_to_folder="results/data_with_only_a_few_repertoires",
-                        paths_to_include=paths_to_include,
-                        path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
-                        show_spread=True,
-                        include_median_plot=True)
+        plot_fitness_vs_numiter(path_to_folder="results/final_children_restricted",
+                                paths_to_include=paths_to_include,
+                                path_to_result=f"plot_results/{algo}-{now_str}",
+                                show_spread=True,
+                                include_median_plot=False,
+                                group_names=group_names)
 
-# Make sure to incude a "/" at the end of a tag to not confuse damaged_0/ with damaged_0_1/, for example
-
-# damage = "damaged_1_2_3/"
+# # Make sure to incude a "/" at the end of a tag to not confuse damaged_0/ with damaged_0_1/, for example
+# damage = "damaged_1/"
 # paths_to_include = []
 # paths_to_include += [["ITE/", damage]]
 # paths_to_include += [["GPCF/", damage]]
@@ -139,7 +167,7 @@ plot_fitness_vs_numiter(path_to_folder="results/data_with_only_a_few_repertoires
 # now = datetime.now()
 # now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
-# plot_fitness_vs_numiter(path_to_folder="results/numiter40k_final_children_with_intact_ancestor_and_intact_child",
+# plot_fitness_vs_numiter(path_to_folder="results/final_children",
 #                         paths_to_include=paths_to_include,
 #                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
 #                         show_spread=False,

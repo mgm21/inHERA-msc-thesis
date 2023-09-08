@@ -40,7 +40,7 @@ path_to_family = f"{path_to_families}/family-seed_{seed}_last_repertoire" # Care
 norm_params = jnp.load(f"{path_to_family}/norm_params.npy")
 task = family_task.task 
 num_iter = family_task.algo_num_iter
-children_in_ancestors = family_task.children_in_ancestors
+children_in_ancestors = False # TODO change if children in ancestors needed 
 
 # Make a directory for the seed (mimic how families are named in the families folder)
 path_to_results = f"{save_dir}/children/family-seed_{seed}_repertoire"
