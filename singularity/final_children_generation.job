@@ -53,7 +53,7 @@
 #          the job is terminated.
 
 
-#PBS -l walltime=2:30:00
+#PBS -l walltime=0:20:00
 #PBS -J 1-20
 
 # number of nodes
@@ -103,7 +103,7 @@ stagein()
 {
  echo ' '
  echo Transferring files from server to compute node
- cp $HOME/final_numiter40k_hyperparam_sweep.sif ./
+ cp $HOME/final_manual_input_kappa_sweep.sif ./
  echo Files in node work directory are as follows:
  ls -l
 }
@@ -123,7 +123,7 @@ runprogram()
     # export SINGULARITYENV_CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
     echo $CUDA_VISIBLE_DEVICES
     echo $PBS_ARRAY_INDEX
-    time singularity -d run --nv final_numiter40k_hyperparam_sweep.sif $PBS_ARRAY_INDEX
+    time singularity -d run --nv final_manual_input_kappa_sweep.sif $PBS_ARRAY_INDEX inHERA-b0
 
 }
 

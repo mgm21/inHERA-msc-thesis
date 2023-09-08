@@ -1,8 +1,7 @@
 from src.utils.all_imports import *
 from scipy.stats import mannwhitneyu
 
-def p_values(path_to_folder, paths_to_include, path_to_result, adaptation_step=6, show_spread=True, group_names=None, include_median_plot=True, include_max_plot=True):    
-    # plt.style.use("seaborn")
+def p_values(path_to_folder, paths_to_include, path_to_result, adaptation_step=3, show_spread=True, group_names=None, include_median_plot=True, include_max_plot=True):    
     sns.set()
     sns.color_palette(n_colors=15)    
     fig, ax = plt.subplots()
@@ -36,34 +35,38 @@ def p_values(path_to_folder, paths_to_include, path_to_result, adaptation_step=6
     
         max_observation_arrays = jnp.array(max_observation_arrays)
         all_arrs_to_compare += [max_observation_arrays[:, adaptation_step]]
-    
-    all_arrs_to_compare = jnp.array(all_arrs_to_compare)
-    print(all_arrs_to_compare)
 
-    print(all_arrs_to_compare[0])
-
-    statistic, p_value = mannwhitneyu(all_arrs_to_compare[0], all_arrs_to_compare[1])
-    print(statistic, p_value)
-
-    # # Configure and save the figure
-    # ax.set_xlabel('Adaptation steps')
-    # ax.set_ylabel('Maximum fitness')
-    # # ax1.legend(loc="lower right")
-    # # To put legend outside of figure
-    # # ax1.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-    # ax.set_ylim()
-    # fig.savefig(path_to_result, dpi=600, bbox_inches="tight")
+    data = jnp.array(all_arrs_to_compare)
+    fig = plt.figure(figsize =(10, 7))
+    ax = fig.add_axes([0, 0, 1, 1])
+    bp = ax.boxplot(data)
 
 
-damage = "damaged_1_2_3/"
+    print(data)
+
+    scaling = 10
+    # Get the p-value between the first array and all the other arrays: https://stackoverflow.com/questions/45310254/fixed-digits-after-decimal-with-f-strings
+    for i, arr in enumerate(all_arrs_to_compare):
+        if i != 0:
+            statistic, p_value = mannwhitneyu(all_arrs_to_compare[0], all_arrs_to_compare[i])
+            print(p_value)
+            x1, x2 = 0+1, i+1
+            y, h, col = 1/scaling + i/scaling, 1, 'k'
+            ax.plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)
+            ax.text((x1+x2)*.5, y+h, f"p = %.2f" % p_value, ha='center', va='bottom', color=col)
+
+    fig.savefig("plot_results/boxplot.png", dpi=600)
+
+
+damage = "damaged_1/"
 paths_to_include = []
-for algorithm in ["GPCF/", "inHERA/"]: #  "GPCF-reg/", "GPCF-1trust/", "inHERA/", "inHERA-b0/"
-    paths_to_include += [[algorithm, damage, "kappa_0.001"]]
+for algorithm in ["GPCF-reg/", "GPCF-1trust/", "inHERA/", "inHERA-b0/", "GPCF/"]:
+    paths_to_include += [[algorithm, damage,]]
 
 now = datetime.now()
 now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
-p_values(path_to_folder="results/kappa_sweep",
+p_values(path_to_folder="results/data_with_only_a_few_repertoires",
                         paths_to_include=paths_to_include,
                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
                         show_spread=False,
