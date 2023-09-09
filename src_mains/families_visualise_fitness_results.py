@@ -133,25 +133,71 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
     fig.savefig(path_to_result, dpi=600, bbox_inches="tight")
 
     return maxscores
+
+
+def get_n_best_seeds(path_to_folder, paths_to_include, n=10):    
+    if len(paths_to_include) == 0: print("Please include at least 1 list with tags in paths_to_include")
+
+    for idx, path_to_include in enumerate(paths_to_include):
+        # Initialise objects to store all the y_observed arrays to be averaged to plot one group (i.e. one curve)
+        max_observation_arrays = []
+
+        # For all directories in the overall folder
+        for root, _, _ in os.walk(path_to_folder):
+            # Important to add / so that the program can differentiate damaged_0 and damaged_0_1 for example
+            root += "/"
+
+            # Only retain the ones which match the requirements in the path to include
+            if all(tag in root for tag in path_to_include):
+                print(f"Included in {path_to_include}'s plot: {root}")
+                max_observation_array = jnp.array([jnp.nanmax(observation_array[:i+1]) for i in range(observation_array.shape[0])])
+                max_observation_arrays += [max_observation_array]
         
+        if len(max_observation_arrays) == 0:
+            print(f"Sorry, this path_to_include {path_to_include} is not found in the {path_to_folder} folder. Or the {path_to_folder} is not recognised.")
+            break
 
-# FINAL PLOTS PLOTTING ROUTNINE
-for algo in ["GPCF", "GPCF-reg", "GPCF-1trust", "inHERA", "inHERA-b0", "inHERA-expert", "inHERA-b0-expert"]:
-    group_names = ["ITE", algo]
-    for damage in ["damaged_1/", "damaged_3_4/", "damaged_1_2_3/"]:
-        paths_to_include = []
-        for algorithm in ["ITE/", f"{algo}/"]: # "ITE", "GPCF/", "GPCF-reg/", "GPCF-1trust/", "inHERA/", "inHERA-b0/", "inHERA-expert/", "inHERA-b0-expert/",
-            paths_to_include += [[algorithm, damage,]]
+        # Turn observation lists to JAX to perform jnp operations on them
+        max_observation_arrays = jnp.array(max_observation_arrays)
 
-        now = datetime.now()
-        now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
+        if len(max_observation_arrays) != 1:
+            max_median_array = jnp.nanmedian(max_observation_arrays, axis=0)
+            num_iter = jnp.array(list(range(1, max_observation_arrays.shape[1]+1)))
 
-        plot_fitness_vs_numiter(path_to_folder="results/final_children_restricted",
-                                paths_to_include=paths_to_include,
-                                path_to_result=f"plot_results/{algo}-{now_str}",
-                                show_spread=True,
-                                include_median_plot=False,
-                                group_names=group_names)
+        # Calculate this curve's score
+        maxscores += [round(jnp.sum(max_median_array)/20, ndigits=8)]
+
+        # Generate the default group name from the tags in the path to include
+        name_tags = [tag for tag in path_to_include]
+        maxgroup_name = ", ".join(name_tags).replace("/", "").replace("_", " ").replace("-", ",") + f" , m = %.2f" % maxscores[idx]
+        print(maxgroup_name)
+
+algo = "ITE"
+damage = "damaged_1/"
+paths_to_include = []
+for seed in range(1,20):
+    paths_to_include += [[f"seed_{seed}_", f"{algo}/", damage]]
+
+get_n_best_seeds(path_to_folder="results/final_children", paths_to_include=paths_to_include)
+
+
+# # FINAL PLOTS PLOTTING ROUTNINE
+# for algo in ["GPCF", "GPCF-reg", "GPCF-1trust", "inHERA", "inHERA-b0", "inHERA-expert", "inHERA-b0-expert"]:
+#     group_names = ["ITE", algo]
+#     for damage in ["damaged_1/", "damaged_3_4/", "damaged_1_2_3/"]:
+#         paths_to_include = []
+#         for algorithm in ["ITE/", f"{algo}/"]: # "ITE", "GPCF/", "GPCF-reg/", "GPCF-1trust/", "inHERA/", "inHERA-b0/", "inHERA-expert/", "inHERA-b0-expert/",
+#             paths_to_include += [[algorithm, damage,]]
+
+#         now = datetime.now()
+#         now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
+
+#         plot_fitness_vs_numiter(path_to_folder="results/final_children",
+#                                 paths_to_include=paths_to_include,
+#                                 path_to_result=f"plot_results/{algo}-{now_str}",
+#                                 show_spread=True,
+#                                 include_median_plot=False,
+#                                 group_names=group_names)
 
 # # Make sure to incude a "/" at the end of a tag to not confuse damaged_0/ with damaged_0_1/, for example
 # damage = "damaged_1/"
