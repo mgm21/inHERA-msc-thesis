@@ -1,7 +1,6 @@
-from src.utils.all_imports import *
-from src.utils.hexapod_damage_dicts import get_damage_dict, shortform_damage_list
-from src.core.adaptive_agent import AdaptiveAgent
-from src.core.gaussian_process import GaussianProcess
+from src.utils.hexapod_damage_dicts import shortform_damage_list
+from src.core.adaptation.adaptive_agent import AdaptiveAgent
+from src.core.adaptation.gaussian_process import GaussianProcess
 from src.adaptation_algorithms.ite import ITE
 from src.loaders.repertoire_loader import RepertoireLoader
 

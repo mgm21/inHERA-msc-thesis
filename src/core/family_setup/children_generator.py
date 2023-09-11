@@ -1,17 +1,16 @@
-from src.utils.all_imports import *
-from src.utils.hexapod_damage_dicts import get_damage_dict, shortform_damage_list
-from src.core.adaptive_agent import AdaptiveAgent
-from src.core.gaussian_process import GaussianProcess
+from src.utils.hexapod_damage_dicts import shortform_damage_list
+from src.core.adaptation.adaptive_agent import AdaptiveAgent
+from src.core.adaptation.gaussian_process import GaussianProcess
 from src.adaptation_algorithms.ite import ITE
-from src.adaptation_algorithms.gpcf import GPCF
-from src.adaptation_algorithms.gpcf_1trust import GPCF1Trust
-from src.adaptation_algorithms.gpcf_reg import GPCFReg
-from src.adaptation_algorithms.inhera import InHERA
-from src.adaptation_algorithms.inhera_b0 import InHERAB0
-from src.adaptation_algorithms.inhera_expert import InHERAExpert
-from src.adaptation_algorithms.inhera_b0_expert import InHERAB0Expert
+from src.adaptation_algorithms.gpcf_variants.gpcf import GPCF
+from src.adaptation_algorithms.gpcf_variants.gpcf_1trust import GPCF1Trust
+from src.adaptation_algorithms.gpcf_variants.gpcf_reg import GPCFReg
+from src.adaptation_algorithms.inhera_variants.inhera import InHERA
+from src.adaptation_algorithms.inhera_variants.inhera_b0 import InHERAB0
+from src.adaptation_algorithms.inhera_variants.inhera_expert import InHERAExpert
+from src.adaptation_algorithms.inhera_variants.inhera_b0_expert import InHERAB0Expert
 from src.loaders.repertoire_loader import RepertoireLoader
-from src.core.family import Family
+from src.core.family_setup.family import Family
 
 # TODO: this is a copy of AncestorsGenerator to have a quick way to test children without re-writing logic. Ultimately
 #  make a super class

@@ -154,7 +154,7 @@ class AdaptiveAgent:
 
 
 if __name__ == "__main__":
-    from src.core.task import Task
+    from src.core.pre_adaptation.task import Task
     from src.loaders.repertoire_loader import RepertoireLoader
     import src.utils.hexapod_damage_dicts as hexapod_damage_dicts
 

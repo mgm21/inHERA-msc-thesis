@@ -1,6 +1,6 @@
 from src.utils.all_imports import *
-from src.core.ancestors_generator import AncestorsGenerator
-from src.core.children_generator import ChildrenGenerator
+from src.core.family_setup.ancestors_generator import AncestorsGenerator
+from src.core.family_setup.children_generator import ChildrenGenerator
 from src.loaders.children_loader import ChildrenLoader
 from src.utils.hexapod_damage_dicts import shortform_damage_list, intact
 from src.utils.visualiser import Visualiser
@@ -209,8 +209,6 @@ if __name__ == "__main__":
     # algo_comp.savefig_per_damage_algos_comparison_results2(medians_dict, quantiles1_dict, quantiles2_dict)
 
     # TO RUN A HYPERPARAMETER SWEEP
-    from src.core.adaptive_agent import AdaptiveAgent
-    from src.core.gaussian_process import GaussianProcess
 
     children_gen = ChildrenGenerator(algorithms_to_test=algo_comp.algorithms_to_test,
                                          path_to_family=algo_comp.path_to_family,

@@ -1,5 +1,5 @@
 from src.utils.all_imports import *
-from src.core.task import Task
+from src.core.pre_adaptation.task import Task
 
 class RepertoireOptimiser:
     def __init__(self,
@@ -225,9 +225,7 @@ class RepertoireOptimiser:
 
         
 if __name__ == "__main__":
-    from src.core.adaptive_agent import AdaptiveAgent
-    from src.core.task import Task
-    import src.utils.hexapod_damage_dicts as hexapod_damage_dicts
+    from src.core.pre_adaptation.task import Task
     import argparse
 
     parser = argparse.ArgumentParser()
