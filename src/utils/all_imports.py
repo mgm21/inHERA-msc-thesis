@@ -29,6 +29,7 @@ from qdax.core.emitters.standard_emitters import MixingEmitter
 from qdax.utils.plotting import plot_map_elites_results
 from qdax.utils.plotting import plot_multidimensional_map_elites_grid
 
+
 from qdax.utils.metrics import CSVLogger, default_qd_metrics
 
 from jax.flatten_util import ravel_pytree

@@ -1,25 +1,29 @@
 from src.utils.all_imports import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--save_dir", type=str, required=False, default="final_repertoires")
-parser.add_argument("--job_index", type=int, required=False, default=1)
+parser.add_argument("--save_dir", type=str, required=False, default="./")
+parser.add_argument("--job_index", type=int, required=False, default=20)
+parser.add_argument("--discretisation", type=int, required=False, default=6)
+parser.add_argument("--num_iterations", type=int, required=False, default=100)
 
 args = parser.parse_args()
 save_dir = args.save_dir
 path_to_result = save_dir
 SEED = args.job_index
+discretisation = args.discretisation
+num_iterations = args.num_iterations
 
 batch_size = 256
-env_name = 'hexapod_uni'
+env_name = 'humanoid_uni'
 episode_length = 150
-num_iterations = 40000
+num_iterations = num_iterations
 seed = SEED
 policy_hidden_layer_sizes = (64, 64)
 iso_sigma = 0.005
 line_sigma = 0.05
 min_bd = 0.
 max_bd = 1.0
-grid_shape = tuple([3])*6
+grid_shape = tuple([discretisation])*2
 
 # Init environment
 env = environments.create(env_name, episode_length=episode_length)
