@@ -5,10 +5,12 @@ from src.utils.repertoire_visualiser import Visualiser as RepertoireVisualiser
 seed = 20
 repertoire_path = f"seed_20_last_repertoire/"
 best = True # If you want the rollout for the max fitness individual
-descriptor_coordinates = jnp.array([0, 2]) # Careful! Will only take effect if best = False
+descriptor_coordinates = jnp.array([0, 0]) # Careful! Will only take effect if best = False
+grid_shape = tuple([6])*2
+save_prefix = "halfcheetah_"
 
 batch_size = 256
-env_name = 'humanoid_uni'
+env_name = 'halfcheetah_uni'
 episode_length = 150
 num_iterations = 40000
 policy_hidden_layer_sizes = (64, 64)
@@ -16,7 +18,6 @@ iso_sigma = 0.005
 line_sigma = 0.05
 min_bd = 0.
 max_bd = 1.0
-grid_shape = tuple([6])*2
 
 # Init environment
 env = environments.create(env_name, episode_length=episode_length)
@@ -46,7 +47,7 @@ repertoire = MapElitesRepertoire.load(reconstruction_fn=reconstruction_fn, path=
 if best:
     rollout_idx = jnp.argmax(repertoire.fitnesses)
     rollout_fitness = jnp.max(repertoire.fitnesses)
-    html_path = f"./seed_{seed}_best_rollout.html"
+    html_path = f"seed_{seed}_best_rollout.html"
 else:
     desired_centroids = (descriptor_coordinates + 1)/(grid_shape[0]) - 1/(2*grid_shape[0])
     n = None
@@ -56,7 +57,7 @@ else:
     if n == None: print("Did not find your index.")
     rollout_idx = n
     rollout_fitness = repertoire.fitnesses[rollout_idx]
-    html_path = f"./seed_{seed}_idx_{rollout_idx}.html"
+    html_path = f"seed_{seed}_idx_{rollout_idx}.html"
 
 rollout_bd = repertoire.descriptors[rollout_idx]
 
@@ -85,4 +86,4 @@ while not state.done:
 
 print(f"The trajectory of this individual contains {len(rollout)} transitions.")
 
-html.save_html(html_path, env.sys, [s.qp for s in rollout[:500]])
+html.save_html(save_prefix + html_path, env.sys, [s.qp for s in rollout[:500]])

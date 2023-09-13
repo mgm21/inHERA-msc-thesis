@@ -14,7 +14,7 @@ discretisation = args.discretisation
 num_iterations = args.num_iterations
 
 batch_size = 256
-env_name = 'humanoid_uni'
+env_name = 'halfcheetah_uni'
 episode_length = 150
 num_iterations = num_iterations
 seed = SEED
