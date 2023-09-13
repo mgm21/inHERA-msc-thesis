@@ -1,6 +1,7 @@
 from src.utils.all_imports import *
 from scipy.stats import mannwhitneyu
 import matplotlib.patches as mpatches
+import matplotlib.font_manager as fm
 
 def p_values(path_to_folder, paths_to_include, path_to_result, adaptation_step=2, show_spread=True, group_names=None, include_median_plot=True, include_max_plot=True):    
     sns.set()
@@ -61,7 +62,7 @@ def p_values(path_to_folder, paths_to_include, path_to_result, adaptation_step=2
     data = jnp.array(all_arrs_to_compare)
     fig = plt.figure(figsize =(10, 7))
     ax = fig.add_axes([0, 0, 1, 1])
-    labels = ["ITE", "GPCF", "GPCF-reg", "GPCF-1trust", "inHERA", "inHERA-b0", "inHERA-exp", "inHERA-b0-exp",]
+    labels = ["ITE", "GPCF", "reg", "trust", "inHERA", "b0", "exp", "b0-exp",]
     bp = ax.boxplot(data, labels=labels, medianprops = dict(color = "black",))
 
     print(colors)
@@ -72,26 +73,36 @@ def p_values(path_to_folder, paths_to_include, path_to_result, adaptation_step=2
 
     # print(data)
 
+    font_used = "Serif"
+    font_size = 28
+    font = {'fontname': font_used}
+    legend_font = fm.FontProperties(family=font_used)
+    legend_font._size = font_size - 3
+
+
     scaling = 50
     for i, arr in enumerate(all_arrs_to_compare):
         if i != 0:
             statistic, p_value = mannwhitneyu(all_arrs_to_compare[0], all_arrs_to_compare[i])
             print(p_value)
             x1, x2 = 0+1, i+1
-            y, h, col = 0.5 - 1/scaling + (i)/scaling, 1/scaling, 'k'
+            y, h, col = 0.3 - 3/scaling + (3*i)/scaling, 1/scaling, 'k'
             ax.plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)
 
             if p_value > 0.1:
-                ax.text((x1+x2)*.5, y+h, f"ns" % p_value, ha='center', va='bottom', color=col)
+                ax.text((x1+x2)*.5, y+h, f"ns" % p_value, ha='center', va='bottom', color=col, fontsize=font_size-7, **font)
             if p_value <= 0.05:
-                ax.text((x1+x2)*.5, y+h, f"p = %.3f" % p_value, ha='center', va='bottom', color=col)
+                ax.text((x1+x2)*.5, y+h, f"p = %.4f" % p_value, ha='center', va='bottom', color=col, fontsize=font_size-7, **font)
             if p_value <= 0.1:
-                ax.text((x1+x2)*.5, y+h, f"p = %.3f" % p_value, ha='center', va='bottom', color=col)
+                ax.text((x1+x2)*.5, y+h, f"p = %.4f" % p_value, ha='center', va='bottom', color=col, fontsize=font_size-7, **font)
     
     ax.yaxis.grid(True)
-    ax.set_ylabel('Maximum fitness')
 
-    fig.savefig("plot_results/boxplot.png", dpi=600, bbox_inches="tight")
+    ax.tick_params(axis='x', labelsize=legend_font._size - 5)
+    ax.tick_params(axis='y', labelsize=legend_font._size - 5)
+    ax.set_ylabel('Maximum fitness', fontsize=font_size, **font)
+
+    fig.savefig(f"plot_results/boxplot-{adaptation_step}.png", dpi=600, bbox_inches="tight")
     plt.show()
 
 
@@ -103,7 +114,7 @@ for algorithm in ["ITE/", "GPCF/", "GPCF-reg/", "GPCF-1trust/", "inHERA/", "inHE
 now = datetime.now()
 now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
 
-p_values(path_to_folder="results/final_children_restricted",
+p_values(path_to_folder="results/best_15__1_2_3",
                         paths_to_include=paths_to_include,
                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}",
                         show_spread=False,

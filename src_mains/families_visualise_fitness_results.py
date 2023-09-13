@@ -108,7 +108,7 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
     # min_y, max_y = 0, 0.2
 
     font_used = "Serif"
-    font_size = 20
+    font_size = 35
     font = {'fontname': font_used}
     legend_font = fm.FontProperties(family=font_used)
     legend_font._size = font_size - 3
@@ -118,8 +118,8 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
         ax1.set_xlabel('Adaptation steps', fontsize=font_size, **font)
         ax1.set_ylabel('Maximum fitness', fontsize=font_size, **font)
         ax1.legend(loc="lower right", prop=legend_font,)
-        ax1.tick_params(axis='x', labelsize=15)
-        ax1.tick_params(axis='y', labelsize=15)
+        ax1.tick_params(axis='x', labelsize=legend_font._size - 5)
+        ax1.tick_params(axis='y', labelsize=legend_font._size - 5)
         # To put legend outside of figure
         # ax1.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
         ax1.set_ylim()
@@ -135,11 +135,15 @@ def plot_fitness_vs_numiter(path_to_folder, paths_to_include, path_to_result, sh
     return maxscores
 
 
-def get_n_best_seeds(path_to_folder, paths_to_include, n=10):    
+def get_n_best_seeds(path_to_folder, paths_to_include, n=10):
+    maxscores = []
+    medscores = []
+
     if len(paths_to_include) == 0: print("Please include at least 1 list with tags in paths_to_include")
 
     for idx, path_to_include in enumerate(paths_to_include):
         # Initialise objects to store all the y_observed arrays to be averaged to plot one group (i.e. one curve)
+        observation_arrays = []
         max_observation_arrays = []
 
         # For all directories in the overall folder
@@ -150,19 +154,28 @@ def get_n_best_seeds(path_to_folder, paths_to_include, n=10):
             # Only retain the ones which match the requirements in the path to include
             if all(tag in root for tag in path_to_include):
                 print(f"Included in {path_to_include}'s plot: {root}")
+
+                observation_array = jnp.load(f"{root}/y_observed.npy")
                 max_observation_array = jnp.array([jnp.nanmax(observation_array[:i+1]) for i in range(observation_array.shape[0])])
+                observation_arrays += [observation_array]
                 max_observation_arrays += [max_observation_array]
         
-        if len(max_observation_arrays) == 0:
+        if len(observation_arrays) == 0:
             print(f"Sorry, this path_to_include {path_to_include} is not found in the {path_to_folder} folder. Or the {path_to_folder} is not recognised.")
             break
 
         # Turn observation lists to JAX to perform jnp operations on them
+        observation_arrays = jnp.array(observation_arrays)
         max_observation_arrays = jnp.array(max_observation_arrays)
 
         if len(max_observation_arrays) != 1:
             max_median_array = jnp.nanmedian(max_observation_arrays, axis=0)
             num_iter = jnp.array(list(range(1, max_observation_arrays.shape[1]+1)))
+        
+        else:
+            num_iter = num_iter = jnp.array(list(range(1, observation_arrays.shape[1]+1)))  
+            median_array = observation_arrays[0]
+            max_median_array = max_observation_arrays[0]
 
         # Calculate this curve's score
         maxscores += [round(jnp.sum(max_median_array)/20, ndigits=8)]
@@ -171,15 +184,71 @@ def get_n_best_seeds(path_to_folder, paths_to_include, n=10):
         name_tags = [tag for tag in path_to_include]
         maxgroup_name = ", ".join(name_tags).replace("/", "").replace("_", " ").replace("-", ",") + f" , m = %.2f" % maxscores[idx]
         print(maxgroup_name)
+    
+    maxscores = jnp.array(maxscores)
+    top_indices = jnp.argpartition(maxscores, -n)[-n:]
+    top_seeds = top_indices + 1
+    return top_seeds
 
-algo = "ITE"
-damage = "damaged_1/"
-paths_to_include = []
-for seed in range(1,20):
-    paths_to_include += [[f"seed_{seed}_", f"{algo}/", damage]]
 
-get_n_best_seeds(path_to_folder="results/final_children", paths_to_include=paths_to_include)
+# FLOW FOR PLOTTING ONLY THE TOP n SEEDS 
+damage = "damaged_1_2_3/"
+type = damage.split("damaged")[-1].strip("/")
+if type == "_1_2_3":
+    type = "3"
+if type == "_3_4":
+    type = "2"
+if type == "_1":
+    type = "1"
+n = 15
+algos = ["GPCF", "GPCF-reg", "GPCF-1trust", "inHERA", "inHERA-b0", "inHERA-expert", "inHERA-b0-expert"]
+path_to_originals = "results/final_children_not_in_ancestors"
 
+for algo in algos:
+    # Get ite best seeds
+    ite_all_paths = []
+    for seed in range(1,21):
+        ite_all_paths += [[f"seed_{seed}_", f"ITE/", damage]]
+    ite_best_seeds = get_n_best_seeds(path_to_folder="results/final_children", paths_to_include=ite_all_paths, n=n)
+
+    # Get algo best seeds
+    algo_all_paths = []
+    for seed in range(1,21):
+        algo_all_paths += [[f"seed_{seed}_", f"{algo}/", damage]]
+    algo_best_seeds = get_n_best_seeds(path_to_folder="results/final_children", paths_to_include=algo_all_paths, n=n)
+
+    # Create the best_n folders
+    overall_dir = f"results/best_{n}_{type}"
+    if not os.path.exists(overall_dir):
+        os.makedirs(overall_dir)
+
+    ite_dir = f"{overall_dir}/ITE/"
+    if not os.path.exists(ite_dir):
+        os.makedirs(ite_dir)
+
+    algo_dir = f"{overall_dir}/{algo}/"
+    if not os.path.exists(algo_dir):
+        os.makedirs(algo_dir)
+
+    for best_seed in ite_best_seeds:
+        copy_tree(f"{path_to_originals}/family-seed_{best_seed}_repertoire/{damage}/ITE", f"{ite_dir}/seed_{best_seed}/{damage}")
+
+    for best_seed in algo_best_seeds:
+        copy_tree(f"{path_to_originals}/family-seed_{best_seed}_repertoire/{damage}/{algo}/", f"{algo_dir}/seed_{best_seed}/{damage}")
+
+    now = datetime.now()
+    now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
+
+    paths_to_include = [["ITE/", damage],
+                        [f"{algo}/", damage]]
+
+    group_names = ["ITE", algo]
+    plot_fitness_vs_numiter(path_to_folder=overall_dir,
+                            paths_to_include=paths_to_include,
+                            path_to_result=f"plot_results/{algo}-{type}",
+                            show_spread=True,
+                            include_median_plot=False,
+                            group_names=group_names)
 
 # # FINAL PLOTS PLOTTING ROUTNINE
 # for algo in ["GPCF", "GPCF-reg", "GPCF-1trust", "inHERA", "inHERA-b0", "inHERA-expert", "inHERA-b0-expert"]:
