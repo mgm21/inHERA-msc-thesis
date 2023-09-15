@@ -3,11 +3,12 @@ from src.utils.repertoire_visualiser import Visualiser as RepertoireVisualiser
 
 # CHANGE THESE 
 seed = 20
-repertoire_path = f"numiter40k_final_families/family-seed_{seed}_last_repertoire/repertoire/"
-plot_path = "./some_repertoire.png"
+repertoire_path = f"results/cheetah_repertoire/"
+plot_path = "./halfcheetah_uni_repertoire.png"
+env_name = 'halfcheetah_uni'
+grid_shape = tuple([6])*2
 
 batch_size = 256
-env_name = 'hexapod_uni'
 episode_length = 150
 num_iterations = 40000
 policy_hidden_layer_sizes = (64, 64)
@@ -15,7 +16,6 @@ iso_sigma = 0.005
 line_sigma = 0.05
 min_bd = 0.
 max_bd = 1.0
-grid_shape = tuple([3])*6
 
 # Init environment
 env = environments.create(env_name, episode_length=episode_length)
@@ -48,4 +48,4 @@ fig, _ = plot_multidimensional_map_elites_grid(
         minval=jnp.asarray([min_bd]),
         grid_shape=grid_shape,)
 
-fig.savefig("./some_repertoire.png", dpi=600)
+fig.savefig(plot_path, dpi=600)

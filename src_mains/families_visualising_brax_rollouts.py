@@ -3,8 +3,8 @@ from src.utils.repertoire_visualiser import Visualiser as RepertoireVisualiser
 
 # CHANGE THESE 
 seed = 20
-repertoire_path = f"seed_20_last_repertoire/"
-best = True # If you want the rollout for the max fitness individual
+repertoire_path = f"results/cheetah_repertoire/"
+best = False # If you want the rollout for the max fitness individual
 descriptor_coordinates = jnp.array([0, 0]) # Careful! Will only take effect if best = False
 grid_shape = tuple([6])*2
 save_prefix = "halfcheetah_"
