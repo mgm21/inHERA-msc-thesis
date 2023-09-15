@@ -83,8 +83,8 @@ class AdaptationAlgorithm:
 
 if __name__ == "__main__":
     from src.loaders.repertoire_loader import RepertoireLoader
-    from src.core.adaptive_agent import AdaptiveAgent
-    from src.core.gaussian_process import GaussianProcess
+    from src.core.adaptation.adaptive_agent import AdaptiveAgent
+    from src.core.adaptation.gaussian_process import GaussianProcess
     from src.utils import hexapod_damage_dicts
 
     from families.family_3 import family_task

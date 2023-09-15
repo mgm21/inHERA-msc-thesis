@@ -1,5 +1,4 @@
-from src.utils.all_imports import *
-from src.adaptation_algorithms.gpcf_variant import GPCFVariant
+from src.adaptation_algorithms.gpcf_variants.gpcf_variant import GPCFVariant
 
 class GPCFReg(GPCFVariant):
     """GPCF algorithm with a regularised likelihood"""
@@ -29,11 +28,10 @@ class GPCFReg(GPCFVariant):
 # TODO: another idea would be a decaying 1trust or decaying regularisation to be more and more willing to share the trust?
 
 if __name__ == "__main__":
-    from src.core.family import Family
-    from src.core.adaptive_agent import AdaptiveAgent
-    from src.core.task import Task
+    from src.core.family_setup.family import Family
+    from src.core.adaptation.adaptive_agent import AdaptiveAgent
     from src.utils import hexapod_damage_dicts
-    from src.core.gaussian_process import GaussianProcess
+    from src.core.adaptation.gaussian_process import GaussianProcess
     from src.loaders.repertoire_loader import RepertoireLoader
 
     path_to_family = "families/family_4"

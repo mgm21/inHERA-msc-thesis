@@ -1,7 +1,7 @@
 from src.utils.all_imports import *
-from src.core.adaptive_agent import AdaptiveAgent
-from src.core.task import Task
-from src.core.repertoire_optimiser import RepertoireOptimiser
+from src.core.adaptation.adaptive_agent import AdaptiveAgent
+from src.core.pre_adaptation.task import Task
+from src.core.pre_adaptation.repertoire_optimiser import RepertoireOptimiser
 
 task = Task(episode_length=150, num_iterations=500, grid_shape=tuple([4]*6))
 

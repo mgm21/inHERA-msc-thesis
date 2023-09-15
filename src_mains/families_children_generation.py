@@ -1,6 +1,5 @@
 from src.utils.all_imports import *
-from src.utils.hexapod_damage_dicts import shortform_damage_list
-from src.core.children_generator import ChildrenGenerator
+from src.core.family_setup.children_generator import ChildrenGenerator
 
 
 # Load/define all the hyperparameters for this run (children/damage_dict to test?, algorithms to test children on?, seed identification? fam_id, ancestors_id?, path_to_results?)

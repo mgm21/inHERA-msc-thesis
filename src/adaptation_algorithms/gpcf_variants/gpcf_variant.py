@@ -1,5 +1,4 @@
-from src.utils.all_imports import *
-from src.adaptation_algorithms.adaptation_algorithm import AdaptationAlgorithm
+from src.adaptation_algorithms.abstract_adaptation_algorithms.adaptation_algorithm import AdaptationAlgorithm
 
 class GPCFVariant(AdaptationAlgorithm):
     def __init__(self, family, agent, gaussian_process, alpha=0.9, verbose=False,
@@ -39,11 +38,10 @@ class GPCFVariant(AdaptationAlgorithm):
 
 
 if __name__ == "__main__":
-    from src.core.family import Family
-    from src.core.adaptive_agent import AdaptiveAgent
-    from src.core.task import Task
+    from src.core.family_setup.family import Family
+    from src.core.adaptation.adaptive_agent import AdaptiveAgent
     from src.utils import hexapod_damage_dicts
-    from src.core.gaussian_process import GaussianProcess
+    from src.core.adaptation.gaussian_process import GaussianProcess
     from src.loaders.repertoire_loader import RepertoireLoader
 
     path_to_family = "families/family_4"

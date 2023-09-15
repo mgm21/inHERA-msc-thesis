@@ -1,5 +1,4 @@
-from src.utils.all_imports import *
-from src.adaptation_algorithms.adaptation_algorithm import AdaptationAlgorithm
+from src.adaptation_algorithms.abstract_adaptation_algorithms.adaptation_algorithm import AdaptationAlgorithm
 
 class ITE(AdaptationAlgorithm):
     def __init__(self, agent, gaussian_process, alpha=0.9, verbose=False,
@@ -15,8 +14,8 @@ class ITE(AdaptationAlgorithm):
 
 if __name__ == "__main__":
     from src.loaders.repertoire_loader import RepertoireLoader
-    from src.core.adaptive_agent import AdaptiveAgent
-    from src.core.gaussian_process import GaussianProcess
+    from src.core.adaptation.adaptive_agent import AdaptiveAgent
+    from src.core.adaptation.gaussian_process import GaussianProcess
     from src.utils import hexapod_damage_dicts
 
     from families.family_3 import family_task

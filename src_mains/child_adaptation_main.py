@@ -1,12 +1,7 @@
-from src.utils.all_imports import *
-from src.core.adaptive_agent import AdaptiveAgent
-from src.loaders.repertoire_loader import RepertoireLoader
-from src.utils.hexapod_damage_dicts import *
-from src.core.ancestors_generator import *
-from src.adaptation_algorithms.ite import ITE
-from src.adaptation_algorithms.gpcf import GPCF
-from src.core.gaussian_process import GaussianProcess
-from src.core.family import Family
+from src.core.family_setup.ancestors_generator import *
+from src.adaptation_algorithms.gpcf_variants.gpcf import GPCF
+from src.core.adaptation.gaussian_process import GaussianProcess
+from src.core.family_setup.family import Family
 
 path_to_family = f"families/family_3"
 from families.family_3 import family_task

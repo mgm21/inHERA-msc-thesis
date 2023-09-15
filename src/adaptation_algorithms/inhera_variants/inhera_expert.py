@@ -1,6 +1,5 @@
-from src.utils.all_imports import *
-from src.adaptation_algorithms.experience_sharing_algorithm import ExperienceSharingAlgorithm
-from src.utils.hexapod_damage_dicts import intact
+from src.adaptation_algorithms.abstract_adaptation_algorithms.experience_sharing_algorithm import ExperienceSharingAlgorithm
+
 
 class InHERAExpert(ExperienceSharingAlgorithm):
     """The inHERA algorithm which allows for experience sharing/inheritance as well as taking into account the uncertainty of ancestors with regards to their final GP means"""
@@ -69,11 +68,10 @@ class InHERAExpert(ExperienceSharingAlgorithm):
 
 
 if __name__ == "__main__":
-    from src.core.family import Family
-    from src.core.adaptive_agent import AdaptiveAgent
-    from src.core.task import Task
+    from src.core.family_setup.family import Family
+    from src.core.adaptation.adaptive_agent import AdaptiveAgent
     from src.utils import hexapod_damage_dicts
-    from src.core.gaussian_process import GaussianProcess
+    from src.core.adaptation.gaussian_process import GaussianProcess
     from src.loaders.repertoire_loader import RepertoireLoader
 
     path_to_family = "families/family_4"

@@ -1,5 +1,5 @@
 from src.utils.all_imports import *
-from src.core.ancestors_generator import AncestorsGenerator
+from src.core.family_setup.ancestors_generator import AncestorsGenerator
 from src.utils.hexapod_damage_dicts import intact
 
 
