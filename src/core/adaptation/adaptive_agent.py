@@ -20,7 +20,7 @@ class AdaptiveAgent:
                  y_observed=jnp.array([]),
                  mu=None,
                  var=None,
-                 path_to_base_repertoire="numiter40k_final_families/family-seed_20_last_repertoire/repertoire/"):
+                 path_to_base_repertoire="final_families/family-seed_20_last_repertoire/repertoire/"):
         
         self.task = task
         self.sim_descriptors = sim_repertoire_arrays[1]

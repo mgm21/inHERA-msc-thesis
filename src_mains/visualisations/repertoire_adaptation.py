@@ -8,8 +8,8 @@ algorithms_to_test = ["ITE"]
 
 # Change these
 children_damage_combinations = [(1,),] # Careful, tuples
-path_to_families = "numiter40k_final_families" # Careful, must be same as below
-from numiter40k_final_families import family_task # Careful, must be same as above
+path_to_families = "final_families" # Careful, must be same as below
+from final_families import family_task # Careful, must be same as above
 verbose = True
 path_to_family = f"{path_to_families}/family-seed_{seed}_last_repertoire" # Careful, individual families are not always stored with the same name
 

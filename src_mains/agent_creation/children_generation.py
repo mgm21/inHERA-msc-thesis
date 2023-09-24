@@ -30,8 +30,8 @@ print(algorithms_to_test)
 # Change these
 children_damage_combinations = [(1,), (3, 4), (1, 2, 3)] # Careful, tuples
  # "ITE", "GPCF", "GPCF-1trust", "GPCF-reg", "inHERA", "inHERA-b0", "inHERA-expert", "inHERA-b0-expert"
-path_to_families = "numiter40k_final_families" # Careful, must be same as below
-from numiter40k_final_families import family_task # Careful, must be same as above
+path_to_families = "final_families" # Careful, must be same as below
+from final_families import family_task # Careful, must be same as above
 verbose = True
 path_to_family = f"{path_to_families}/family-seed_{seed}_last_repertoire" # Careful, individual families are not always stored with the same name
 

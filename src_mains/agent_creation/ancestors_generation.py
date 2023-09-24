@@ -3,8 +3,8 @@ from src.core.family_setup.ancestors_generator import AncestorsGenerator
 from src.utils.hexapod_damage_dicts import intact
 
 
-families_path = "./numiter40k_final_families"
-from numiter40k_final_families import family_task
+families_path = "./final_families"
+from final_families import family_task
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--save_dir", type=str, required=False, default="dummy_ancestors")

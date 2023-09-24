@@ -80,8 +80,8 @@ if __name__ == "__main__":
     from src.core.adaptation.gaussian_process import GaussianProcess
     from src.loaders.repertoire_loader import RepertoireLoader
 
-    path_to_family = "families/numiter40k_final_families"
-    from numiter40k_final_families import family_task
+    path_to_family = "families/final_families"
+    from final_families import family_task
     fam = Family(path_to_family=path_to_family)
     task = family_task.task
     norm_params = jnp.load(f"{path_to_family}/norm_params.npy")

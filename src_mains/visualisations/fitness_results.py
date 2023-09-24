@@ -441,7 +441,7 @@ for algo in algos:
 
 # now = datetime.now()
 # now_str = now.strftime(f"%Y-%m-%d_%H-%M-%S")
-# plot_fitness_vs_numiter(path_to_folder="numiter40k_final_families",
+# plot_fitness_vs_numiter(path_to_folder="final_families",
 #                         paths_to_include=paths_to_include,
 #                         path_to_result=f"plot_results/result_plot-adaptation-{now_str}-without-intact",
 #                         show_spread=True,
