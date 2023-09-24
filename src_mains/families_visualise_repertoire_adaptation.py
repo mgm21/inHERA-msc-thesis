@@ -1,26 +1,38 @@
 from src.utils.all_imports import *
-from src.loaders.repertoire_loader import RepertoireLoader
-from src.core.adaptation.adaptive_agent import AdaptiveAgent
-from src.core.adaptation.gaussian_process import GaussianProcess
-from src.utils import hexapod_damage_dicts
+from src.core.family_setup.children_generator import ChildrenGenerator
 
-# Import algorithms
-from src.adaptation_algorithms.ite import ITE
-from src.adaptation_algorithms.gpcf_variants.gpcf_1trust import GPCF1trust
 
-# from families.family_3 import family_task
-# path_to_family = "families/family_3"
-# task = family_task.task
-# repertoire_loader = RepertoireLoader()
-# simu_arrs = repertoire_loader.load_repertoire(repertoire_path=f"{path_to_family}/repertoire", remove_empty_bds=False)
-# damage_dict = hexapod_damage_dicts.leg_1_broken
-# agent = AdaptiveAgent(task=task, sim_repertoire_arrays=simu_arrs, damage_dictionary=damage_dict)
-# gp = GaussianProcess()
-# norm_params = jnp.load(f"{path_to_family}/norm_params.npy")
+save_dir = "./trial_setting"
+seed = 20
+algorithms_to_test = ["ITE"]
 
-# ite = ITE(agent=agent,
-#             gaussian_process=gp,
-#             verbose=True,
-#             norm_params=norm_params)
+# Change these
+children_damage_combinations = [(1,),] # Careful, tuples
+path_to_families = "numiter40k_final_families" # Careful, must be same as below
+from numiter40k_final_families import family_task # Careful, must be same as above
+verbose = True
+path_to_family = f"{path_to_families}/family-seed_{seed}_last_repertoire" # Careful, individual families are not always stored with the same name
 
-# ite.run(num_iter=5)
+# Defined automatically
+norm_params = jnp.load(f"{path_to_family}/norm_params.npy")
+task = family_task.task 
+num_iter = family_task.algo_num_iter
+children_in_ancestors = True # TODO change if children in ancestors needed 
+
+# Make a directory for the seed (mimic how families are named in the families folder)
+path_to_results = f"{save_dir}/children/family-seed_{seed}_repertoire"
+os.makedirs(name=path_to_results, exist_ok=True)
+
+children_generator = ChildrenGenerator(algorithms_to_test=algorithms_to_test,
+                                       path_to_family=path_to_family, # Not path to families!
+                                       task=task,
+                                       ite_alpha=0.9,
+                                       ite_num_iter=num_iter,
+                                       verbose=verbose,
+                                       norm_params=norm_params,
+                                       gpcf_kappa=0.05,
+                                       children_in_ancestors=children_in_ancestors)
+
+children_generator.path_to_children = path_to_results
+children_generator.generate_custom_children(combinations=children_damage_combinations) # Generate the chosen children
+# children_generator.generate_custom_children(combinations=[()]) # Generate the intact child

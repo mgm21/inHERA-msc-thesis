@@ -729,6 +729,15 @@ def plot_multidimensional_map_elites_grid(
     if vmax is None:
         vmax = float(jnp.max(non_empty_fitnesses))
 
+    
+    # # # TODO: remove these lines to get behaviour back to normal
+    # # vmin, vmax = 0, 1
+    # # Note some strange behaviour occurs when vmin = vmax, for example in the case of inputting an updated_fitness with all values equal to 1.001 as the initial variance.
+    # # TODO: adding this fallback for now but eventually it should be checked why this plotting routine fails for vmin = vmax.
+    # if vmin == vmax:
+    #     vmin = vmax - 1
+    # TODO: The solution is to set the vmin and vmax manually when calling this function.
+
     ax.imshow(
         grid_2d.T,
         origin="lower",

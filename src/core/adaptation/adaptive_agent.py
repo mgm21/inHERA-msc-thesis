@@ -20,7 +20,7 @@ class AdaptiveAgent:
                  y_observed=jnp.array([]),
                  mu=None,
                  var=None,
-                 path_to_base_repertoire="families/ite_example/sim_repertoire/"):
+                 path_to_base_repertoire="numiter40k_final_families/family-seed_20_last_repertoire/repertoire/"):
         
         self.task = task
         self.sim_descriptors = sim_repertoire_arrays[1]
@@ -140,17 +140,21 @@ class AdaptiveAgent:
 
         if quantity == "mu":
             updated_fitness = self.mu
+            vmax, vmin = 1, -1
         elif quantity == "var":
             updated_fitness = self.var
+            vmax, vmin = 1, 0
 
         fig, _ = plot_multidimensional_map_elites_grid(
         repertoire=repertoire,
         updated_fitness=updated_fitness,
         maxval=jnp.asarray([self.task.max_bd]),
         minval=jnp.asarray([self.task.min_bd]),
-        grid_shape=tuple(self.task.grid_shape),)
+        grid_shape=tuple(self.task.grid_shape),
+        vmin=vmin,
+        vmax=vmax)
 
-        fig.savefig(path_to_save_to)
+        fig.savefig(path_to_save_to, dpi=600)
 
 
 if __name__ == "__main__":

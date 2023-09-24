@@ -2,7 +2,7 @@ from src.adaptation_algorithms.abstract_adaptation_algorithms.adaptation_algorit
 
 class ITE(AdaptationAlgorithm):
     def __init__(self, agent, gaussian_process, alpha=0.9, verbose=False,
-                 path_to_results="families/algorithm_example/", save_res_arrs=True, norm_params=(0, 40), plot_repertoires=False):
+                 path_to_results="families/algorithm_example/", save_res_arrs=True, norm_params=(0, 40), plot_repertoires=True):
         super().__init__(agent, gaussian_process, alpha, verbose,
                  path_to_results, save_res_arrs, norm_params, plot_repertoires)
     

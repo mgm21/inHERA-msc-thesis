@@ -1,4 +1,6 @@
+from src.utils.all_imports import *
 from src.utils.hexapod_damage_dicts import shortform_damage_list
+from src.utils.hexapod_damage_dicts import get_damage_dict
 from src.core.adaptation.adaptive_agent import AdaptiveAgent
 from src.core.adaptation.gaussian_process import GaussianProcess
 from src.adaptation_algorithms.ite import ITE
@@ -118,7 +120,7 @@ class ChildrenGenerator:
             ite = ITE(agent=agent,
                     gaussian_process=gp,
                     alpha=self.ite_alpha,
-                    plot_repertoires=False,
+                    plot_repertoires=True,
                     save_res_arrs=True,
                     path_to_results=f"{self.path_to_children}/{agent.name}/ITE/",
                     verbose=self.verbose,

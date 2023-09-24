@@ -43,7 +43,7 @@ children_in_ancestors = False # TODO change if children in ancestors needed
 
 # Make a directory for the seed (mimic how families are named in the families folder)
 path_to_results = f"{save_dir}/children/family-seed_{seed}_repertoire"
-os.makedirs(name=path_to_results, exist_ok=True)
+os.makedirs(name=path_to_results, exist_ok=True)x
 
 children_generator = ChildrenGenerator(algorithms_to_test=algorithms_to_test,
                                        path_to_family=path_to_family, # Not path to families!
@@ -58,3 +58,4 @@ children_generator = ChildrenGenerator(algorithms_to_test=algorithms_to_test,
 children_generator.path_to_children = path_to_results
 children_generator.generate_custom_children(combinations=children_damage_combinations) # Generate the chosen children
 children_generator.generate_custom_children(combinations=[()]) # Generate the intact child
+

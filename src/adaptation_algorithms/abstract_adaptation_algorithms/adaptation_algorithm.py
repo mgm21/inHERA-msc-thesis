@@ -2,7 +2,7 @@ from src.utils.all_imports import *
 
 class AdaptationAlgorithm:
     def __init__(self, agent, gaussian_process, alpha=0.9, verbose=False,
-                 path_to_results="families/algorithm_example/", save_res_arrs=True, norm_params=(0, 40), plot_repertoires=False):
+                 path_to_results="families/algorithm_example/", save_res_arrs=True, norm_params=(0, 40), plot_repertoires=True):
         self.agent = agent
         self.alpha = alpha
         self.verbose = verbose
@@ -16,15 +16,15 @@ class AdaptationAlgorithm:
         self.run_setup(num_iter)
 
         for counter in range(num_iter):
+            if self.plot_repertoires:
+                self.agent.plot_repertoire(quantity="mu", path_to_save_to=self.path_to_results + f"mu{counter}")
+                self.agent.plot_repertoire(quantity="var", path_to_save_to=self.path_to_results + f"var{counter}")
+
             if self.verbose: print(f"Iteration: {counter}")
 
             self.observe_acquisition_point(counter)
             self.update_mean_function(counter)
             self.train_gaussian_process(counter)
-
-            if self.plot_repertoires:
-                self.agent.plot_repertoire(quantity="mu", path_to_save_to=self.path_to_results + f"mu{counter}")
-                self.agent.plot_repertoire(quantity="var", path_to_save_to=self.path_to_results + f"var{counter}")
 
         self.save_results()
     
