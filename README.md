@@ -1,0 +1,46 @@
+# inHERA-msc-thesis
+inHERA-msc-thesis is a Python library to test repertoire-based robotic adaptation algorithms with hardware acceleration support.
+It also proposes a new class of algorithms called Experience-Sharing Adaptation Algorithms.
+
+## Description
+This repository contains the adaptation pipeline written during Matteo G. Mecattaf's
+master's project for the MSc in Artificial Intelligence delivered by Imperial College London.
+
+This project enables repertoire-based robotic adaptation to be tested using hardware acceleration tools.
+
+For more details, see the associated master's thesis.
+
+## Visuals
+The following are some examples of the visual results that can be produced with this library.
+### Dynamic [QDax](https://qdax.readthedocs.io/en/latest/) grid during ITE adaptation
+
+#### Mean
+<div align="center">
+<img alt="mean" height="350" width="350" src="/docs/media/ite_mean_adaptation.gif"/>
+</div>
+
+#### Variance
+<div align="center">
+<img alt="variance" height="350" width="350" src="/docs/media/ite_variance_adaptation.gif"/>
+</div>
+
+### Adaptation plots
+<div align="center">
+<img alt="adaptation" height="230" src="/docs/media/adaptation_plots.png"/>
+</div>
+
+## Installation
+
+## Usage
+
+## Support
+For any questions related to this project, feel free to message me on LinkedIn: [Matteo G. Mecattaf](https://www.linkedin.com/in/matteo-mecattaf/).
+
+## Acknowledgment
+Thank you to the supervisor of this thesis Dr Antoine Cully who has offered invaluable help throughout the project.
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
+
+
+

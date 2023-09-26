@@ -11,13 +11,13 @@ last_repertoire
 tmp.def
 
 
-# Figures and Videos
-*.pth
-*.png
-*.svg
-*.pdf
-*.mp4
-*.gif
+## Figures and Videos
+#*.pth
+#*.png
+#*.svg
+#*.pdf
+#*.mp4
+#*.gif
 
 # IDE configuration file
 .idea/
