@@ -30,8 +30,17 @@ The following are some examples of the visual results that can be produced with 
 </div>
 
 ## Installation
+For installation, please refer to the [AIRL wiki](https://gitlab.doc.ic.ac.uk/AIRL/AIRL_WIKI) for tips on using Singularity.
 
 ## Usage
+The main usages of this library are:
+- To generate MAP-Elites grids (see [repertoire_creation](src_mains/repertoire_creation) folder)
+- To create robotic ancestors (see [ancestors_generation.py](src_mains/agent_creation/ancestors_generation.py) file)
+- To create robotic children (see [children_generation.py](src_mains/agent_creation/children_generation.py))
+- To visualise results (see [visualisations](src_mains/visualisations) folder)
+
+Note that all the example uses listed above and more can be found in the [src_mains](src_mains) folder.
+All the example main files in this folder use the classes written in the [src](src) folder.
 
 ## Support
 For any questions related to this project, feel free to message me on LinkedIn: [Matteo G. Mecattaf](https://www.linkedin.com/in/matteo-mecattaf/).
